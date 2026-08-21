@@ -1,0 +1,564 @@
+/* =========================
+   MenuAR - Global Styles
+   ========================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    background:
+        linear-gradient(
+            145deg,
+            #fffaf4 0%,
+            #ffffff 50%,
+            #fff5e8 100%
+        );
+
+    color: #222222;
+}
+
+
+/* =========================
+   Home Page
+   ========================= */
+
+.home-page {
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 30px 20px;
+}
+
+.hero {
+    width: 100%;
+    max-width: 520px;
+
+    text-align: center;
+}
+
+
+/* =========================
+   Branding
+   ========================= */
+
+.brand {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    gap: 10px;
+
+    margin-bottom: 10px;
+}
+
+.brand-icon {
+    font-size: 32px;
+}
+
+.brand h1 {
+    font-size: 42px;
+    font-weight: 800;
+
+    letter-spacing: -1px;
+
+    color: #e85d04;
+}
+
+
+/* =========================
+   Intro Text
+   ========================= */
+
+.tagline {
+    font-size: 20px;
+    font-weight: 600;
+
+    margin-bottom: 12px;
+}
+
+.description {
+    max-width: 430px;
+
+    margin: 0 auto 35px;
+
+    font-size: 15px;
+    line-height: 1.6;
+
+    color: #666666;
+}
+
+
+/* =========================
+   AR Mode Cards
+   ========================= */
+
+.mode-container {
+    display: flex;
+    flex-direction: column;
+
+    gap: 16px;
+}
+
+.mode-card {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    gap: 16px;
+
+    padding: 20px;
+
+    background-color: #ffffff;
+
+    border: 1px solid #eeeeee;
+    border-radius: 16px;
+
+    text-decoration: none;
+
+    color: #222222;
+
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.06);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.mode-card:hover {
+    transform: translateY(-2px);
+
+    border-color: #f3b27c;
+
+    box-shadow:
+        0 12px 28px rgba(0, 0, 0, 0.10);
+}
+
+.mode-card:active {
+    transform: scale(0.98);
+}
+
+
+/* =========================
+   Card Content
+   ========================= */
+
+.mode-icon {
+    width: 55px;
+    height: 55px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-color: #fff2e5;
+
+    border-radius: 14px;
+
+    font-size: 27px;
+}
+
+.mode-content {
+    flex: 1;
+
+    text-align: left;
+}
+
+.mode-content h2 {
+    margin-bottom: 6px;
+
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.mode-content p {
+    font-size: 13px;
+    line-height: 1.5;
+
+    color: #777777;
+}
+
+.arrow {
+    font-size: 23px;
+    font-weight: 600;
+
+    color: #e85d04;
+}
+
+
+/* =========================
+   Device Note
+   ========================= */
+
+.device-note {
+    margin-top: 28px;
+
+    font-size: 12px;
+
+    color: #999999;
+}
+
+
+/* =========================
+   Mobile Adjustments
+   ========================= */
+
+@media (max-width: 480px) {
+
+    .home-page {
+        padding: 25px 16px;
+    }
+
+    .brand h1 {
+        font-size: 36px;
+    }
+
+    .tagline {
+        font-size: 18px;
+    }
+
+    .description {
+        font-size: 14px;
+
+        margin-bottom: 28px;
+    }
+
+    .mode-card {
+        padding: 17px;
+    }
+
+    .mode-icon {
+        width: 48px;
+        height: 48px;
+
+        font-size: 23px;
+    }
+
+    .mode-content h2 {
+        font-size: 16px;
+    }
+
+}
+
+/* =========================
+   AR Pages
+   ========================= */
+
+.ar-page {
+    min-height: 100vh;
+    background-color: #f8f8f8;
+}
+
+
+/* =========================
+   AR Header
+   ========================= */
+
+.ar-header {
+    min-height: 75px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 16px;
+
+    padding: 15px 20px;
+
+    background-color: #ffffff;
+
+    border-bottom: 1px solid #eeeeee;
+}
+
+.ar-header h1 {
+    font-size: 19px;
+    font-weight: 700;
+
+    margin-bottom: 3px;
+}
+
+.ar-header p {
+    font-size: 12px;
+
+    color: #777777;
+}
+
+
+.back-button {
+    width: 42px;
+    height: 42px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border-radius: 12px;
+
+    background-color: #fff2e5;
+
+    color: #e85d04;
+
+    font-size: 23px;
+
+    text-decoration: none;
+}
+
+
+/* =========================
+   AR Layout
+   ========================= */
+
+.ar-layout {
+    min-height: calc(100vh - 75px);
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* =========================
+   Temporary Camera Area
+   ========================= */
+
+.camera-placeholder {
+    min-height: 430px;
+    flex: 1;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background:
+        linear-gradient(
+            135deg,
+            #222222,
+            #111111
+        );
+}
+
+.camera-message {
+    padding: 30px;
+
+    text-align: center;
+
+    color: #ffffff;
+}
+
+.camera-icon {
+    display: block;
+
+    margin-bottom: 15px;
+
+    font-size: 45px;
+}
+
+.camera-message h2 {
+    margin-bottom: 8px;
+
+    font-size: 20px;
+}
+
+.camera-message p {
+    max-width: 280px;
+
+    font-size: 13px;
+    line-height: 1.5;
+
+    color: #cccccc;
+}
+
+
+/* =========================
+   AR Controls
+   ========================= */
+
+.ar-controls {
+    padding: 20px;
+
+    background-color: #ffffff;
+}
+
+.control-label {
+    margin-bottom: 10px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    color: #555555;
+}
+
+
+.food-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    gap: 10px;
+}
+
+
+.food-button {
+    min-height: 48px;
+
+    border: 1px solid #dddddd;
+    border-radius: 12px;
+
+    background-color: #ffffff;
+
+    color: #333333;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+.food-button.active {
+    border-color: #e85d04;
+
+    background-color: #fff2e5;
+
+    color: #d95400;
+}
+
+
+/* =========================
+   Instructions / Status
+   ========================= */
+
+.instruction,
+.status-message {
+    margin-top: 15px;
+
+    padding: 12px;
+
+    border-radius: 10px;
+
+    background-color: #fff8f1;
+
+    font-size: 12px;
+    line-height: 1.5;
+
+    color: #666666;
+}
+
+.status-message {
+    margin-top: 0;
+    margin-bottom: 16px;
+
+    text-align: center;
+
+    color: #d95400;
+}
+
+
+/* =========================
+   Markerless Controls
+   ========================= */
+
+.interaction-controls {
+    margin-top: 18px;
+}
+
+
+.control-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    gap: 10px;
+
+    margin-bottom: 10px;
+}
+
+
+.control-button,
+.remove-button,
+.confirm-button {
+    min-height: 46px;
+
+    border-radius: 11px;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+
+.control-button {
+    border: 1px solid #dddddd;
+
+    background-color: #ffffff;
+
+    color: #333333;
+}
+
+
+.remove-button {
+    width: 100%;
+
+    margin-top: 2px;
+
+    border: 1px solid #e2aaaa;
+
+    background-color: #fff5f5;
+
+    color: #b83232;
+}
+
+
+.confirm-button {
+    width: 100%;
+
+    margin-top: 10px;
+
+    border: none;
+
+    background-color: #e85d04;
+
+    color: #ffffff;
+}
+
+
+/* =========================
+   Disabled Controls
+   ========================= */
+
+button:disabled {
+    opacity: 0.4;
+
+    cursor: not-allowed;
+}
+
+
+/* =========================
+   Desktop AR Preview
+   ========================= */
+
+@media (min-width: 800px) {
+
+    .ar-layout {
+        max-width: 700px;
+
+        margin: 0 auto;
+    }
+
+    .ar-header {
+        justify-content: flex-start;
+    }
+
+}

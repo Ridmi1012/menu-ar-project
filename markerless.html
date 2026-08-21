@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>MenuAR | View Food on Table</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="ar-page">
+
+    <header class="ar-header">
+
+        <a href="index.html" class="back-button">
+            ←
+        </a>
+
+        <div>
+            <h1>View Food on Table</h1>
+            <p>Place food on a real surface</p>
+        </div>
+
+    </header>
+
+
+    <main class="ar-layout">
+
+        <!--
+            This temporary area will later contain
+            the WebXR camera and hit-test scene.
+        -->
+        <section class="camera-placeholder">
+
+            <div class="camera-message">
+
+                <span class="camera-icon">📱</span>
+
+                <h2>AR Surface View</h2>
+
+                <p>
+                    Surface detection and camera view
+                    will appear here.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <section class="ar-controls">
+
+            <p class="status-message">
+                Select a food item to begin
+            </p>
+
+
+            <p class="control-label">
+                Select Food
+            </p>
+
+            <div class="food-selector">
+
+                <button
+                    type="button"
+                    class="food-button active"
+                    id="burgerBtn"
+                >
+                    🍔 Burger
+                </button>
+
+                <button
+                    type="button"
+                    class="food-button"
+                    id="pizzaBtn"
+                >
+                    🍕 Pizza
+                </button>
+
+            </div>
+
+
+            <div class="interaction-controls">
+
+                <div class="control-row">
+
+                    <button
+                        type="button"
+                        class="control-button"
+                        disabled
+                    >
+                        ↶ Rotate Left
+                    </button>
+
+                    <button
+                        type="button"
+                        class="control-button"
+                        disabled
+                    >
+                        Rotate Right ↷
+                    </button>
+
+                </div>
+
+
+                <div class="control-row">
+
+                    <button
+                        type="button"
+                        class="control-button"
+                        disabled
+                    >
+                        − Size
+                    </button>
+
+                    <button
+                        type="button"
+                        class="control-button"
+                        disabled
+                    >
+                        + Size
+                    </button>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="remove-button"
+                    disabled
+                >
+                    Remove Food
+                </button>
+
+
+                <button
+                    type="button"
+                    class="confirm-button"
+                    disabled
+                >
+                    Confirm Preview
+                </button>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <script src="js/markerless-ar.js"></script>
+
+</body>
+</html>

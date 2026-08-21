@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>MenuAR | Marker Preview</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="ar-page">
+
+    <header class="ar-header">
+
+        <a href="index.html" class="back-button">
+            ←
+        </a>
+
+        <div>
+            <h1>Marker AR Preview</h1>
+            <p>Point your camera at the AR marker</p>
+        </div>
+
+    </header>
+
+
+    <main class="ar-layout">
+
+        <!--
+            This temporary area will later be replaced
+            by the real AR.js camera scene.
+        -->
+        <section class="camera-placeholder">
+
+            <div class="camera-message">
+
+                <span class="camera-icon">📷</span>
+
+                <h2>AR Camera</h2>
+
+                <p>
+                    The marker-based AR camera will
+                    appear here.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <section class="ar-controls">
+
+            <p class="control-label">
+                Select Food
+            </p>
+
+            <div class="food-selector">
+
+                <button
+                    type="button"
+                    class="food-button active"
+                    id="markerBurgerBtn"
+                >
+                    🍔 Burger
+                </button>
+
+                <button
+                    type="button"
+                    class="food-button"
+                    id="markerPizzaBtn"
+                >
+                    🍕 Pizza
+                </button>
+
+            </div>
+
+            <p class="instruction">
+                Point your camera toward the printed
+                marker to display the selected food item.
+            </p>
+
+        </section>
+
+    </main>
+
+    <script src="js/marker-ar.js"></script>
+
+</body>
+</html>
