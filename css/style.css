@@ -1,0 +1,1047 @@
+/* =========================================
+   MenuAR - Global Reset
+   ========================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+html {
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+}
+
+
+body {
+    min-height: 100vh;
+
+    background:
+        linear-gradient(
+            145deg,
+            #fffaf4 0%,
+            #ffffff 50%,
+            #fff5e8 100%
+        );
+
+    color: #222222;
+}
+
+
+/* =========================================
+   Home Page
+   ========================================= */
+
+.home-page {
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 30px 20px;
+}
+
+
+.hero {
+    width: 100%;
+    max-width: 520px;
+
+    text-align: center;
+}
+
+
+/* =========================================
+   Branding
+   ========================================= */
+
+.brand {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    gap: 10px;
+
+    margin-bottom: 10px;
+}
+
+
+.brand-icon {
+    font-size: 32px;
+}
+
+
+.brand h1 {
+    font-size: 42px;
+    font-weight: 800;
+
+    letter-spacing: -1px;
+
+    color: #e85d04;
+}
+
+
+/* =========================================
+   Intro Text
+   ========================================= */
+
+.tagline {
+    margin-bottom: 12px;
+
+    font-size: 20px;
+    font-weight: 600;
+}
+
+
+.description {
+    max-width: 430px;
+
+    margin: 0 auto 35px;
+
+    font-size: 15px;
+    line-height: 1.6;
+
+    color: #666666;
+}
+
+
+/* =========================================
+   Home Mode Cards
+   ========================================= */
+
+.mode-container {
+    display: flex;
+    flex-direction: column;
+
+    gap: 16px;
+}
+
+
+.mode-card {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    gap: 16px;
+
+    padding: 20px;
+
+    background-color: #ffffff;
+
+    border: 1px solid #eeeeee;
+    border-radius: 16px;
+
+    text-decoration: none;
+
+    color: #222222;
+
+    box-shadow:
+        0 8px 24px
+        rgba(0, 0, 0, 0.06);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+
+.mode-card:hover {
+    transform:
+        translateY(-2px);
+
+    border-color:
+        #f3b27c;
+
+    box-shadow:
+        0 12px 28px
+        rgba(0, 0, 0, 0.10);
+}
+
+
+.mode-card:active {
+    transform:
+        scale(0.98);
+}
+
+
+/* =========================================
+   Home Card Content
+   ========================================= */
+
+.mode-icon {
+    width: 55px;
+    height: 55px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-color:
+        #fff2e5;
+
+    border-radius: 14px;
+
+    font-size: 27px;
+}
+
+
+.mode-content {
+    flex: 1;
+
+    text-align: left;
+}
+
+
+.mode-content h2 {
+    margin-bottom: 6px;
+
+    font-size: 17px;
+    font-weight: 700;
+}
+
+
+.mode-content p {
+    font-size: 13px;
+    line-height: 1.5;
+
+    color: #777777;
+}
+
+
+.arrow {
+    font-size: 23px;
+    font-weight: 600;
+
+    color: #e85d04;
+}
+
+
+/* =========================================
+   Device Note
+   ========================================= */
+
+.device-note {
+    margin-top: 28px;
+
+    font-size: 12px;
+
+    color: #999999;
+}
+
+
+/* =========================================
+   Shared AR Header
+   ========================================= */
+
+.ar-header {
+    min-height: 75px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 16px;
+
+    padding: 15px 20px;
+
+    background-color:
+        #ffffff;
+
+    border-bottom:
+        1px solid #eeeeee;
+}
+
+
+.ar-header h1 {
+    margin-bottom: 3px;
+
+    font-size: 19px;
+    font-weight: 700;
+}
+
+
+.ar-header p {
+    font-size: 12px;
+
+    color: #777777;
+}
+
+
+.back-button {
+    width: 42px;
+    height: 42px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border-radius: 12px;
+
+    background-color:
+        #fff2e5;
+
+    color: #e85d04;
+
+    font-size: 23px;
+
+    text-decoration: none;
+}
+
+
+/* =========================================
+   Shared AR Controls
+   ========================================= */
+
+.ar-controls {
+    padding: 20px;
+
+    background-color:
+        #ffffff;
+}
+
+
+.control-label {
+    margin-bottom: 10px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    color: #555555;
+}
+
+
+.food-selector {
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 10px;
+}
+
+
+.food-button {
+    min-height: 48px;
+
+    padding: 8px 12px;
+
+    border:
+        1px solid #dddddd;
+
+    border-radius: 12px;
+
+    background-color:
+        #ffffff;
+
+    color: #333333;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+.food-button.active {
+    border-color:
+        #e85d04;
+
+    background-color:
+        #fff2e5;
+
+    color:
+        #d95400;
+}
+
+
+/* =========================================
+   Status / Instructions
+   ========================================= */
+
+.instruction,
+.status-message {
+    margin-top: 15px;
+
+    padding: 12px;
+
+    border-radius: 10px;
+
+    background-color:
+        #fff8f1;
+
+    font-size: 12px;
+    line-height: 1.5;
+
+    color: #666666;
+}
+
+
+.status-message {
+    margin-top: 0;
+    margin-bottom: 16px;
+
+    text-align: center;
+
+    color: #d95400;
+}
+
+
+/* =========================================
+   Interaction Controls
+   ========================================= */
+
+.interaction-controls {
+    margin-top: 18px;
+}
+
+
+.control-row {
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 10px;
+
+    margin-bottom: 10px;
+}
+
+
+.control-button,
+.remove-button,
+.confirm-button {
+    min-height: 46px;
+
+    border-radius: 11px;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+
+.control-button {
+    border:
+        1px solid #dddddd;
+
+    background-color:
+        #ffffff;
+
+    color: #333333;
+}
+
+
+.remove-button {
+    width: 100%;
+
+    margin-top: 2px;
+
+    border:
+        1px solid #e2aaaa;
+
+    background-color:
+        #fff5f5;
+
+    color: #b83232;
+}
+
+
+.confirm-button {
+    width: 100%;
+
+    margin-top: 10px;
+
+    border: none;
+
+    background-color:
+        #e85d04;
+
+    color: #ffffff;
+}
+
+
+button:disabled {
+    opacity: 0.4;
+
+    cursor: not-allowed;
+}
+
+
+/* =========================================
+   Temporary Generic Camera Area
+   ========================================= */
+
+.camera-placeholder {
+    min-height: 430px;
+    flex: 1;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background:
+        linear-gradient(
+            135deg,
+            #222222,
+            #111111
+        );
+}
+
+
+.camera-message {
+    padding: 30px;
+
+    text-align: center;
+
+    color: #ffffff;
+}
+
+
+.camera-icon {
+    display: block;
+
+    margin-bottom: 15px;
+
+    font-size: 45px;
+}
+
+
+.camera-message h2 {
+    margin-bottom: 8px;
+
+    font-size: 20px;
+}
+
+
+.camera-message p {
+    max-width: 300px;
+
+    font-size: 13px;
+    line-height: 1.5;
+
+    color: #cccccc;
+}
+
+
+/* =========================================
+   Marker AR
+   ========================================= */
+
+.marker-ar-page {
+    width: 100%;
+    height: 100vh;
+
+    overflow: hidden;
+
+    background-color:
+        #000000;
+}
+
+
+.marker-ar-page a-scene {
+    position: fixed;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    z-index: 1;
+}
+
+
+.marker-ui {
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 10;
+
+    pointer-events: none;
+
+    display: flex;
+    flex-direction: column;
+
+    justify-content:
+        space-between;
+}
+
+
+.marker-ui button,
+.marker-ui a {
+    pointer-events: auto;
+}
+
+
+.marker-top-bar {
+    display: flex;
+    align-items: center;
+
+    gap: 14px;
+
+    padding:
+        calc(
+            12px +
+            env(safe-area-inset-top)
+        )
+        15px
+        12px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.94
+        );
+
+    backdrop-filter:
+        blur(8px);
+
+    border-bottom:
+        1px solid
+        rgba(
+            0,
+            0,
+            0,
+            0.08
+        );
+}
+
+
+.marker-top-bar h1 {
+    margin-bottom: 3px;
+
+    font-size: 18px;
+}
+
+
+.marker-top-bar p {
+    font-size: 11px;
+
+    color: #666666;
+}
+
+
+.marker-status-wrapper {
+    display: flex;
+
+    justify-content: center;
+
+    padding: 15px;
+}
+
+
+.marker-status {
+    max-width: 340px;
+
+    padding: 10px 16px;
+
+    border-radius: 20px;
+
+    background:
+        rgba(
+            20,
+            20,
+            20,
+            0.75
+        );
+
+    color: #ffffff;
+
+    font-size: 12px;
+
+    text-align: center;
+
+    backdrop-filter:
+        blur(5px);
+}
+
+
+.marker-status.detected {
+    background:
+        rgba(
+            35,
+            130,
+            75,
+            0.88
+        );
+}
+
+
+.marker-control-panel {
+    padding:
+        16px
+        16px
+        calc(
+            16px +
+            env(safe-area-inset-bottom)
+        );
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.96
+        );
+
+    backdrop-filter:
+        blur(10px);
+}
+
+
+/* =========================================
+   Markerless WebXR
+   ========================================= */
+
+.markerless-page {
+    min-height: 100vh;
+
+    background-color:
+        #f8f8f8;
+}
+
+
+.markerless-layout {
+    min-height:
+        calc(
+            100vh - 75px
+        );
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* =========================================
+   WebXR Viewport
+   ========================================= */
+
+.xr-viewport {
+    position: relative;
+
+    min-height: 420px;
+
+    flex: 1;
+
+    overflow: hidden;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background:
+        linear-gradient(
+            135deg,
+            #222222,
+            #111111
+        );
+}
+
+
+.xr-canvas {
+    position: absolute;
+
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    z-index: 1;
+}
+
+
+.xr-viewport .camera-message {
+    position: relative;
+
+    z-index: 2;
+}
+
+
+/* =========================================
+   Start / Exit AR Buttons
+   ========================================= */
+
+.start-ar-button {
+    min-width: 170px;
+
+    margin-top: 20px;
+
+    padding: 14px 22px;
+
+    border: none;
+    border-radius: 12px;
+
+    background-color:
+        #e85d04;
+
+    color: #ffffff;
+
+    font-size: 15px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+
+.start-ar-button:disabled {
+    background-color:
+        #888888;
+}
+
+
+.exit-ar-button {
+    display: none;
+
+    width: 100%;
+
+    min-height: 40px;
+
+    margin-top: 10px;
+
+    border:
+        1px solid #dddddd;
+
+    border-radius: 10px;
+
+    background-color:
+        #ffffff;
+
+    color: #555555;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+/* =========================================
+   Immersive WebXR DOM Overlay
+   ========================================= */
+
+body:xr-overlay {
+    background-color:
+        transparent;
+}
+
+
+/*
+    Hide the normal page header and
+    introduction during immersive AR.
+*/
+
+body:xr-overlay
+.ar-header {
+    display: none;
+}
+
+
+body:xr-overlay
+#xrIntro {
+    display: none;
+}
+
+
+body:xr-overlay
+.markerless-layout {
+    min-height: 100vh;
+}
+
+
+body:xr-overlay
+.xr-viewport {
+    position: fixed;
+
+    inset: 0;
+
+    min-height: 100vh;
+
+    background:
+        transparent;
+
+    pointer-events: none;
+}
+
+
+/*
+    Compact bottom control panel so
+    the real world remains visible.
+*/
+
+body:xr-overlay
+.ar-controls {
+    position: fixed;
+
+    left: 12px;
+    right: 12px;
+    bottom:
+        calc(
+            12px +
+            env(safe-area-inset-bottom)
+        );
+
+    z-index: 100;
+
+    max-width: 620px;
+
+    margin: 0 auto;
+
+    padding: 12px;
+
+    border-radius: 16px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.94
+        );
+
+    backdrop-filter:
+        blur(8px);
+
+    box-shadow:
+        0 8px 30px
+        rgba(
+            0,
+            0,
+            0,
+            0.15
+        );
+}
+
+
+body:xr-overlay
+.status-message {
+    margin-bottom: 10px;
+
+    padding: 8px 10px;
+
+    font-size: 11px;
+}
+
+
+body:xr-overlay
+.control-label {
+    display: none;
+}
+
+
+body:xr-overlay
+.food-button {
+    min-height: 42px;
+
+    font-size: 13px;
+}
+
+
+/*
+    We have not implemented manipulation
+    yet, so don't waste camera space
+    showing disabled controls in XR.
+*/
+
+body:xr-overlay
+.interaction-controls {
+    display: none;
+}
+
+
+body:xr-overlay
+.exit-ar-button {
+    display: block;
+}
+
+
+/* =========================================
+   Mobile Home Adjustments
+   ========================================= */
+
+@media (
+    max-width: 480px
+) {
+
+    .home-page {
+        padding:
+            25px 16px;
+    }
+
+
+    .brand h1 {
+        font-size: 36px;
+    }
+
+
+    .tagline {
+        font-size: 18px;
+    }
+
+
+    .description {
+        margin-bottom: 28px;
+
+        font-size: 14px;
+    }
+
+
+    .mode-card {
+        padding: 17px;
+    }
+
+
+    .mode-icon {
+        width: 48px;
+        height: 48px;
+
+        font-size: 23px;
+    }
+
+
+    .mode-content h2 {
+        font-size: 16px;
+    }
+
+}
+
+
+/* =========================================
+   Larger Screens
+   ========================================= */
+
+@media (
+    min-width: 700px
+) {
+
+    .marker-control-panel {
+        width: 520px;
+
+        margin:
+            0 auto
+            18px;
+
+        border-radius: 18px;
+    }
+
+}
+
+
+@media (
+    min-width: 800px
+) {
+
+    .markerless-layout {
+        max-width: 700px;
+
+        margin: 0 auto;
+    }
+
+}

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MenuAR Model Test</title>
+
+    <!-- A-Frame -->
+    <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
+</head>
+
+<body>
+
+    <a-scene background="color: #ECECEC">
+
+        <!-- Assets -->
+        <a-assets>
+
+            <a-asset-item id="burgerModel" src="assets/models/burger.glb">
+            </a-asset-item>
+
+            <a-asset-item id="pizzaModel" src="assets/models/pizza.glb">
+            </a-asset-item>
+
+        </a-assets>
+
+
+        <!-- Burger -->
+        <a-entity gltf-model="#burgerModel" position="-0.8 1 -2" scale="1.8 1.8 1.8">
+        </a-entity>
+
+        <!-- Pizza -->
+        <a-entity gltf-model="#pizzaModel" position="0.8 1 -2" scale="1.8 1.8 1.8">
+        </a-entity>
+
+
+        <!-- Lighting -->
+
+        <a-light type="ambient" intensity="1">
+        </a-light>
+
+        <a-light type="directional" position="1 3 2" intensity="1">
+        </a-light>
+
+
+        <!-- Ground -->
+
+        <a-plane position="0 0 -3" rotation="-90 0 0" width="6" height="6" color="#DDDDDD">
+        </a-plane>
+
+
+        <!-- Camera -->
+
+        <a-camera position="0 1.6 0">
+        </a-camera>
+
+    </a-scene>
+
+</body>
+
+</html>

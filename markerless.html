@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>MenuAR | View Food on Table</title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css?v=3"
+    >
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+            }
+        }
+    </script>
+
+</head>
+
+
+<body class="markerless-page">
+
+    <header class="ar-header">
+
+        <a
+            href="index.html"
+            class="back-button"
+        >
+            ←
+        </a>
+
+        <div>
+            <h1>View Food on Table</h1>
+
+            <p>
+                Place food on a real surface
+            </p>
+        </div>
+
+    </header>
+
+
+    <main class="markerless-layout">
+
+        <section
+            class="xr-viewport"
+            id="xrViewport"
+        >
+
+            <div
+                class="camera-message"
+                id="xrIntro"
+            >
+
+                <span class="camera-icon">
+                    📱
+                </span>
+
+                <h2>
+                    AR Surface View
+                </h2>
+
+                <p>
+                    Start AR, then move your tablet
+                    slowly across a well-lit table.
+                </p>
+
+                <button
+                    type="button"
+                    id="startARBtn"
+                    class="start-ar-button"
+                    disabled
+                >
+                    Loading...
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <section
+            class="ar-controls"
+            id="arControls"
+        >
+
+            <p
+                class="status-message"
+                id="statusMessage"
+            >
+                Loading MenuAR...
+            </p>
+
+
+            <p class="control-label">
+                Select Food
+            </p>
+
+
+            <div class="food-selector">
+
+                <button
+                    type="button"
+                    class="food-button active"
+                    id="burgerBtn"
+                >
+                    🍔 Burger
+                </button>
+
+                <button
+                    type="button"
+                    class="food-button"
+                    id="pizzaBtn"
+                >
+                    🍕 Pizza
+                </button>
+
+            </div>
+
+
+            <div
+                class="interaction-controls"
+                id="interactionControls"
+            >
+
+                <div class="control-row">
+
+                    <button
+                        type="button"
+                        class="control-button"
+                        id="rotateLeftBtn"
+                        disabled
+                    >
+                        ↶ Rotate Left
+                    </button>
+
+                    <button
+                        type="button"
+                        class="control-button"
+                        id="rotateRightBtn"
+                        disabled
+                    >
+                        Rotate Right ↷
+                    </button>
+
+                </div>
+
+
+                <div class="control-row">
+
+                    <button
+                        type="button"
+                        class="control-button"
+                        id="sizeDownBtn"
+                        disabled
+                    >
+                        − Size
+                    </button>
+
+                    <button
+                        type="button"
+                        class="control-button"
+                        id="sizeUpBtn"
+                        disabled
+                    >
+                        + Size
+                    </button>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="remove-button"
+                    id="removeBtn"
+                    disabled
+                >
+                    Remove Food
+                </button>
+
+
+                <button
+                    type="button"
+                    class="confirm-button"
+                    id="confirmBtn"
+                    disabled
+                >
+                    Confirm Preview
+                </button>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="exit-ar-button"
+                id="exitARBtn"
+            >
+                Exit AR
+            </button>
+
+        </section>
+
+    </main>
+
+
+    <script
+        type="module"
+        src="js/markerless-ar.js?v=5"
+    ></script>
+
+</body>
+
+</html>
