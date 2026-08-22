@@ -22,87 +22,82 @@ const hiroMarker =
 const markerStatus =
     document.getElementById("markerStatus");
 
+const burgerModelAsset =
+    document.getElementById("burgerModel");
+
+const pizzaModelAsset =
+    document.getElementById("pizzaModel");
+
 
 // ------------------------------------------
 // Marker AR State
 // ------------------------------------------
 
 const markerARState = {
+
     selectedFood: "burger",
-    markerVisible: false
+
+    markerVisible: false,
+
+    currentModelLoaded: false,
+
+    modelError: false
+
 };
 
 
 // ------------------------------------------
-// Food Model Configuration
+// Model Configuration
+// ------------------------------------------
+//
+// These values are intentionally different
+// from the old Kenney-model values.
+//
+// They are starting calibration values for
+// the new realistic GLB assets.
+//
 // ------------------------------------------
 
 const MARKER_MODEL_CONFIG = {
 
     burger: {
+
         model: "#burgerModel",
-        scale: "0.7 0.7 0.7",
-        position: "0 0.35 0"
+
+        scale: "5 5 5",
+
+        position: "0 0.55 0",
+
+        rotation: "0 0 0"
+
     },
 
+
     pizza: {
+
         model: "#pizzaModel",
-        scale: "0.7 0.7 0.7",
-        position: "0 0.15 0"
+
+        scale: "4 4 4",
+
+        position: "0 0.42 0",
+
+        rotation: "0 0 0"
+
     }
 
 };
 
 
 // ------------------------------------------
-// Update Selected Food
+// Get Display Food Name
 // ------------------------------------------
 
-function selectMarkerFood(food) {
+function getFoodName() {
 
-    markerARState.selectedFood = food;
+    return markerARState.selectedFood === "burger"
+        ? "Burger"
+        : "Pizza";
 
-    const config =
-        MARKER_MODEL_CONFIG[food];
-
-
-    // Change active button
-    if (food === "burger") {
-
-        markerBurgerBtn.classList.add("active");
-        markerPizzaBtn.classList.remove("active");
-
-    } else {
-
-        markerPizzaBtn.classList.add("active");
-        markerBurgerBtn.classList.remove("active");
-
-    }
-
-
-    // Change 3D model
-    markerFoodModel.setAttribute(
-        "gltf-model",
-        config.model
-    );
-
-    markerFoodModel.setAttribute(
-        "scale",
-        config.scale
-    );
-
-    markerFoodModel.setAttribute(
-        "position",
-        config.position
-    );
-
-
-    updateMarkerStatus();
-
-    console.log(
-        "Marker AR selected food:",
-        markerARState.selectedFood
-    );
 }
 
 
@@ -112,12 +107,36 @@ function selectMarkerFood(food) {
 
 function updateMarkerStatus() {
 
-    const foodName =
-        markerARState.selectedFood === "burger"
-            ? "Burger"
-            : "Pizza";
+    const foodName = getFoodName();
 
 
+    // Model loading failed
+    if (markerARState.modelError) {
+
+        markerStatus.textContent =
+            `${foodName} model could not be loaded.`;
+
+        markerStatus.classList.remove("detected");
+
+        return;
+
+    }
+
+
+    // Model is still loading
+    if (!markerARState.currentModelLoaded) {
+
+        markerStatus.textContent =
+            `Loading ${foodName} model...`;
+
+        markerStatus.classList.remove("detected");
+
+        return;
+
+    }
+
+
+    // Marker currently detected
     if (markerARState.markerVisible) {
 
         markerStatus.textContent =
@@ -125,20 +144,113 @@ function updateMarkerStatus() {
 
         markerStatus.classList.add("detected");
 
-    } else {
-
-        markerStatus.textContent =
-            `Looking for Hiro marker — ${foodName} selected.`;
-
-        markerStatus.classList.remove("detected");
+        return;
 
     }
+
+
+    // Model ready but marker not detected
+    markerStatus.textContent =
+        `Looking for Hiro marker — ${foodName} ready.`;
+
+    markerStatus.classList.remove("detected");
 
 }
 
 
 // ------------------------------------------
-// Food Selection Buttons
+// Apply Selected Food Model
+// ------------------------------------------
+
+function applyMarkerFoodModel(food) {
+
+    const config =
+        MARKER_MODEL_CONFIG[food];
+
+
+    markerARState.currentModelLoaded = false;
+
+    markerARState.modelError = false;
+
+
+    markerFoodModel.setAttribute(
+        "position",
+        config.position
+    );
+
+
+    markerFoodModel.setAttribute(
+        "rotation",
+        config.rotation
+    );
+
+
+    markerFoodModel.setAttribute(
+        "scale",
+        config.scale
+    );
+
+
+    markerFoodModel.setAttribute(
+        "gltf-model",
+        config.model
+    );
+
+
+    updateMarkerStatus();
+
+}
+
+
+// ------------------------------------------
+// Select Food
+// ------------------------------------------
+
+function selectMarkerFood(food) {
+
+    // Avoid unnecessary reload if already selected
+    if (
+        markerARState.selectedFood === food &&
+        markerARState.currentModelLoaded
+    ) {
+
+        return;
+
+    }
+
+
+    markerARState.selectedFood = food;
+
+
+    // Update UI buttons
+    if (food === "burger") {
+
+        markerBurgerBtn.classList.add("active");
+
+        markerPizzaBtn.classList.remove("active");
+
+    } else {
+
+        markerPizzaBtn.classList.add("active");
+
+        markerBurgerBtn.classList.remove("active");
+
+    }
+
+
+    applyMarkerFoodModel(food);
+
+
+    console.log(
+        "Marker AR selected food:",
+        markerARState.selectedFood
+    );
+
+}
+
+
+// ------------------------------------------
+// Food Selection Button Events
 // ------------------------------------------
 
 markerBurgerBtn.addEventListener(
@@ -162,7 +274,56 @@ markerPizzaBtn.addEventListener(
 
 
 // ------------------------------------------
-// Marker Tracking Events
+// Model Loaded
+// ------------------------------------------
+
+markerFoodModel.addEventListener(
+    "model-loaded",
+    () => {
+
+        markerARState.currentModelLoaded = true;
+
+        markerARState.modelError = false;
+
+
+        console.log(
+            `${getFoodName()} model loaded successfully`
+        );
+
+
+        updateMarkerStatus();
+
+    }
+);
+
+
+// ------------------------------------------
+// Model Loading Error
+// ------------------------------------------
+
+markerFoodModel.addEventListener(
+    "model-error",
+    (event) => {
+
+        markerARState.currentModelLoaded = false;
+
+        markerARState.modelError = true;
+
+
+        console.error(
+            "Marker AR model loading error:",
+            event
+        );
+
+
+        updateMarkerStatus();
+
+    }
+);
+
+
+// ------------------------------------------
+// Marker Found
 // ------------------------------------------
 
 hiroMarker.addEventListener(
@@ -171,13 +332,21 @@ hiroMarker.addEventListener(
 
         markerARState.markerVisible = true;
 
-        updateMarkerStatus();
 
-        console.log("Hiro marker detected");
+        console.log(
+            "Hiro marker detected"
+        );
+
+
+        updateMarkerStatus();
 
     }
 );
 
+
+// ------------------------------------------
+// Marker Lost
+// ------------------------------------------
 
 hiroMarker.addEventListener(
     "markerLost",
@@ -185,16 +354,48 @@ hiroMarker.addEventListener(
 
         markerARState.markerVisible = false;
 
-        updateMarkerStatus();
 
-        console.log("Hiro marker lost");
+        console.log(
+            "Hiro marker lost"
+        );
+
+
+        updateMarkerStatus();
 
     }
 );
 
 
 // ------------------------------------------
-// Initial UI
+// Asset Diagnostics
+// ------------------------------------------
+
+burgerModelAsset.addEventListener(
+    "loaded",
+    () => {
+
+        console.log(
+            "Burger GLB asset downloaded"
+        );
+
+    }
+);
+
+
+pizzaModelAsset.addEventListener(
+    "loaded",
+    () => {
+
+        console.log(
+            "Pizza GLB asset downloaded"
+        );
+
+    }
+);
+
+
+// ------------------------------------------
+// Initial State
 // ------------------------------------------
 
 updateMarkerStatus();
