@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -11,37 +12,55 @@
 
     <title>MenuAR | Marker AR Preview</title>
 
-    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Main Styles -->
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
 
     <!-- A-Frame -->
-    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <script
+        src="https://aframe.io/releases/1.6.0/aframe.min.js">
+    </script>
+
 
     <!-- AR.js -->
     <script
         src="https://raw.githack.com/AR-js-org/AR.js/3.4.7/aframe/build/aframe-ar.js">
     </script>
 
+
     <style>
+
         /*
-            Remove A-Frame's VR button.
             MenuAR uses AR only.
+            Hide the default A-Frame VR button.
         */
+
         .a-enter-vr-button {
             display: none !important;
         }
+
     </style>
 
 </head>
 
+
 <body class="marker-ar-page">
 
+
     <!-- =====================================
-         MARKER AR SCENE
+         Marker AR Scene
          ===================================== -->
 
     <a-scene
+
         embedded
+
         vr-mode-ui="enabled: false"
+
         loading-screen="enabled: false"
 
         renderer="
@@ -72,86 +91,117 @@
         "
     >
 
+
         <!-- =================================
-             ASSETS
+             3D Assets
              ================================= -->
 
         <a-assets timeout="20000">
 
+
             <a-asset-item
+
                 id="burgerModel"
-                src="assets/models/burger.glb?v=realistic-3"
+
+                src="assets/models/burger.glb?v=realistic-final"
+
                 response-type="arraybuffer"
+
             >
             </a-asset-item>
 
+
+
             <a-asset-item
+
                 id="pizzaModel"
-                src="assets/models/pizza.glb?v=realistic-3"
+
+                src="assets/models/pizza.glb?v=realistic-final"
+
                 response-type="arraybuffer"
+
             >
             </a-asset-item>
+
 
         </a-assets>
 
 
+
         <!-- =================================
-             LIGHTING
+             Lighting
              ================================= -->
 
         <a-entity
+
             light="
                 type: ambient;
                 color: #FFFFFF;
                 intensity: 1.0;
             "
+
         >
         </a-entity>
 
+
+
         <a-entity
+
             light="
                 type: directional;
                 color: #FFFFFF;
                 intensity: 1.25;
             "
+
             position="-1 3 2"
+
         >
         </a-entity>
 
+
+
         <a-entity
+
             light="
                 type: directional;
                 color: #FFF1DD;
                 intensity: 0.55;
             "
+
             position="2 2 1"
+
         >
         </a-entity>
 
 
+
         <!-- =================================
-             HIRO MARKER
+             Hiro Marker
              ================================= -->
 
         <a-marker
+
             id="hiroMarker"
+
             preset="hiro"
 
             emitevents="true"
 
             smooth="true"
+
             smoothCount="5"
+
             smoothTolerance="0.01"
+
             smoothThreshold="2"
+
         >
 
-            <!--
-                Initial Burger model.
-                Scale is calibrated specifically
-                for the marker scene.
-            -->
+
+            <!-- Selected Food -->
 
             <a-entity
+
                 id="markerFoodModel"
 
                 gltf-model="#burgerModel"
@@ -161,41 +211,54 @@
                 rotation="0 0 0"
 
                 scale="1.8 1.8 1.8"
+
             >
             </a-entity>
+
 
         </a-marker>
 
 
+
         <!-- =================================
-             AR CAMERA
+             AR Camera
              ================================= -->
 
         <a-entity
+
             camera="
                 near: 0.01;
                 far: 1000;
             "
+
         >
         </a-entity>
+
 
     </a-scene>
 
 
+
     <!-- =====================================
-         UI
+         Interface
          ===================================== -->
 
     <div class="marker-ui">
 
+
+        <!-- Header -->
+
         <header class="marker-top-bar">
+
 
             <a
                 href="index.html"
                 class="back-button"
+                aria-label="Back to home"
             >
                 ←
             </a>
+
 
             <div>
 
@@ -209,59 +272,76 @@
 
             </div>
 
+
         </header>
 
 
-        <div class="marker-status-wrapper">
 
-            <p
-                id="markerStatus"
-                class="marker-status"
-            >
-                Loading Burger model...
-            </p>
-
-        </div>
-
+        <!-- =================================
+             Controls
+             ================================= -->
 
         <section class="marker-control-panel">
+
 
             <p class="control-label">
                 Select Food
             </p>
 
+
             <div class="food-selector">
 
+
                 <button
+
                     type="button"
+
                     class="food-button active"
+
                     id="markerBurgerBtn"
+
                 >
                     🍔 Burger
                 </button>
 
+
+
                 <button
+
                     type="button"
+
                     class="food-button"
+
                     id="markerPizzaBtn"
+
                 >
                     🍕 Pizza
                 </button>
 
+
             </div>
 
+
             <p class="instruction">
-                Keep the complete Hiro marker visible.
-                Hold your device steady and move it slowly
-                until the marker is detected.
+
+                Keep the complete marker visible
+                and move your device slowly if
+                tracking becomes unstable.
+
             </p>
 
+
         </section>
+
 
     </div>
 
 
-    <script src="js/marker-ar.js?v=9"></script>
+
+    <!-- Marker Interaction -->
+
+    <script src="js/marker-ar.js?v=10"></script>
+
 
 </body>
 
