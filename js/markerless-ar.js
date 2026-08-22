@@ -1,5 +1,8 @@
-import * as THREE from
-    "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
+import * as THREE from "three";
+
+import {
+    GLTFLoader
+} from "three/addons/loaders/GLTFLoader.js";
 
 
 // ==========================================
@@ -18,11 +21,32 @@ const statusMessage =
 const startARBtn =
     document.getElementById("startARBtn");
 
+const exitARBtn =
+    document.getElementById("exitARBtn");
+
 const xrIntro =
     document.getElementById("xrIntro");
 
 const xrViewport =
     document.getElementById("xrViewport");
+
+const rotateLeftBtn =
+    document.getElementById("rotateLeftBtn");
+
+const rotateRightBtn =
+    document.getElementById("rotateRightBtn");
+
+const sizeDownBtn =
+    document.getElementById("sizeDownBtn");
+
+const sizeUpBtn =
+    document.getElementById("sizeUpBtn");
+
+const removeBtn =
+    document.getElementById("removeBtn");
+
+const confirmBtn =
+    document.getElementById("confirmBtn");
 
 
 // ==========================================
@@ -33,7 +57,7 @@ const menuARState = {
 
     selectedFood: "burger",
 
-    appState: "CHECKING_SUPPORT",
+    appState: "INITIALIZING",
 
     placedObject: null,
 
@@ -41,19 +65,68 @@ const menuARState = {
 
     currentRotation: 0,
 
-    surfaceFound: false
+    surfaceFound: false,
+
+    modelsReady: false,
+
+    xrSupported: false
 
 };
 
 
 // ==========================================
-// Three.js Variables
+// Model Configuration
+// ==========================================
+//
+// Keeping model-specific settings here means
+// we can replace the Kenney models later without
+// rewriting the AR logic.
+//
+
+const MODEL_CONFIG = {
+
+    burger: {
+
+        src:
+            "assets/models/burger.glb",
+
+        scale:
+            0.22,
+
+        surfaceOffset:
+            0.015
+
+    },
+
+    pizza: {
+
+        src:
+            "assets/models/pizza.glb",
+
+        scale:
+            0.24,
+
+        surfaceOffset:
+            0.012
+
+    }
+
+};
+
+
+// ==========================================
+// Three.js / WebXR Variables
 // ==========================================
 
 let scene;
+
 let camera;
+
 let renderer;
+
 let reticle;
+
+let controller;
 
 let xrSession = null;
 
@@ -64,19 +137,32 @@ let viewerSpace = null;
 let referenceSpace = null;
 
 
+// Loaded model templates
+
+const modelTemplates = {
+
+    burger: null,
+
+    pizza: null
+
+};
+
+
 // ==========================================
-// Initialize Three.js
+// Three.js Initialization
 // ==========================================
 
 function initThreeJS() {
 
-    scene = new THREE.Scene();
+    scene =
+        new THREE.Scene();
 
 
     camera =
         new THREE.PerspectiveCamera(
             70,
-            window.innerWidth / window.innerHeight,
+            window.innerWidth /
+                window.innerHeight,
             0.01,
             20
         );
@@ -90,7 +176,10 @@ function initThreeJS() {
 
 
     renderer.setPixelRatio(
-        Math.min(window.devicePixelRatio, 2)
+        Math.min(
+            window.devicePixelRatio,
+            2
+        )
     );
 
 
@@ -100,7 +189,8 @@ function initThreeJS() {
     );
 
 
-    renderer.xr.enabled = true;
+    renderer.xr.enabled =
+        true;
 
 
     renderer.domElement.classList.add(
@@ -117,14 +207,36 @@ function initThreeJS() {
     // Lighting
     // --------------------------------------
 
-    const ambientLight =
+    const hemisphereLight =
         new THREE.HemisphereLight(
             0xffffff,
-            0x444444,
-            2
+            0x666666,
+            2.5
         );
 
-    scene.add(ambientLight);
+
+    scene.add(
+        hemisphereLight
+    );
+
+
+    const directionalLight =
+        new THREE.DirectionalLight(
+            0xffffff,
+            1.5
+        );
+
+
+    directionalLight.position.set(
+        1,
+        3,
+        2
+    );
+
+
+    scene.add(
+        directionalLight
+    );
 
 
     // --------------------------------------
@@ -133,8 +245,8 @@ function initThreeJS() {
 
     const reticleGeometry =
         new THREE.RingGeometry(
-            0.07,
-            0.09,
+            0.065,
+            0.085,
             32
         );
 
@@ -146,7 +258,13 @@ function initThreeJS() {
 
     const reticleMaterial =
         new THREE.MeshBasicMaterial({
-            color: 0xffffff
+
+            color:
+                0xffffff,
+
+            side:
+                THREE.DoubleSide
+
         });
 
 
@@ -157,12 +275,36 @@ function initThreeJS() {
         );
 
 
-    reticle.matrixAutoUpdate = false;
+    reticle.matrixAutoUpdate =
+        false;
 
-    reticle.visible = false;
+
+    reticle.visible =
+        false;
 
 
-    scene.add(reticle);
+    scene.add(
+        reticle
+    );
+
+
+    // --------------------------------------
+    // XR Touch / Select Controller
+    // --------------------------------------
+
+    controller =
+        renderer.xr.getController(0);
+
+
+    controller.addEventListener(
+        "select",
+        onXRSelect
+    );
+
+
+    scene.add(
+        controller
+    );
 
 
     // --------------------------------------
@@ -183,11 +325,121 @@ function initThreeJS() {
 function setStatus(message) {
 
     if (
-        statusMessage.textContent !== message
+        statusMessage.textContent !==
+        message
     ) {
 
         statusMessage.textContent =
             message;
+
+    }
+
+}
+
+
+// ==========================================
+// Model Loading
+// ==========================================
+
+function loadModel(food) {
+
+    return new Promise(
+        (resolve, reject) => {
+
+            const loader =
+                new GLTFLoader();
+
+
+            const config =
+                MODEL_CONFIG[food];
+
+
+            loader.load(
+
+                config.src,
+
+                (gltf) => {
+
+                    modelTemplates[food] =
+                        gltf.scene;
+
+
+                    console.log(
+                        `${food} model loaded.`
+                    );
+
+
+                    resolve();
+
+                },
+
+                undefined,
+
+                (error) => {
+
+                    console.error(
+                        `Failed to load ${food}:`,
+                        error
+                    );
+
+
+                    reject(error);
+
+                }
+
+            );
+
+        }
+    );
+
+}
+
+
+// ==========================================
+// Load All Models
+// ==========================================
+
+async function loadModels() {
+
+    try {
+
+        setStatus(
+            "Loading Burger and Pizza models..."
+        );
+
+
+        await Promise.all([
+
+            loadModel("burger"),
+
+            loadModel("pizza")
+
+        ]);
+
+
+        menuARState.modelsReady =
+            true;
+
+
+        console.log(
+            "All MenuAR models loaded."
+        );
+
+    } catch (error) {
+
+        menuARState.modelsReady =
+            false;
+
+
+        setStatus(
+            "3D models could not be loaded."
+        );
+
+
+        console.error(
+            "Model loading failed:",
+            error
+        );
 
     }
 
@@ -200,15 +452,35 @@ function setStatus(message) {
 
 function selectFood(food) {
 
+    // Do not replace placed object yet.
+    // That comes in the manipulation phase.
+
+    if (
+        menuARState.placedObject
+    ) {
+
+        setStatus(
+            "Food is already placed. Dish switching will be enabled in the next interaction phase."
+        );
+
+
+        return;
+
+    }
+
+
     menuARState.selectedFood =
         food;
 
 
-    if (food === "burger") {
+    if (
+        food === "burger"
+    ) {
 
         burgerBtn.classList.add(
             "active"
         );
+
 
         pizzaBtn.classList.remove(
             "active"
@@ -220,6 +492,7 @@ function selectFood(food) {
             "active"
         );
 
+
         burgerBtn.classList.remove(
             "active"
         );
@@ -228,23 +501,28 @@ function selectFood(food) {
 
 
     const foodName =
-        food === "burger"
-            ? "Burger"
-            : "Pizza";
+        getFoodName(food);
 
 
     if (!xrSession) {
 
-        setStatus(
-            `${foodName} selected. Start AR to scan a surface.`
-        );
+        if (
+            menuARState.xrSupported &&
+            menuARState.modelsReady
+        ) {
+
+            setStatus(
+                `${foodName} selected. Ready to start AR.`
+            );
+
+        }
 
     } else if (
         menuARState.surfaceFound
     ) {
 
         setStatus(
-            `${foodName} selected. Surface detected.`
+            `${foodName} selected. Tap the white circle to place it.`
         );
 
     } else {
@@ -257,9 +535,22 @@ function selectFood(food) {
 
 
     console.log(
-        "MenuAR state:",
-        menuARState
+        "Selected food:",
+        food
     );
+
+}
+
+
+// ==========================================
+// Human-readable Food Name
+// ==========================================
+
+function getFoodName(food) {
+
+    return food === "burger"
+        ? "Burger"
+        : "Pizza";
 
 }
 
@@ -272,17 +563,20 @@ async function checkXRSupport() {
 
     if (!navigator.xr) {
 
+        menuARState.xrSupported =
+            false;
+
+
         menuARState.appState =
             "UNSUPPORTED";
-
-
-        startARBtn.disabled =
-            true;
 
 
         setStatus(
             "WebXR is not available in this browser."
         );
+
+
+        updateStartButton();
 
 
         return;
@@ -298,19 +592,14 @@ async function checkXRSupport() {
             );
 
 
+        menuARState.xrSupported =
+            supported;
+
+
         if (supported) {
 
             menuARState.appState =
                 "READY_TO_SCAN";
-
-
-            startARBtn.disabled =
-                false;
-
-
-            setStatus(
-                "Burger selected. Ready to start AR."
-            );
 
         } else {
 
@@ -318,15 +607,14 @@ async function checkXRSupport() {
                 "UNSUPPORTED";
 
 
-            startARBtn.disabled =
-                true;
-
-
             setStatus(
                 "Immersive AR is not supported on this device."
             );
 
         }
+
+
+        updateStartButton();
 
     } catch (error) {
 
@@ -336,13 +624,68 @@ async function checkXRSupport() {
         );
 
 
-        startARBtn.disabled =
-            true;
+        menuARState.xrSupported =
+            false;
+
+
+        menuARState.appState =
+            "UNSUPPORTED";
 
 
         setStatus(
             "Unable to check WebXR support."
         );
+
+
+        updateStartButton();
+
+    }
+
+}
+
+
+// ==========================================
+// Start Button Availability
+// ==========================================
+
+function updateStartButton() {
+
+    const ready =
+        menuARState.xrSupported &&
+        menuARState.modelsReady;
+
+
+    startARBtn.disabled =
+        !ready;
+
+
+    if (ready) {
+
+        startARBtn.textContent =
+            "Start AR";
+
+
+        const foodName =
+            getFoodName(
+                menuARState.selectedFood
+            );
+
+
+        setStatus(
+            `${foodName} selected. Ready to start AR.`
+        );
+
+    } else if (
+        !menuARState.xrSupported
+    ) {
+
+        startARBtn.textContent =
+            "AR Unsupported";
+
+    } else {
+
+        startARBtn.textContent =
+            "Loading Models...";
 
     }
 
@@ -354,6 +697,16 @@ async function checkXRSupport() {
 // ==========================================
 
 async function startARSession() {
+
+    if (
+        !menuARState.xrSupported ||
+        !menuARState.modelsReady
+    ) {
+
+        return;
+
+    }
+
 
     try {
 
@@ -372,7 +725,8 @@ async function startARSession() {
                     ],
 
                     domOverlay: {
-                        root: document.body
+                        root:
+                            document.body
                     }
 
                 }
@@ -390,15 +744,27 @@ async function startARSession() {
             );
 
 
-        referenceSpace =
-            await xrSession.requestReferenceSpace(
-                "local"
-            );
+        try {
+
+            referenceSpace =
+                await xrSession.requestReferenceSpace(
+                    "local-floor"
+                );
+
+        } catch {
+
+            referenceSpace =
+                await xrSession.requestReferenceSpace(
+                    "local"
+                );
+
+        }
 
 
         hitTestSource =
             await xrSession.requestHitTestSource({
-                space: viewerSpace
+                space:
+                    viewerSpace
             });
 
 
@@ -416,17 +782,13 @@ async function startARSession() {
             false;
 
 
-        startARBtn.textContent =
-            "Exit AR";
-
-
-        xrIntro.classList.add(
-            "xr-active"
+        document.body.classList.add(
+            "xr-session-active"
         );
 
 
         setStatus(
-            "Move your tablet slowly across the table."
+            "Move your tablet slowly across a well-lit table."
         );
 
 
@@ -442,7 +804,8 @@ async function startARSession() {
         );
 
 
-        xrSession = null;
+        xrSession =
+            null;
 
 
         setStatus(
@@ -455,7 +818,7 @@ async function startARSession() {
 
 
 // ==========================================
-// End AR Session
+// Exit AR Session
 // ==========================================
 
 async function endARSession() {
@@ -470,25 +833,34 @@ async function endARSession() {
 
 
 // ==========================================
-// AR Session End Cleanup
+// Session Cleanup
 // ==========================================
 
 function onARSessionEnded() {
 
-    if (hitTestSource) {
+    if (
+        hitTestSource
+    ) {
 
         hitTestSource.cancel();
 
     }
 
 
-    hitTestSource = null;
+    hitTestSource =
+        null;
 
-    viewerSpace = null;
 
-    referenceSpace = null;
+    viewerSpace =
+        null;
 
-    xrSession = null;
+
+    referenceSpace =
+        null;
+
+
+    xrSession =
+        null;
 
 
     reticle.visible =
@@ -503,19 +875,15 @@ function onARSessionEnded() {
         "READY_TO_SCAN";
 
 
-    startARBtn.textContent =
-        "Start AR";
-
-
-    xrIntro.classList.remove(
-        "xr-active"
+    document.body.classList.remove(
+        "xr-session-active"
     );
 
 
     const foodName =
-        menuARState.selectedFood === "burger"
-            ? "Burger"
-            : "Pizza";
+        getFoodName(
+            menuARState.selectedFood
+        );
 
 
     setStatus(
@@ -526,6 +894,173 @@ function onARSessionEnded() {
     console.log(
         "WebXR AR session ended."
     );
+
+}
+
+
+// ==========================================
+// Place Selected Food
+// ==========================================
+
+function placeSelectedFood() {
+
+    if (
+        !reticle.visible ||
+        menuARState.placedObject
+    ) {
+
+        return;
+
+    }
+
+
+    const food =
+        menuARState.selectedFood;
+
+
+    const template =
+        modelTemplates[food];
+
+
+    if (!template) {
+
+        return;
+
+    }
+
+
+    const config =
+        MODEL_CONFIG[food];
+
+
+    const placedModel =
+        template.clone(true);
+
+
+    // --------------------------------------
+    // Position
+    // --------------------------------------
+
+    const placementPosition =
+        new THREE.Vector3();
+
+
+    placementPosition.setFromMatrixPosition(
+        reticle.matrix
+    );
+
+
+    placedModel.position.copy(
+        placementPosition
+    );
+
+
+    placedModel.position.y +=
+        config.surfaceOffset;
+
+
+    // --------------------------------------
+    // Surface Orientation
+    // --------------------------------------
+
+    const placementRotation =
+        new THREE.Quaternion();
+
+
+    const placementScale =
+        new THREE.Vector3();
+
+
+    reticle.matrix.decompose(
+        new THREE.Vector3(),
+        placementRotation,
+        placementScale
+    );
+
+
+    placedModel.quaternion.copy(
+        placementRotation
+    );
+
+
+    // --------------------------------------
+    // Food Scale
+    // --------------------------------------
+
+    placedModel.scale.setScalar(
+        config.scale
+    );
+
+
+    // --------------------------------------
+    // Add to Scene
+    // --------------------------------------
+
+    scene.add(
+        placedModel
+    );
+
+
+    menuARState.placedObject =
+        placedModel;
+
+
+    menuARState.appState =
+        "PLACED";
+
+
+    menuARState.currentScale =
+        config.scale;
+
+
+    menuARState.currentRotation =
+        0;
+
+
+    reticle.visible =
+        false;
+
+
+    burgerBtn.disabled =
+        true;
+
+
+    pizzaBtn.disabled =
+        true;
+
+
+    const foodName =
+        getFoodName(food);
+
+
+    setStatus(
+        `${foodName} placed successfully.`
+    );
+
+
+    console.log(
+        `${foodName} placed.`,
+        placedModel.position
+    );
+
+}
+
+
+// ==========================================
+// XR Tap / Select Event
+// ==========================================
+
+function onXRSelect() {
+
+    if (
+        menuARState.appState ===
+            "SURFACE_FOUND" &&
+        reticle.visible
+    ) {
+
+        placeSelectedFood();
+
+    }
 
 }
 
@@ -542,7 +1077,8 @@ function render(
     if (
         frame &&
         hitTestSource &&
-        referenceSpace
+        referenceSpace &&
+        !menuARState.placedObject
     ) {
 
         const hitTestResults =
@@ -588,8 +1124,14 @@ function render(
                         "SURFACE_FOUND";
 
 
+                    const foodName =
+                        getFoodName(
+                            menuARState.selectedFood
+                        );
+
+
                     setStatus(
-                        "Surface detected. Placement indicator ready."
+                        `${foodName} selected. Tap the white circle to place it.`
                     );
 
 
@@ -619,8 +1161,14 @@ function render(
                     "SCANNING";
 
 
+                const foodName =
+                    getFoodName(
+                        menuARState.selectedFood
+                    );
+
+
                 setStatus(
-                    "Surface lost. Move your tablet slowly across the table."
+                    `${foodName} selected. Surface lost — move your tablet slowly.`
                 );
 
             }
@@ -639,14 +1187,16 @@ function render(
 
 
 // ==========================================
-// Button Events
+// Food Selection Events
 // ==========================================
 
 burgerBtn.addEventListener(
     "click",
     () => {
 
-        selectFood("burger");
+        selectFood(
+            "burger"
+        );
 
     }
 );
@@ -656,25 +1206,33 @@ pizzaBtn.addEventListener(
     "click",
     () => {
 
-        selectFood("pizza");
+        selectFood(
+            "pizza"
+        );
 
     }
 );
 
 
+// ==========================================
+// Start / Exit AR Events
+// ==========================================
+
 startARBtn.addEventListener(
     "click",
     async () => {
 
-        if (xrSession) {
+        await startARSession();
 
-            await endARSession();
+    }
+);
 
-        } else {
 
-            await startARSession();
+exitARBtn.addEventListener(
+    "click",
+    async () => {
 
-        }
+        await endARSession();
 
     }
 );
@@ -687,6 +1245,16 @@ startARBtn.addEventListener(
 window.addEventListener(
     "resize",
     () => {
+
+        if (
+            !camera ||
+            !renderer
+        ) {
+
+            return;
+
+        }
+
 
         camera.aspect =
             window.innerWidth /
@@ -706,11 +1274,33 @@ window.addEventListener(
 
 
 // ==========================================
-// Start Application
+// Application Startup
 // ==========================================
 
-initThreeJS();
+async function initializeApplication() {
 
-selectFood("burger");
+    initThreeJS();
 
-checkXRSupport();
+
+    selectFood(
+        "burger"
+    );
+
+
+    await Promise.all([
+
+        loadModels(),
+
+        checkXRSupport()
+
+    ]);
+
+
+    updateStartButton();
+
+}
+
+
+// Start MenuAR
+
+initializeApplication();

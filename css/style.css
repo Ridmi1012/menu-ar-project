@@ -1,6 +1,6 @@
-/* =========================
-   MenuAR - Global Styles
-   ========================= */
+/* =========================================
+   MenuAR - Global Reset
+   ========================================= */
 
 * {
     margin: 0;
@@ -8,12 +8,18 @@
     box-sizing: border-box;
 }
 
+
 html {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
 }
+
 
 body {
     min-height: 100vh;
+
     background:
         linear-gradient(
             145deg,
@@ -26,9 +32,9 @@ body {
 }
 
 
-/* =========================
+/* =========================================
    Home Page
-   ========================= */
+   ========================================= */
 
 .home-page {
     min-height: 100vh;
@@ -40,6 +46,7 @@ body {
     padding: 30px 20px;
 }
 
+
 .hero {
     width: 100%;
     max-width: 520px;
@@ -48,9 +55,9 @@ body {
 }
 
 
-/* =========================
+/* =========================================
    Branding
-   ========================= */
+   ========================================= */
 
 .brand {
     display: flex;
@@ -62,9 +69,11 @@ body {
     margin-bottom: 10px;
 }
 
+
 .brand-icon {
     font-size: 32px;
 }
+
 
 .brand h1 {
     font-size: 42px;
@@ -76,16 +85,17 @@ body {
 }
 
 
-/* =========================
+/* =========================================
    Intro Text
-   ========================= */
+   ========================================= */
 
 .tagline {
+    margin-bottom: 12px;
+
     font-size: 20px;
     font-weight: 600;
-
-    margin-bottom: 12px;
 }
+
 
 .description {
     max-width: 430px;
@@ -99,9 +109,9 @@ body {
 }
 
 
-/* =========================
-   AR Mode Cards
-   ========================= */
+/* =========================================
+   Home Mode Cards
+   ========================================= */
 
 .mode-container {
     display: flex;
@@ -109,6 +119,7 @@ body {
 
     gap: 16px;
 }
+
 
 .mode-card {
     width: 100%;
@@ -130,7 +141,8 @@ body {
     color: #222222;
 
     box-shadow:
-        0 8px 24px rgba(0, 0, 0, 0.06);
+        0 8px 24px
+        rgba(0, 0, 0, 0.06);
 
     transition:
         transform 0.2s ease,
@@ -138,23 +150,29 @@ body {
         border-color 0.2s ease;
 }
 
-.mode-card:hover {
-    transform: translateY(-2px);
 
-    border-color: #f3b27c;
+.mode-card:hover {
+    transform:
+        translateY(-2px);
+
+    border-color:
+        #f3b27c;
 
     box-shadow:
-        0 12px 28px rgba(0, 0, 0, 0.10);
+        0 12px 28px
+        rgba(0, 0, 0, 0.10);
 }
+
 
 .mode-card:active {
-    transform: scale(0.98);
+    transform:
+        scale(0.98);
 }
 
 
-/* =========================
-   Card Content
-   ========================= */
+/* =========================================
+   Home Card Content
+   ========================================= */
 
 .mode-icon {
     width: 55px;
@@ -166,18 +184,21 @@ body {
     justify-content: center;
     align-items: center;
 
-    background-color: #fff2e5;
+    background-color:
+        #fff2e5;
 
     border-radius: 14px;
 
     font-size: 27px;
 }
 
+
 .mode-content {
     flex: 1;
 
     text-align: left;
 }
+
 
 .mode-content h2 {
     margin-bottom: 6px;
@@ -186,12 +207,14 @@ body {
     font-weight: 700;
 }
 
+
 .mode-content p {
     font-size: 13px;
     line-height: 1.5;
 
     color: #777777;
 }
+
 
 .arrow {
     font-size: 23px;
@@ -201,9 +224,9 @@ body {
 }
 
 
-/* =========================
+/* =========================================
    Device Note
-   ========================= */
+   ========================================= */
 
 .device-note {
     margin-top: 28px;
@@ -214,60 +237,9 @@ body {
 }
 
 
-/* =========================
-   Mobile Adjustments
-   ========================= */
-
-@media (max-width: 480px) {
-
-    .home-page {
-        padding: 25px 16px;
-    }
-
-    .brand h1 {
-        font-size: 36px;
-    }
-
-    .tagline {
-        font-size: 18px;
-    }
-
-    .description {
-        font-size: 14px;
-
-        margin-bottom: 28px;
-    }
-
-    .mode-card {
-        padding: 17px;
-    }
-
-    .mode-icon {
-        width: 48px;
-        height: 48px;
-
-        font-size: 23px;
-    }
-
-    .mode-content h2 {
-        font-size: 16px;
-    }
-
-}
-
-/* =========================
-   AR Pages
-   ========================= */
-
-.ar-page {
-    min-height: 100vh;
-    background-color: #f8f8f8;
-}
-
-
-/* =========================
-   AR Header
-   ========================= */
+/* =========================================
+   Shared AR Header
+   ========================================= */
 
 .ar-header {
     min-height: 75px;
@@ -279,17 +251,21 @@ body {
 
     padding: 15px 20px;
 
-    background-color: #ffffff;
+    background-color:
+        #ffffff;
 
-    border-bottom: 1px solid #eeeeee;
+    border-bottom:
+        1px solid #eeeeee;
 }
+
 
 .ar-header h1 {
+    margin-bottom: 3px;
+
     font-size: 19px;
     font-weight: 700;
-
-    margin-bottom: 3px;
 }
+
 
 .ar-header p {
     font-size: 12px;
@@ -310,7 +286,8 @@ body {
 
     border-radius: 12px;
 
-    background-color: #fff2e5;
+    background-color:
+        #fff2e5;
 
     color: #e85d04;
 
@@ -320,79 +297,17 @@ body {
 }
 
 
-/* =========================
-   AR Layout
-   ========================= */
-
-.ar-layout {
-    min-height: calc(100vh - 75px);
-
-    display: flex;
-    flex-direction: column;
-}
-
-
-/* =========================
-   Temporary Camera Area
-   ========================= */
-
-.camera-placeholder {
-    min-height: 430px;
-    flex: 1;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    background:
-        linear-gradient(
-            135deg,
-            #222222,
-            #111111
-        );
-}
-
-.camera-message {
-    padding: 30px;
-
-    text-align: center;
-
-    color: #ffffff;
-}
-
-.camera-icon {
-    display: block;
-
-    margin-bottom: 15px;
-
-    font-size: 45px;
-}
-
-.camera-message h2 {
-    margin-bottom: 8px;
-
-    font-size: 20px;
-}
-
-.camera-message p {
-    max-width: 280px;
-
-    font-size: 13px;
-    line-height: 1.5;
-
-    color: #cccccc;
-}
-
-
-/* =========================
-   AR Controls
-   ========================= */
+/* =========================================
+   Shared AR Controls
+   ========================================= */
 
 .ar-controls {
     padding: 20px;
 
-    background-color: #ffffff;
+    background-color:
+        #ffffff;
 }
+
 
 .control-label {
     margin-bottom: 10px;
@@ -406,7 +321,9 @@ body {
 
 .food-selector {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+
+    grid-template-columns:
+        1fr 1fr;
 
     gap: 10px;
 }
@@ -415,10 +332,15 @@ body {
 .food-button {
     min-height: 48px;
 
-    border: 1px solid #dddddd;
+    padding: 8px 12px;
+
+    border:
+        1px solid #dddddd;
+
     border-radius: 12px;
 
-    background-color: #ffffff;
+    background-color:
+        #ffffff;
 
     color: #333333;
 
@@ -430,17 +352,20 @@ body {
 
 
 .food-button.active {
-    border-color: #e85d04;
+    border-color:
+        #e85d04;
 
-    background-color: #fff2e5;
+    background-color:
+        #fff2e5;
 
-    color: #d95400;
+    color:
+        #d95400;
 }
 
 
-/* =========================
-   Instructions / Status
-   ========================= */
+/* =========================================
+   Status / Instructions
+   ========================================= */
 
 .instruction,
 .status-message {
@@ -450,13 +375,15 @@ body {
 
     border-radius: 10px;
 
-    background-color: #fff8f1;
+    background-color:
+        #fff8f1;
 
     font-size: 12px;
     line-height: 1.5;
 
     color: #666666;
 }
+
 
 .status-message {
     margin-top: 0;
@@ -468,9 +395,9 @@ body {
 }
 
 
-/* =========================
-   Markerless Controls
-   ========================= */
+/* =========================================
+   Interaction Controls
+   ========================================= */
 
 .interaction-controls {
     margin-top: 18px;
@@ -479,7 +406,9 @@ body {
 
 .control-row {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+
+    grid-template-columns:
+        1fr 1fr;
 
     gap: 10px;
 
@@ -500,9 +429,11 @@ body {
 
 
 .control-button {
-    border: 1px solid #dddddd;
+    border:
+        1px solid #dddddd;
 
-    background-color: #ffffff;
+    background-color:
+        #ffffff;
 
     color: #333333;
 }
@@ -513,9 +444,11 @@ body {
 
     margin-top: 2px;
 
-    border: 1px solid #e2aaaa;
+    border:
+        1px solid #e2aaaa;
 
-    background-color: #fff5f5;
+    background-color:
+        #fff5f5;
 
     color: #b83232;
 }
@@ -528,15 +461,12 @@ body {
 
     border: none;
 
-    background-color: #e85d04;
+    background-color:
+        #e85d04;
 
     color: #ffffff;
 }
 
-
-/* =========================
-   Disabled Controls
-   ========================= */
 
 button:disabled {
     opacity: 0.4;
@@ -545,48 +475,81 @@ button:disabled {
 }
 
 
-/* =========================
-   Desktop AR Preview
-   ========================= */
+/* =========================================
+   Temporary Generic Camera Area
+   ========================================= */
 
-@media (min-width: 800px) {
+.camera-placeholder {
+    min-height: 430px;
+    flex: 1;
 
-    .ar-layout {
-        max-width: 700px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
-        margin: 0 auto;
-    }
-
-    .ar-header {
-        justify-content: flex-start;
-    }
-
+    background:
+        linear-gradient(
+            135deg,
+            #222222,
+            #111111
+        );
 }
 
+
+.camera-message {
+    padding: 30px;
+
+    text-align: center;
+
+    color: #ffffff;
+}
+
+
+.camera-icon {
+    display: block;
+
+    margin-bottom: 15px;
+
+    font-size: 45px;
+}
+
+
+.camera-message h2 {
+    margin-bottom: 8px;
+
+    font-size: 20px;
+}
+
+
+.camera-message p {
+    max-width: 300px;
+
+    font-size: 13px;
+    line-height: 1.5;
+
+    color: #cccccc;
+}
+
+
 /* =========================================
-   Marker AR Fullscreen Experience
+   Marker AR
    ========================================= */
 
 .marker-ar-page {
-    margin: 0;
-    padding: 0;
-
     width: 100%;
     height: 100vh;
 
     overflow: hidden;
 
-    background-color: #000000;
+    background-color:
+        #000000;
 }
 
-
-/* A-Frame scene fills screen */
 
 .marker-ar-page a-scene {
     position: fixed;
 
-    top: 0;
-    left: 0;
+    inset: 0;
 
     width: 100%;
     height: 100%;
@@ -594,10 +557,6 @@ button:disabled {
     z-index: 1;
 }
 
-
-/* =========================================
-   Marker AR UI Overlay
-   ========================================= */
 
 .marker-ui {
     position: fixed;
@@ -611,21 +570,16 @@ button:disabled {
     display: flex;
     flex-direction: column;
 
-    justify-content: space-between;
+    justify-content:
+        space-between;
 }
 
-
-/* Allow buttons / links to receive taps */
 
 .marker-ui button,
 .marker-ui a {
     pointer-events: auto;
 }
 
-
-/* =========================================
-   Marker Top Bar
-   ========================================= */
 
 .marker-top-bar {
     display: flex;
@@ -634,24 +588,39 @@ button:disabled {
     gap: 14px;
 
     padding:
-        calc(12px + env(safe-area-inset-top))
+        calc(
+            12px +
+            env(safe-area-inset-top)
+        )
         15px
         12px;
 
     background:
-        rgba(255, 255, 255, 0.94);
+        rgba(
+            255,
+            255,
+            255,
+            0.94
+        );
 
-    backdrop-filter: blur(8px);
+    backdrop-filter:
+        blur(8px);
 
     border-bottom:
-        1px solid rgba(0, 0, 0, 0.08);
+        1px solid
+        rgba(
+            0,
+            0,
+            0,
+            0.08
+        );
 }
 
 
 .marker-top-bar h1 {
-    font-size: 18px;
-
     margin-bottom: 3px;
+
+    font-size: 18px;
 }
 
 
@@ -661,10 +630,6 @@ button:disabled {
     color: #666666;
 }
 
-
-/* =========================================
-   Tracking Status
-   ========================================= */
 
 .marker-status-wrapper {
     display: flex;
@@ -683,7 +648,12 @@ button:disabled {
     border-radius: 20px;
 
     background:
-        rgba(20, 20, 20, 0.75);
+        rgba(
+            20,
+            20,
+            20,
+            0.75
+        );
 
     color: #ffffff;
 
@@ -691,48 +661,43 @@ button:disabled {
 
     text-align: center;
 
-    backdrop-filter: blur(5px);
+    backdrop-filter:
+        blur(5px);
 }
 
 
 .marker-status.detected {
     background:
-        rgba(35, 130, 75, 0.88);
+        rgba(
+            35,
+            130,
+            75,
+            0.88
+        );
 }
 
-
-/* =========================================
-   Marker Controls
-   ========================================= */
 
 .marker-control-panel {
     padding:
         16px
         16px
-        calc(16px + env(safe-area-inset-bottom));
+        calc(
+            16px +
+            env(safe-area-inset-bottom)
+        );
 
     background:
-        rgba(255, 255, 255, 0.96);
+        rgba(
+            255,
+            255,
+            255,
+            0.96
+        );
 
-    backdrop-filter: blur(10px);
+    backdrop-filter:
+        blur(10px);
 }
 
-
-/* Keep panel usable on larger screens */
-
-@media (min-width: 700px) {
-
-    .marker-control-panel {
-        width: 520px;
-
-        margin:
-            0 auto
-            18px;
-
-        border-radius: 18px;
-    }
-
-}
 
 /* =========================================
    Markerless WebXR
@@ -741,12 +706,16 @@ button:disabled {
 .markerless-page {
     min-height: 100vh;
 
-    background-color: #f8f8f8;
+    background-color:
+        #f8f8f8;
 }
 
 
 .markerless-layout {
-    min-height: calc(100vh - 75px);
+    min-height:
+        calc(
+            100vh - 75px
+        );
 
     display: flex;
     flex-direction: column;
@@ -754,13 +723,14 @@ button:disabled {
 
 
 /* =========================================
-   XR Viewport
+   WebXR Viewport
    ========================================= */
 
 .xr-viewport {
     position: relative;
 
     min-height: 420px;
+
     flex: 1;
 
     overflow: hidden;
@@ -798,19 +768,21 @@ button:disabled {
 
 
 /* =========================================
-   Start AR Button
+   Start / Exit AR Buttons
    ========================================= */
 
 .start-ar-button {
     min-width: 170px;
 
     margin-top: 20px;
+
     padding: 14px 22px;
 
     border: none;
     border-radius: 12px;
 
-    background-color: #e85d04;
+    background-color:
+        #e85d04;
 
     color: #ffffff;
 
@@ -822,69 +794,249 @@ button:disabled {
 
 
 .start-ar-button:disabled {
-    background-color: #888888;
+    background-color:
+        #888888;
 }
 
 
-/* Hide intro content during active XR */
+.exit-ar-button {
+    display: none;
 
-.camera-message.xr-active
-.camera-icon,
+    width: 100%;
 
-.camera-message.xr-active h2,
+    min-height: 40px;
 
-.camera-message.xr-active p {
+    margin-top: 10px;
+
+    border:
+        1px solid #dddddd;
+
+    border-radius: 10px;
+
+    background-color:
+        #ffffff;
+
+    color: #555555;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+/* =========================================
+   Immersive WebXR DOM Overlay
+   ========================================= */
+
+body:xr-overlay {
+    background-color:
+        transparent;
+}
+
+
+/*
+    Hide the normal page header and
+    introduction during immersive AR.
+*/
+
+body:xr-overlay
+.ar-header {
     display: none;
 }
 
 
-/* =========================================
-   DOM Overlay during immersive WebXR
-   ========================================= */
-
-body:xr-overlay {
-    background-color: transparent;
+body:xr-overlay
+#xrIntro {
+    display: none;
 }
 
 
-body:xr-overlay .ar-header {
+body:xr-overlay
+.markerless-layout {
+    min-height: 100vh;
+}
+
+
+body:xr-overlay
+.xr-viewport {
+    position: fixed;
+
+    inset: 0;
+
+    min-height: 100vh;
+
     background:
-        rgba(255, 255, 255, 0.92);
+        transparent;
+
+    pointer-events: none;
 }
 
 
-body:xr-overlay .ar-controls {
+/*
+    Compact bottom control panel so
+    the real world remains visible.
+*/
+
+body:xr-overlay
+.ar-controls {
     position: fixed;
 
     left: 12px;
     right: 12px;
-    bottom: 12px;
+    bottom:
+        calc(
+            12px +
+            env(safe-area-inset-bottom)
+        );
 
     z-index: 100;
 
-    max-height: 44vh;
+    max-width: 620px;
 
-    overflow-y: auto;
+    margin: 0 auto;
 
-    border-radius: 18px;
+    padding: 12px;
+
+    border-radius: 16px;
 
     background:
-        rgba(255, 255, 255, 0.94);
+        rgba(
+            255,
+            255,
+            255,
+            0.94
+        );
 
-    backdrop-filter: blur(8px);
+    backdrop-filter:
+        blur(8px);
+
+    box-shadow:
+        0 8px 30px
+        rgba(
+            0,
+            0,
+            0,
+            0.15
+        );
 }
 
 
-body:xr-overlay .xr-viewport {
-    background: transparent;
+body:xr-overlay
+.status-message {
+    margin-bottom: 10px;
+
+    padding: 8px 10px;
+
+    font-size: 11px;
+}
+
+
+body:xr-overlay
+.control-label {
+    display: none;
+}
+
+
+body:xr-overlay
+.food-button {
+    min-height: 42px;
+
+    font-size: 13px;
+}
+
+
+/*
+    We have not implemented manipulation
+    yet, so don't waste camera space
+    showing disabled controls in XR.
+*/
+
+body:xr-overlay
+.interaction-controls {
+    display: none;
+}
+
+
+body:xr-overlay
+.exit-ar-button {
+    display: block;
 }
 
 
 /* =========================================
-   Desktop width
+   Mobile Home Adjustments
    ========================================= */
 
-@media (min-width: 800px) {
+@media (
+    max-width: 480px
+) {
+
+    .home-page {
+        padding:
+            25px 16px;
+    }
+
+
+    .brand h1 {
+        font-size: 36px;
+    }
+
+
+    .tagline {
+        font-size: 18px;
+    }
+
+
+    .description {
+        margin-bottom: 28px;
+
+        font-size: 14px;
+    }
+
+
+    .mode-card {
+        padding: 17px;
+    }
+
+
+    .mode-icon {
+        width: 48px;
+        height: 48px;
+
+        font-size: 23px;
+    }
+
+
+    .mode-content h2 {
+        font-size: 16px;
+    }
+
+}
+
+
+/* =========================================
+   Larger Screens
+   ========================================= */
+
+@media (
+    min-width: 700px
+) {
+
+    .marker-control-panel {
+        width: 520px;
+
+        margin:
+            0 auto
+            18px;
+
+        border-radius: 18px;
+    }
+
+}
+
+
+@media (
+    min-width: 800px
+) {
 
     .markerless-layout {
         max-width: 700px;
