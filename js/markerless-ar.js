@@ -24,9 +24,6 @@ const startARBtn =
 const exitARBtn =
     document.getElementById("exitARBtn");
 
-const xrIntro =
-    document.getElementById("xrIntro");
-
 const xrViewport =
     document.getElementById("xrViewport");
 
@@ -77,11 +74,6 @@ const menuARState = {
 // ==========================================
 // Model Configuration
 // ==========================================
-//
-// Keeping model-specific settings here means
-// we can replace the Kenney models later without
-// rewriting the AR logic.
-//
 
 const MODEL_CONFIG = {
 
@@ -137,7 +129,9 @@ let viewerSpace = null;
 let referenceSpace = null;
 
 
-// Loaded model templates
+// ==========================================
+// Loaded Model Templates
+// ==========================================
 
 const modelTemplates = {
 
@@ -289,7 +283,7 @@ function initThreeJS() {
 
 
     // --------------------------------------
-    // XR Touch / Select Controller
+    // XR Controller
     // --------------------------------------
 
     controller =
@@ -333,6 +327,19 @@ function setStatus(message) {
             message;
 
     }
+
+}
+
+
+// ==========================================
+// Human-readable Food Name
+// ==========================================
+
+function getFoodName(food) {
+
+    return food === "burger"
+        ? "Burger"
+        : "Pizza";
 
 }
 
@@ -452,15 +459,12 @@ async function loadModels() {
 
 function selectFood(food) {
 
-    // Do not replace placed object yet.
-    // That comes in the manipulation phase.
-
     if (
         menuARState.placedObject
     ) {
 
         setStatus(
-            "Food is already placed. Dish switching will be enabled in the next interaction phase."
+            "A food item is already placed."
         );
 
 
@@ -532,25 +536,6 @@ function selectFood(food) {
         );
 
     }
-
-
-    console.log(
-        "Selected food:",
-        food
-    );
-
-}
-
-
-// ==========================================
-// Human-readable Food Name
-// ==========================================
-
-function getFoodName(food) {
-
-    return food === "burger"
-        ? "Burger"
-        : "Pizza";
 
 }
 
@@ -818,7 +803,7 @@ async function startARSession() {
 
 
 // ==========================================
-// Exit AR Session
+// End AR Session
 // ==========================================
 
 async function endARSession() {
@@ -833,10 +818,93 @@ async function endARSession() {
 
 
 // ==========================================
-// Session Cleanup
+// Remove Placed Object
+// ==========================================
+
+function removePlacedObject() {
+
+    if (
+        !menuARState.placedObject
+    ) {
+
+        return;
+
+    }
+
+
+    scene.remove(
+        menuARState.placedObject
+    );
+
+
+    menuARState.placedObject =
+        null;
+
+
+    menuARState.currentScale =
+        1;
+
+
+    menuARState.currentRotation =
+        0;
+
+
+    console.log(
+        "Placed food removed from scene."
+    );
+
+}
+
+
+// ==========================================
+// Reset Interaction Controls
+// ==========================================
+
+function resetInteractionControls() {
+
+    burgerBtn.disabled =
+        false;
+
+
+    pizzaBtn.disabled =
+        false;
+
+
+    rotateLeftBtn.disabled =
+        true;
+
+
+    rotateRightBtn.disabled =
+        true;
+
+
+    sizeDownBtn.disabled =
+        true;
+
+
+    sizeUpBtn.disabled =
+        true;
+
+
+    removeBtn.disabled =
+        true;
+
+
+    confirmBtn.disabled =
+        true;
+
+}
+
+
+// ==========================================
+// AR Session Cleanup
 // ==========================================
 
 function onARSessionEnded() {
+
+    // --------------------------------------
+    // Stop Hit Testing
+    // --------------------------------------
 
     if (
         hitTestSource
@@ -863,9 +931,20 @@ function onARSessionEnded() {
         null;
 
 
+    // --------------------------------------
+    // Remove AR Objects
+    // --------------------------------------
+
     reticle.visible =
         false;
 
+
+    removePlacedObject();
+
+
+    // --------------------------------------
+    // Reset Application State
+    // --------------------------------------
 
     menuARState.surfaceFound =
         false;
@@ -873,6 +952,13 @@ function onARSessionEnded() {
 
     menuARState.appState =
         "READY_TO_SCAN";
+
+
+    // --------------------------------------
+    // Reset UI
+    // --------------------------------------
+
+    resetInteractionControls();
 
 
     document.body.classList.remove(
@@ -892,7 +978,7 @@ function onARSessionEnded() {
 
 
     console.log(
-        "WebXR AR session ended."
+        "WebXR AR session ended and scene reset."
     );
 
 }
@@ -960,7 +1046,7 @@ function placeSelectedFood() {
 
 
     // --------------------------------------
-    // Surface Orientation
+    // Orientation
     // --------------------------------------
 
     const placementRotation =
@@ -972,9 +1058,13 @@ function placeSelectedFood() {
 
 
     reticle.matrix.decompose(
+
         new THREE.Vector3(),
+
         placementRotation,
+
         placementScale
+
     );
 
 
@@ -984,7 +1074,7 @@ function placeSelectedFood() {
 
 
     // --------------------------------------
-    // Food Scale
+    // Scale
     // --------------------------------------
 
     placedModel.scale.setScalar(
@@ -1017,6 +1107,10 @@ function placeSelectedFood() {
         0;
 
 
+    // --------------------------------------
+    // Stop Placement Mode
+    // --------------------------------------
+
     reticle.visible =
         false;
 
@@ -1047,7 +1141,7 @@ function placeSelectedFood() {
 
 
 // ==========================================
-// XR Tap / Select Event
+// XR Tap Event
 // ==========================================
 
 function onXRSelect() {
@@ -1132,11 +1226,6 @@ function render(
 
                     setStatus(
                         `${foodName} selected. Tap the white circle to place it.`
-                    );
-
-
-                    console.log(
-                        "Surface detected."
                     );
 
                 }
@@ -1282,6 +1371,9 @@ async function initializeApplication() {
     initThreeJS();
 
 
+    resetInteractionControls();
+
+
     selectFood(
         "burger"
     );
@@ -1301,6 +1393,8 @@ async function initializeApplication() {
 }
 
 
+// ==========================================
 // Start MenuAR
+// ==========================================
 
 initializeApplication();
