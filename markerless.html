@@ -13,9 +13,10 @@
 
     <link
         rel="stylesheet"
-        href="css/style.css?v=3"
+        href="css/style.css?v=6"
     >
 
+    <!-- Three.js Import Map -->
     <script type="importmap">
         {
             "imports": {
@@ -30,6 +31,10 @@
 
 <body class="markerless-page">
 
+    <!-- =====================================
+         NORMAL PAGE HEADER
+         ===================================== -->
+
     <header class="ar-header">
 
         <a
@@ -40,17 +45,25 @@
         </a>
 
         <div>
-            <h1>View Food on Table</h1>
+
+            <h1>
+                View Food on Table
+            </h1>
 
             <p>
                 Place food on a real surface
             </p>
+
         </div>
 
     </header>
 
 
     <main class="markerless-layout">
+
+        <!-- =================================
+             AR START AREA
+             ================================= -->
 
         <section
             class="xr-viewport"
@@ -89,10 +102,16 @@
         </section>
 
 
+        <!-- =================================
+             AR CONTROL PANEL
+             ================================= -->
+
         <section
             class="ar-controls"
             id="arControls"
         >
+
+            <!-- Status / feedback -->
 
             <p
                 class="status-message"
@@ -101,6 +120,8 @@
                 Loading MenuAR...
             </p>
 
+
+            <!-- Food selection -->
 
             <p class="control-label">
                 Select Food
@@ -117,6 +138,7 @@
                     🍔 Burger
                 </button>
 
+
                 <button
                     type="button"
                     class="food-button"
@@ -128,10 +150,18 @@
             </div>
 
 
+            <!-- =================================
+                 MANIPULATION CONTROLS
+
+                 Hidden until a model is placed.
+                 ================================= -->
+
             <div
                 class="interaction-controls"
                 id="interactionControls"
             >
+
+                <!-- Rotation -->
 
                 <div class="control-row">
 
@@ -143,6 +173,7 @@
                     >
                         ↶ Rotate Left
                     </button>
+
 
                     <button
                         type="button"
@@ -156,6 +187,8 @@
                 </div>
 
 
+                <!-- Size -->
+
                 <div class="control-row">
 
                     <button
@@ -166,6 +199,7 @@
                     >
                         − Size
                     </button>
+
 
                     <button
                         type="button"
@@ -179,6 +213,20 @@
                 </div>
 
 
+                <!-- Move -->
+
+                <button
+                    type="button"
+                    class="move-button"
+                    id="moveBtn"
+                    disabled
+                >
+                    ↔ Move
+                </button>
+
+
+                <!-- Remove -->
+
                 <button
                     type="button"
                     class="remove-button"
@@ -188,6 +236,8 @@
                     Remove Food
                 </button>
 
+
+                <!-- Confirm -->
 
                 <button
                     type="button"
@@ -200,6 +250,8 @@
 
             </div>
 
+
+            <!-- Exit remains available in AR -->
 
             <button
                 type="button"
@@ -216,7 +268,7 @@
 
     <script
         type="module"
-        src="js/markerless-ar.js?v=5"
+        src="js/markerless-ar.js?v=7"
     ></script>
 
 </body>

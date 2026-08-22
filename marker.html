@@ -6,7 +6,7 @@
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0"
+        content="width=device-width, initial-scale=1.0, user-scalable=no"
     >
 
     <title>MenuAR | Marker AR Preview</title>
@@ -16,70 +16,175 @@
     <!-- A-Frame -->
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
 
-    <!-- AR.js - Marker Tracking Build -->
-    <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.7/aframe/build/aframe-ar.js"></script>
+    <!-- AR.js -->
+    <script
+        src="https://raw.githack.com/AR-js-org/AR.js/3.4.7/aframe/build/aframe-ar.js">
+    </script>
+
+    <style>
+        /*
+            Remove A-Frame's VR button.
+            MenuAR uses AR only.
+        */
+        .a-enter-vr-button {
+            display: none !important;
+        }
+    </style>
 
 </head>
 
 <body class="marker-ar-page">
 
-    <!-- =========================
-         AR Scene
-         ========================= -->
+    <!-- =====================================
+         MARKER AR SCENE
+         ===================================== -->
 
     <a-scene
         embedded
         vr-mode-ui="enabled: false"
-        renderer="antialias: true; alpha: true;"
+        loading-screen="enabled: false"
+
+        renderer="
+            antialias: true;
+            alpha: true;
+            colorManagement: true;
+            physicallyCorrectLights: true;
+        "
+
         arjs="
             sourceType: webcam;
+
+            trackingMethod: best;
+            detectionMode: mono;
+
+            sourceWidth: 480;
+            sourceHeight: 640;
+
+            displayWidth: 480;
+            displayHeight: 640;
+
+            canvasWidth: 480;
+            canvasHeight: 640;
+
+            maxDetectionRate: 30;
+
             debugUIEnabled: false;
         "
     >
 
-        <!-- 3D Assets -->
-        <a-assets>
+        <!-- =================================
+             ASSETS
+             ================================= -->
+
+        <a-assets timeout="20000">
 
             <a-asset-item
                 id="burgerModel"
-                src="assets/models/burger.glb">
+                src="assets/models/burger.glb?v=realistic-3"
+                response-type="arraybuffer"
+            >
             </a-asset-item>
 
             <a-asset-item
                 id="pizzaModel"
-                src="assets/models/pizza.glb">
+                src="assets/models/pizza.glb?v=realistic-3"
+                response-type="arraybuffer"
+            >
             </a-asset-item>
 
         </a-assets>
 
 
-        <!-- Hiro Marker -->
+        <!-- =================================
+             LIGHTING
+             ================================= -->
+
+        <a-entity
+            light="
+                type: ambient;
+                color: #FFFFFF;
+                intensity: 1.0;
+            "
+        >
+        </a-entity>
+
+        <a-entity
+            light="
+                type: directional;
+                color: #FFFFFF;
+                intensity: 1.25;
+            "
+            position="-1 3 2"
+        >
+        </a-entity>
+
+        <a-entity
+            light="
+                type: directional;
+                color: #FFF1DD;
+                intensity: 0.55;
+            "
+            position="2 2 1"
+        >
+        </a-entity>
+
+
+        <!-- =================================
+             HIRO MARKER
+             ================================= -->
+
         <a-marker
             id="hiroMarker"
             preset="hiro"
+
+            emitevents="true"
+
+            smooth="true"
+            smoothCount="5"
+            smoothTolerance="0.01"
+            smoothThreshold="2"
         >
 
-            <!-- Selected food appears here -->
+            <!--
+                Initial Burger model.
+                Scale is calibrated specifically
+                for the marker scene.
+            -->
+
             <a-entity
                 id="markerFoodModel"
+
                 gltf-model="#burgerModel"
-                position="0 0.35 0"
-                scale="0.7 0.7 0.7"
+
+                position="0 0.18 0"
+
+                rotation="0 0 0"
+
+                scale="1.8 1.8 1.8"
             >
             </a-entity>
 
         </a-marker>
 
 
-        <!-- AR Camera -->
-        <a-entity camera></a-entity>
+        <!-- =================================
+             AR CAMERA
+             ================================= -->
+
+        <a-entity
+            camera="
+                near: 0.01;
+                far: 1000;
+            "
+        >
+        </a-entity>
 
     </a-scene>
 
 
-    <!-- =========================
-         UI Overlay
-         ========================= -->
+    <!-- =====================================
+         UI
+         ===================================== -->
 
     <div class="marker-ui">
 
@@ -93,11 +198,15 @@
             </a>
 
             <div>
-                <h1>Marker AR Preview</h1>
+
+                <h1>
+                    Marker AR Preview
+                </h1>
 
                 <p>
                     Point your camera at the Hiro marker
                 </p>
+
             </div>
 
         </header>
@@ -109,7 +218,7 @@
                 id="markerStatus"
                 class="marker-status"
             >
-                Looking for Hiro marker...
+                Loading Burger model...
             </p>
 
         </div>
@@ -142,8 +251,9 @@
             </div>
 
             <p class="instruction">
-                Keep the full marker visible and move your
-                phone slowly if tracking is unstable.
+                Keep the complete Hiro marker visible.
+                Hold your device steady and move it slowly
+                until the marker is detected.
             </p>
 
         </section>
@@ -151,7 +261,7 @@
     </div>
 
 
-    <script src="js/marker-ar.js"></script>
+    <script src="js/marker-ar.js?v=9"></script>
 
 </body>
 
