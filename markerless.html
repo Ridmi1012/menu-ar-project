@@ -4,14 +4,11 @@
 <head>
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>MenuAR | View Food on Table</title>
 
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=2">
 </head>
 
 <body class="markerless-page">
@@ -32,15 +29,9 @@
 
     <main class="markerless-layout">
 
-        <section
-            class="xr-viewport"
-            id="xrViewport"
-        >
+        <section class="xr-viewport" id="xrViewport">
 
-            <div
-                class="camera-message"
-                id="xrIntro"
-            >
+            <div class="camera-message" id="xrIntro">
                 <span class="camera-icon">
                     📱
                 </span>
@@ -52,11 +43,7 @@
                     across a well-lit table.
                 </p>
 
-                <button
-                    type="button"
-                    id="startARBtn"
-                    class="start-ar-button"
-                >
+                <button type="button" id="startARBtn" class="start-ar-button">
                     Start AR
                 </button>
 
@@ -67,10 +54,7 @@
 
         <section class="ar-controls">
 
-            <p
-                class="status-message"
-                id="statusMessage"
-            >
+            <p class="status-message" id="statusMessage">
                 Checking WebXR support...
             </p>
 
@@ -81,19 +65,11 @@
 
             <div class="food-selector">
 
-                <button
-                    type="button"
-                    class="food-button active"
-                    id="burgerBtn"
-                >
+                <button type="button" class="food-button active" id="burgerBtn">
                     🍔 Burger
                 </button>
 
-                <button
-                    type="button"
-                    class="food-button"
-                    id="pizzaBtn"
-                >
+                <button type="button" class="food-button" id="pizzaBtn">
                     🍕 Pizza
                 </button>
 
@@ -104,21 +80,11 @@
 
                 <div class="control-row">
 
-                    <button
-                        type="button"
-                        class="control-button"
-                        id="rotateLeftBtn"
-                        disabled
-                    >
+                    <button type="button" class="control-button" id="rotateLeftBtn" disabled>
                         ↶ Rotate Left
                     </button>
 
-                    <button
-                        type="button"
-                        class="control-button"
-                        id="rotateRightBtn"
-                        disabled
-                    >
+                    <button type="button" class="control-button" id="rotateRightBtn" disabled>
                         Rotate Right ↷
                     </button>
 
@@ -127,43 +93,23 @@
 
                 <div class="control-row">
 
-                    <button
-                        type="button"
-                        class="control-button"
-                        id="sizeDownBtn"
-                        disabled
-                    >
+                    <button type="button" class="control-button" id="sizeDownBtn" disabled>
                         − Size
                     </button>
 
-                    <button
-                        type="button"
-                        class="control-button"
-                        id="sizeUpBtn"
-                        disabled
-                    >
+                    <button type="button" class="control-button" id="sizeUpBtn" disabled>
                         + Size
                     </button>
 
                 </div>
 
 
-                <button
-                    type="button"
-                    class="remove-button"
-                    id="removeBtn"
-                    disabled
-                >
+                <button type="button" class="remove-button" id="removeBtn" disabled>
                     Remove Food
                 </button>
 
 
-                <button
-                    type="button"
-                    class="confirm-button"
-                    id="confirmBtn"
-                    disabled
-                >
+                <button type="button" class="confirm-button" id="confirmBtn" disabled>
                     Confirm Preview
                 </button>
 
@@ -174,10 +120,7 @@
     </main>
 
 
-    <script
-        type="module"
-        src="js/markerless-ar.js"
-    ></script>
+    <script type="module" src="js/markerless-ar.js?v=2"></script>
 
 </body>
 
