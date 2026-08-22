@@ -10,7 +10,7 @@
         content="width=device-width, initial-scale=1.0, user-scalable=no"
     >
 
-    <title>MenuAR | Marker AR Preview</title>
+    <title>MenuAR | Scan Menu Marker</title>
 
 
     <!-- Main Styles -->
@@ -32,15 +32,247 @@
     </script>
 
 
+    <!--
+        Marker-page-only visual polish.
+        Kept here so the existing shared
+        stylesheet does not need to change.
+    -->
     <style>
 
-        /*
-            MenuAR uses AR only.
-            Hide the default A-Frame VR button.
-        */
+        /* -----------------------------------
+           Hide default VR button
+           ----------------------------------- */
 
         .a-enter-vr-button {
             display: none !important;
+        }
+
+
+        /* -----------------------------------
+           Header entrance
+           ----------------------------------- */
+
+        .marker-ar-page .marker-top-bar {
+            animation:
+                markerHeaderReveal
+                420ms
+                ease-out
+                both;
+        }
+
+
+        /* -----------------------------------
+           Bottom controls entrance
+           ----------------------------------- */
+
+        .marker-ar-page .marker-control-panel {
+            animation:
+                markerPanelReveal
+                480ms
+                ease-out
+                both;
+        }
+
+
+        /* -----------------------------------
+           Food buttons
+           ----------------------------------- */
+
+        .marker-ar-page .food-button {
+
+            transition:
+                transform 160ms ease,
+                border-color 180ms ease,
+                background-color 180ms ease,
+                box-shadow 180ms ease;
+
+        }
+
+
+        .marker-ar-page .food-button:active {
+
+            transform:
+                scale(0.96);
+
+        }
+
+
+        .marker-ar-page .food-button.active {
+
+            box-shadow:
+                0 4px 14px
+                rgba(232, 93, 4, 0.12);
+
+        }
+
+
+        /* -----------------------------------
+           Header animation
+           ----------------------------------- */
+
+        @keyframes markerHeaderReveal {
+
+            from {
+                opacity: 0;
+                transform: translateY(-14px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+        }
+
+
+        /* -----------------------------------
+           Control panel animation
+           ----------------------------------- */
+
+        @keyframes markerPanelReveal {
+
+            from {
+                opacity: 0;
+                transform: translateY(22px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+        }
+
+
+        /* -----------------------------------
+           Phone portrait adjustments
+           ----------------------------------- */
+
+        @media
+        (orientation: portrait)
+        and
+        (max-width: 480px) {
+
+            .marker-ar-page
+            .marker-top-bar {
+
+                padding-top:
+                    calc(
+                        9px +
+                        env(safe-area-inset-top)
+                    );
+
+                padding-bottom:
+                    9px;
+
+            }
+
+
+            .marker-ar-page
+            .marker-top-bar h1 {
+
+                font-size:
+                    16px;
+
+            }
+
+
+            .marker-ar-page
+            .marker-top-bar p {
+
+                font-size:
+                    10px;
+
+            }
+
+
+            .marker-ar-page
+            .marker-control-panel {
+
+                padding:
+                    13px
+                    14px
+                    calc(
+                        13px +
+                        env(safe-area-inset-bottom)
+                    );
+
+            }
+
+
+            .marker-ar-page
+            .food-button {
+
+                min-height:
+                    44px;
+
+            }
+
+
+            .marker-ar-page
+            .instruction {
+
+                margin-top:
+                    10px;
+
+                padding:
+                    10px;
+
+                font-size:
+                    11px;
+
+            }
+
+        }
+
+
+        /* -----------------------------------
+           Short portrait screens
+           ----------------------------------- */
+
+        @media
+        (orientation: portrait)
+        and
+        (max-height: 650px) {
+
+            .marker-ar-page
+            .instruction {
+
+                display:
+                    none;
+
+            }
+
+        }
+
+
+        /* -----------------------------------
+           Accessibility
+           ----------------------------------- */
+
+        @media
+        (prefers-reduced-motion: reduce) {
+
+            .marker-ar-page
+            .marker-top-bar,
+
+            .marker-ar-page
+            .marker-control-panel {
+
+                animation:
+                    none;
+
+            }
+
+
+            .marker-ar-page
+            .food-button {
+
+                transition:
+                    none;
+
+            }
+
         }
 
     </style>
@@ -52,7 +284,7 @@
 
 
     <!-- =====================================
-         Marker AR Scene
+         MARKER AR SCENE
          ===================================== -->
 
     <a-scene
@@ -93,7 +325,7 @@
 
 
         <!-- =================================
-             3D Assets
+             FOOD ASSETS
              ================================= -->
 
         <a-assets timeout="20000">
@@ -103,7 +335,7 @@
 
                 id="burgerModel"
 
-                src="assets/models/burger.glb?v=realistic-final"
+                src="assets/models/burger.glb?v=final-marker-1"
 
                 response-type="arraybuffer"
 
@@ -116,7 +348,7 @@
 
                 id="pizzaModel"
 
-                src="assets/models/pizza.glb?v=realistic-final"
+                src="assets/models/pizza.glb?v=final-marker-1"
 
                 response-type="arraybuffer"
 
@@ -129,7 +361,7 @@
 
 
         <!-- =================================
-             Lighting
+             LIGHTING
              ================================= -->
 
         <a-entity
@@ -176,7 +408,13 @@
 
 
         <!-- =================================
-             Hiro Marker
+             MARKER
+
+             For this test we KEEP Hiro.
+
+             Once animations are validated on
+             phone + tablet, this will become
+             our custom MenuAR tray marker.
              ================================= -->
 
         <a-marker
@@ -198,7 +436,13 @@
         >
 
 
-            <!-- Selected Food -->
+            <!-- =================================
+                 SELECTED FOOD
+
+                 Because this entity is inside
+                 <a-marker>, the food is tied
+                 directly to marker tracking.
+                 ================================= -->
 
             <a-entity
 
@@ -221,7 +465,7 @@
 
 
         <!-- =================================
-             AR Camera
+             AR CAMERA
              ================================= -->
 
         <a-entity
@@ -240,35 +484,45 @@
 
 
     <!-- =====================================
-         Interface
+         USER INTERFACE
          ===================================== -->
 
     <div class="marker-ui">
 
 
-        <!-- Header -->
+        <!-- =================================
+             HEADER
+             ================================= -->
 
         <header class="marker-top-bar">
 
 
             <a
+
                 href="index.html"
+
                 class="back-button"
-                aria-label="Back to home"
+
+                aria-label="Back to menu"
+
             >
                 ←
             </a>
 
 
+
             <div>
 
+
                 <h1>
-                    Marker AR Preview
+                    Scan Menu Marker
                 </h1>
 
+
                 <p>
-                    Point your camera at the Hiro marker
+                    Point your camera at the marker on the menu
                 </p>
+
 
             </div>
 
@@ -278,15 +532,16 @@
 
 
         <!-- =================================
-             Controls
+             FOOD SELECTION
              ================================= -->
 
         <section class="marker-control-panel">
 
 
             <p class="control-label">
-                Select Food
+                Choose Your Dish
             </p>
+
 
 
             <div class="food-selector">
@@ -322,11 +577,11 @@
             </div>
 
 
+
             <p class="instruction">
 
-                Keep the complete marker visible
-                and move your device slowly if
-                tracking becomes unstable.
+                Keep the full marker visible
+                while viewing your selected dish.
 
             </p>
 
@@ -338,9 +593,11 @@
 
 
 
-    <!-- Marker Interaction -->
+    <!-- Marker AR Interaction -->
 
-    <script src="js/marker-ar.js?v=10"></script>
+    <script
+        src="js/marker-ar.js?v=11">
+    </script>
 
 
 </body>
