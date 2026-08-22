@@ -56,18 +56,8 @@ const confirmBtn =
 
 
 // ==========================================
-// APPLICATION STATES
+// APPLICATION STATE
 // ==========================================
-//
-// INITIALIZING
-// READY_TO_SCAN
-// SCANNING
-// SURFACE_FOUND
-// PLACED
-// MOVE_MODE
-// CONFIRMED
-// UNSUPPORTED
-//
 
 const menuARState = {
 
@@ -89,12 +79,9 @@ const menuARState = {
     xrSupported:
         false,
 
-    // User-controlled scale multiplier.
-    // 1 = model's normal configured size.
     scaleFactor:
         1,
 
-    // Used mainly for state/debug information.
     currentRotation:
         0
 
@@ -104,13 +91,6 @@ const menuARState = {
 // ==========================================
 // MODEL CONFIGURATION
 // ==========================================
-//
-// These are model-specific.
-//
-// When we replace Kenney with more realistic
-// models later, this is one of the main places
-// we will need to adjust.
-//
 
 const MODEL_CONFIG = {
 
@@ -164,6 +144,29 @@ const MAX_SCALE_FACTOR =
     2.0;
 
 
+// Ignore XR world-select briefly after
+// touching HTML controls.
+
+const UI_SELECT_GUARD_MS =
+    650;
+
+
+// After pressing Move, require a short
+// intentional delay before accepting
+// the new world position.
+
+const MOVE_ACTIVATION_DELAY_MS =
+    700;
+
+
+let ignoreXRSelectUntil =
+    0;
+
+
+let moveModeStartedAt =
+    0;
+
+
 // ==========================================
 // THREE.JS / WEBXR VARIABLES
 // ==========================================
@@ -196,7 +199,7 @@ let referenceSpace =
 
 
 // ==========================================
-// LOADED MODEL TEMPLATES
+// MODEL TEMPLATES
 // ==========================================
 
 const modelTemplates = {
@@ -331,7 +334,7 @@ function initThreeJS() {
 
 
     // --------------------------------------
-    // PLACEMENT RETICLE
+    // RETICLE
     // --------------------------------------
 
     const reticleGeometry =
@@ -387,7 +390,7 @@ function initThreeJS() {
 
 
     // --------------------------------------
-    // XR TOUCH CONTROLLER
+    // XR CONTROLLER
     // --------------------------------------
 
     controller =
@@ -408,10 +411,6 @@ function initThreeJS() {
     );
 
 
-    // --------------------------------------
-    // RENDER LOOP
-    // --------------------------------------
-
     renderer.setAnimationLoop(
         render
     );
@@ -420,7 +419,7 @@ function initThreeJS() {
 
 
 // ==========================================
-// STATUS MESSAGE
+// STATUS
 // ==========================================
 
 function setStatus(message) {
@@ -439,7 +438,7 @@ function setStatus(message) {
 
 
 // ==========================================
-// FOOD DISPLAY NAME
+// FOOD NAME
 // ==========================================
 
 function getFoodName(food) {
@@ -452,7 +451,7 @@ function getFoodName(food) {
 
 
 // ==========================================
-// LOAD ONE MODEL
+// LOAD MODEL
 // ==========================================
 
 function loadModel(food) {
@@ -548,11 +547,6 @@ async function loadModels() {
         menuARState.modelsReady =
             true;
 
-
-        console.log(
-            "All MenuAR models loaded."
-        );
-
     } catch (error) {
 
         menuARState.modelsReady =
@@ -575,7 +569,7 @@ async function loadModels() {
 
 
 // ==========================================
-// UPDATE FOOD BUTTON APPEARANCE
+// FOOD BUTTON APPEARANCE
 // ==========================================
 
 function updateFoodButtons(food) {
@@ -610,20 +604,8 @@ function updateFoodButtons(food) {
 
 
 // ==========================================
-// FOOD SELECTION
+// SELECT / CHANGE FOOD
 // ==========================================
-//
-// Food can be changed:
-//
-// - before AR starts
-// - while scanning
-// - when a surface is found
-// - after placement
-// - during Move Mode
-//
-// Food selection is locked only after
-// Confirm Preview.
-//
 
 function selectFood(food) {
 
@@ -655,10 +637,6 @@ function selectFood(food) {
             food
         );
 
-
-    // --------------------------------------
-    // MODEL ALREADY PLACED
-    // --------------------------------------
 
     if (
         menuARState.placedObject
@@ -704,10 +682,6 @@ function selectFood(food) {
     }
 
 
-    // --------------------------------------
-    // BEFORE AR
-    // --------------------------------------
-
     if (
         !xrSession
     ) {
@@ -729,10 +703,6 @@ function selectFood(food) {
     }
 
 
-    // --------------------------------------
-    // SURFACE ALREADY FOUND
-    // --------------------------------------
-
     if (
         menuARState.appState ===
         "SURFACE_FOUND"
@@ -748,10 +718,6 @@ function selectFood(food) {
     }
 
 
-    // --------------------------------------
-    // SCANNING
-    // --------------------------------------
-
     setStatus(
         `${foodName} selected. Move your tablet slowly to scan the table.`
     );
@@ -760,14 +726,8 @@ function selectFood(food) {
 
 
 // ==========================================
-// REPLACE ALREADY-PLACED FOOD
+// REPLACE PLACED FOOD
 // ==========================================
-//
-// Position is preserved.
-// Rotation is preserved.
-// User scale factor is preserved.
-// Move Mode is also preserved if active.
-//
 
 function replacePlacedFood(
 
@@ -794,11 +754,6 @@ function replacePlacedFood(
         !template
     ) {
 
-        setStatus(
-            "Selected model is not ready."
-        );
-
-
         return;
 
     }
@@ -816,9 +771,7 @@ function replacePlacedFood(
         MODEL_CONFIG[previousFood];
 
 
-    // --------------------------------------
-    // SAVE CURRENT TRANSFORM
-    // --------------------------------------
+    // Save exact transform.
 
     const savedPosition =
         oldModel.position.clone();
@@ -828,34 +781,25 @@ function replacePlacedFood(
         oldModel.quaternion.clone();
 
 
-    // --------------------------------------
-    // REMOVE OLD MODEL
-    // --------------------------------------
+    const savedScaleFactor =
+        menuARState.scaleFactor;
+
 
     scene.remove(
         oldModel
     );
 
 
-    // --------------------------------------
-    // CREATE REPLACEMENT
-    // --------------------------------------
-
     const newModel =
         template.clone(true);
 
 
-    // --------------------------------------
-    // PRESERVE POSITION
-    // --------------------------------------
+    // Position
 
     newModel.position.copy(
         savedPosition
     );
 
-
-    // Correct only for the difference between
-    // each model's vertical surface offset.
 
     newModel.position.y +=
 
@@ -864,34 +808,23 @@ function replacePlacedFood(
         previousConfig.surfaceOffset;
 
 
-    // --------------------------------------
-    // PRESERVE ROTATION
-    // --------------------------------------
+    // Rotation
 
     newModel.quaternion.copy(
         savedQuaternion
     );
 
 
-    // --------------------------------------
-    // PRESERVE USER SIZE
-    // --------------------------------------
+    // User scale
 
-    const replacementScale =
+    newModel.scale.setScalar(
 
         newConfig.baseScale *
 
-        menuARState.scaleFactor;
+        savedScaleFactor
 
-
-    newModel.scale.setScalar(
-        replacementScale
     );
 
-
-    // --------------------------------------
-    // ADD REPLACEMENT
-    // --------------------------------------
 
     scene.add(
         newModel
@@ -902,15 +835,15 @@ function replacePlacedFood(
         newModel;
 
 
+    menuARState.scaleFactor =
+        savedScaleFactor;
+
+
     const foodName =
         getFoodName(
             newFood
         );
 
-
-    // --------------------------------------
-    // PRESERVE MOVE MODE
-    // --------------------------------------
 
     if (
         menuARState.appState ===
@@ -931,16 +864,11 @@ function replacePlacedFood(
 
     }
 
-
-    console.log(
-        `Changed placed food to ${foodName}.`
-    );
-
 }
 
 
 // ==========================================
-// WEBXR SUPPORT CHECK
+// WEBXR SUPPORT
 // ==========================================
 
 async function checkXRSupport() {
@@ -1008,7 +936,6 @@ async function checkXRSupport() {
     } catch (error) {
 
         console.error(
-            "WebXR support check failed:",
             error
         );
 
@@ -1034,7 +961,7 @@ async function checkXRSupport() {
 
 
 // ==========================================
-// UPDATE START AR BUTTON
+// START BUTTON
 // ==========================================
 
 function updateStartButton() {
@@ -1058,14 +985,8 @@ function updateStartButton() {
             "Start AR";
 
 
-        const foodName =
-            getFoodName(
-                menuARState.selectedFood
-            );
-
-
         setStatus(
-            `${foodName} selected. Ready to start AR.`
+            `${getFoodName(menuARState.selectedFood)} selected. Ready to start AR.`
         );
 
     } else if (
@@ -1086,7 +1007,7 @@ function updateStartButton() {
 
 
 // ==========================================
-// START AR SESSION
+// START AR
 // ==========================================
 
 async function startARSession() {
@@ -1212,25 +1133,13 @@ async function startARSession() {
         hideInteractionControls();
 
 
-        const foodName =
-            getFoodName(
-                menuARState.selectedFood
-            );
-
-
         setStatus(
-            `${foodName} selected. Move your tablet slowly across the table.`
-        );
-
-
-        console.log(
-            "WebXR AR session started."
+            `${getFoodName(menuARState.selectedFood)} selected. Move your tablet slowly across the table.`
         );
 
     } catch (error) {
 
         console.error(
-            "Could not start AR session:",
             error
         );
 
@@ -1240,7 +1149,7 @@ async function startARSession() {
 
 
         setStatus(
-            "AR could not start. Check camera permission and WebXR support."
+            "AR could not start."
         );
 
     }
@@ -1249,7 +1158,7 @@ async function startARSession() {
 
 
 // ==========================================
-// END AR SESSION
+// END AR
 // ==========================================
 
 async function endARSession() {
@@ -1266,7 +1175,7 @@ async function endARSession() {
 
 
 // ==========================================
-// REMOVE MODEL FROM THREE.JS SCENE
+// REMOVE FROM SCENE
 // ==========================================
 
 function removePlacedObjectFromScene() {
@@ -1292,7 +1201,7 @@ function removePlacedObjectFromScene() {
 
 
 // ==========================================
-// SHOW INTERACTION CONTROLS
+// CONTROL VISIBILITY
 // ==========================================
 
 function showInteractionControls() {
@@ -1303,10 +1212,6 @@ function showInteractionControls() {
 
 }
 
-
-// ==========================================
-// HIDE INTERACTION CONTROLS
-// ==========================================
 
 function hideInteractionControls() {
 
@@ -1405,13 +1310,6 @@ function disableManipulationControls() {
 // ==========================================
 // MOVE MODE CONTROLS
 // ==========================================
-//
-// During Move Mode:
-//
-// Burger/Pizza remain available.
-// Other manipulation controls are disabled
-// until a new position is selected.
-//
 
 function setMoveModeControls() {
 
@@ -1455,7 +1353,7 @@ function setMoveModeControls() {
 
 
 // ==========================================
-// RESET ALL CONTROLS
+// RESET CONTROLS
 // ==========================================
 
 function resetControls() {
@@ -1551,26 +1449,15 @@ function onARSessionEnded() {
     );
 
 
-    const foodName =
-        getFoodName(
-            menuARState.selectedFood
-        );
-
-
     setStatus(
-        `${foodName} selected. Ready to start AR.`
-    );
-
-
-    console.log(
-        "WebXR session ended and MenuAR reset."
+        `${getFoodName(menuARState.selectedFood)} selected. Ready to start AR.`
     );
 
 }
 
 
 // ==========================================
-// PLACE SELECTED FOOD
+// PLACE FOOD
 // ==========================================
 
 function placeSelectedFood() {
@@ -1613,10 +1500,6 @@ function placeSelectedFood() {
         template.clone(true);
 
 
-    // --------------------------------------
-    // POSITION
-    // --------------------------------------
-
     const placementPosition =
         new THREE.Vector3();
 
@@ -1634,10 +1517,6 @@ function placeSelectedFood() {
     placedModel.position.y +=
         config.surfaceOffset;
 
-
-    // --------------------------------------
-    // INITIAL SURFACE ORIENTATION
-    // --------------------------------------
 
     const placementRotation =
         new THREE.Quaternion();
@@ -1663,10 +1542,6 @@ function placeSelectedFood() {
     );
 
 
-    // --------------------------------------
-    // INITIAL SCALE
-    // --------------------------------------
-
     menuARState.scaleFactor =
         1;
 
@@ -1675,10 +1550,6 @@ function placeSelectedFood() {
         config.baseScale
     );
 
-
-    // --------------------------------------
-    // ADD TO SCENE
-    // --------------------------------------
 
     scene.add(
         placedModel
@@ -1705,43 +1576,21 @@ function placeSelectedFood() {
         false;
 
 
-    // Food switching remains available.
-
-    burgerBtn.disabled =
-        false;
-
-
-    pizzaBtn.disabled =
-        false;
-
-
     showInteractionControls();
 
 
     enableManipulationControls();
 
 
-    const foodName =
-        getFoodName(
-            food
-        );
-
-
     setStatus(
-        `${foodName} placed. Rotate, resize, move, change dish, remove or confirm.`
-    );
-
-
-    console.log(
-        `${foodName} placed.`,
-        placedModel.position
+        `${getFoodName(food)} placed. Rotate, resize, move, change dish, remove or confirm.`
     );
 
 }
 
 
 // ==========================================
-// ROTATE LEFT
+// ROTATION
 // ==========================================
 
 function rotateLeft() {
@@ -1771,10 +1620,6 @@ function rotateLeft() {
 }
 
 
-// ==========================================
-// ROTATE RIGHT
-// ==========================================
-
 function rotateRight() {
 
     if (
@@ -1803,7 +1648,7 @@ function rotateRight() {
 
 
 // ==========================================
-// CAN OBJECT BE MANIPULATED?
+// CAN MANIPULATE?
 // ==========================================
 
 function canManipulate() {
@@ -1822,7 +1667,7 @@ function canManipulate() {
 
 
 // ==========================================
-// CHANGE MODEL SIZE
+// SIZE
 // ==========================================
 
 function changeSize(direction) {
@@ -1864,34 +1709,26 @@ function changeSize(direction) {
         ];
 
 
-    const actualScale =
+    menuARState.placedObject.scale.setScalar(
 
         config.baseScale *
 
-        menuARState.scaleFactor;
+        menuARState.scaleFactor
 
-
-    menuARState.placedObject.scale.setScalar(
-        actualScale
     );
 
 
-    const percentage =
-        Math.round(
-            menuARState.scaleFactor *
-            100
-        );
-
-
     setStatus(
-        `${getFoodName(menuARState.selectedFood)} size: ${percentage}%.`
+
+        `${getFoodName(menuARState.selectedFood)} size: ${Math.round(menuARState.scaleFactor * 100)}%.`
+
     );
 
 }
 
 
 // ==========================================
-// ENTER MOVE MODE
+// MOVE MODE
 // ==========================================
 
 function enterMoveMode() {
@@ -1917,16 +1754,22 @@ function enterMoveMode() {
         false;
 
 
+    moveModeStartedAt =
+        performance.now();
+
+
+    ignoreXRSelectUntil =
+
+        performance.now() +
+
+        UI_SELECT_GUARD_MS;
+
+
     setMoveModeControls();
 
 
     setStatus(
-        "Move mode — scan for a new position on the table."
-    );
-
-
-    console.log(
-        "MenuAR entered MOVE_MODE."
+        "Move mode — point at a new position, then tap the white circle."
     );
 
 }
@@ -1949,13 +1792,13 @@ function setMoveModeStatus() {
     ) {
 
         setStatus(
-            `${foodName} selected. Move mode — tap the white circle to reposition it.`
+            `${foodName} move mode — tap the white circle to reposition it.`
         );
 
     } else {
 
         setStatus(
-            `${foodName} selected. Move mode — scan for a new position.`
+            `${foodName} move mode — scan for a new position.`
         );
 
     }
@@ -1964,13 +1807,10 @@ function setMoveModeStatus() {
 
 
 // ==========================================
-// REPOSITION PLACED FOOD
+// REPOSITION MODEL
 // ==========================================
 //
-// Position changes.
-//
-// Existing rotation and scale remain
-// completely untouched.
+// ONLY POSITION MAY CHANGE HERE.
 //
 
 function repositionPlacedFood() {
@@ -1991,6 +1831,38 @@ function repositionPlacedFood() {
     }
 
 
+    // --------------------------------------
+    // SNAPSHOT EXACT TRANSFORM
+    // --------------------------------------
+
+    const savedQuaternion =
+
+        menuARState.placedObject
+            .quaternion
+            .clone();
+
+
+    const savedScale =
+
+        menuARState.placedObject
+            .scale
+            .clone();
+
+
+    const savedScaleFactor =
+
+        menuARState.scaleFactor;
+
+
+    const savedRotation =
+
+        menuARState.currentRotation;
+
+
+    // --------------------------------------
+    // CALCULATE NEW POSITION
+    // --------------------------------------
+
     const newPosition =
         new THREE.Vector3();
 
@@ -2006,6 +1878,10 @@ function repositionPlacedFood() {
         ];
 
 
+    // --------------------------------------
+    // CHANGE POSITION ONLY
+    // --------------------------------------
+
     menuARState.placedObject.position.copy(
         newPosition
     );
@@ -2015,10 +1891,35 @@ function repositionPlacedFood() {
         config.surfaceOffset;
 
 
-    // IMPORTANT:
-    // quaternion is not changed.
-    // scale is not changed.
+    // --------------------------------------
+    // EXPLICITLY RESTORE ROTATION
+    // --------------------------------------
 
+    menuARState.placedObject.quaternion.copy(
+        savedQuaternion
+    );
+
+
+    // --------------------------------------
+    // EXPLICITLY RESTORE SCALE
+    // --------------------------------------
+
+    menuARState.placedObject.scale.copy(
+        savedScale
+    );
+
+
+    menuARState.scaleFactor =
+        savedScaleFactor;
+
+
+    menuARState.currentRotation =
+        savedRotation;
+
+
+    // --------------------------------------
+    // EXIT MOVE MODE
+    // --------------------------------------
 
     menuARState.appState =
         "PLACED";
@@ -2035,26 +1936,15 @@ function repositionPlacedFood() {
     enableManipulationControls();
 
 
-    const foodName =
-        getFoodName(
-            menuARState.selectedFood
-        );
-
-
     setStatus(
-        `${foodName} moved. Rotation and size preserved.`
-    );
-
-
-    console.log(
-        `${foodName} repositioned.`
+        `${getFoodName(menuARState.selectedFood)} moved. Size and rotation preserved.`
     );
 
 }
 
 
 // ==========================================
-// REMOVE / RESET
+// REMOVE
 // ==========================================
 
 function removeFood() {
@@ -2102,34 +1992,15 @@ function removeFood() {
     disableManipulationControls();
 
 
-    burgerBtn.disabled =
-        false;
-
-
-    pizzaBtn.disabled =
-        false;
-
-
-    const foodName =
-        getFoodName(
-            menuARState.selectedFood
-        );
-
-
     setStatus(
-        `${foodName} removed. Scan the table to place a new dish.`
-    );
-
-
-    console.log(
-        "Placed food removed. Returned to scanning."
+        `${getFoodName(menuARState.selectedFood)} removed. Scan to place again.`
     );
 
 }
 
 
 // ==========================================
-// CONFIRM PREVIEW
+// CONFIRM
 // ==========================================
 
 function confirmPreview() {
@@ -2155,8 +2026,6 @@ function confirmPreview() {
         false;
 
 
-    // Lock dish selection.
-
     burgerBtn.disabled =
         true;
 
@@ -2165,8 +2034,6 @@ function confirmPreview() {
         true;
 
 
-    // Lock all manipulation.
-
     disableManipulationControls();
 
 
@@ -2174,29 +2041,36 @@ function confirmPreview() {
         "✓ Preview Confirmed";
 
 
-    const foodName =
-        getFoodName(
-            menuARState.selectedFood
-        );
-
-
     setStatus(
-        `Preview confirmed — ${foodName} is locked in place.`
-    );
-
-
-    console.log(
-        "MenuAR preview confirmed."
+        `Preview confirmed — ${getFoodName(menuARState.selectedFood)} is locked in place.`
     );
 
 }
 
 
 // ==========================================
-// XR TAP / SELECT EVENT
+// XR SELECT
 // ==========================================
 
 function onXRSelect() {
+
+    const now =
+        performance.now();
+
+
+    // --------------------------------------
+    // IGNORE SELECT CAUSED BY UI TAP
+    // --------------------------------------
+
+    if (
+        now <
+        ignoreXRSelectUntil
+    ) {
+
+        return;
+
+    }
+
 
     // --------------------------------------
     // FIRST PLACEMENT
@@ -2222,7 +2096,7 @@ function onXRSelect() {
 
 
     // --------------------------------------
-    // MOVE / REPOSITION
+    // MOVE MODE
     // --------------------------------------
 
     if (
@@ -2236,6 +2110,24 @@ function onXRSelect() {
 
     ) {
 
+        // Require Move Mode to have been active
+        // long enough that the Move button tap
+        // cannot also be interpreted as a world tap.
+
+        if (
+
+            now -
+            moveModeStartedAt <
+
+            MOVE_ACTIVATION_DELAY_MS
+
+        ) {
+
+            return;
+
+        }
+
+
         repositionPlacedFood();
 
     }
@@ -2244,7 +2136,7 @@ function onXRSelect() {
 
 
 // ==========================================
-// XR FRAME LOOP
+// HIT TEST / RENDER LOOP
 // ==========================================
 
 function render(
@@ -2283,10 +2175,6 @@ function render(
             );
 
 
-        // ----------------------------------
-        // SURFACE FOUND
-        // ----------------------------------
-
         if (
             hitTestResults.length > 0
         ) {
@@ -2318,10 +2206,6 @@ function render(
                     true;
 
 
-                // --------------------------
-                // INITIAL PLACEMENT MODE
-                // --------------------------
-
                 if (
 
                     !menuARState.placedObject &&
@@ -2335,22 +2219,12 @@ function render(
                         "SURFACE_FOUND";
 
 
-                    const foodName =
-                        getFoodName(
-                            menuARState.selectedFood
-                        );
-
-
                     setStatus(
-                        `${foodName} selected. Tap the white circle to place it.`
+                        `${getFoodName(menuARState.selectedFood)} selected. Tap the white circle to place it.`
                     );
 
                 }
 
-
-                // --------------------------
-                // MOVE MODE
-                // --------------------------
 
                 if (
                     menuARState.appState ===
@@ -2363,13 +2237,7 @@ function render(
 
             }
 
-        }
-
-        // ----------------------------------
-        // NO SURFACE FOUND
-        // ----------------------------------
-
-        else {
+        } else {
 
             reticle.visible =
                 false;
@@ -2379,10 +2247,6 @@ function render(
                 false;
 
 
-            // ------------------------------
-            // MOVE MODE
-            // ------------------------------
-
             if (
                 menuARState.appState ===
                 "MOVE_MODE"
@@ -2390,26 +2254,14 @@ function render(
 
                 setMoveModeStatus();
 
-            }
-
-            // ------------------------------
-            // INITIAL SCANNING
-            // ------------------------------
-
-            else {
+            } else {
 
                 menuARState.appState =
                     "SCANNING";
 
 
-                const foodName =
-                    getFoodName(
-                        menuARState.selectedFood
-                    );
-
-
                 setStatus(
-                    `${foodName} selected. Move your tablet slowly to scan the table.`
+                    `${getFoodName(menuARState.selectedFood)} selected. Move your tablet slowly to scan the table.`
                 );
 
             }
@@ -2418,11 +2270,6 @@ function render(
 
     }
 
-
-    // --------------------------------------
-    // Hide reticle when no hit-testing mode
-    // is active.
-    // --------------------------------------
 
     if (
         !shouldRunHitTest
@@ -2443,7 +2290,68 @@ function render(
 
 
 // ==========================================
-// FOOD BUTTON EVENTS
+// UI → XR TAP GUARD
+// ==========================================
+
+function markUITouch() {
+
+    ignoreXRSelectUntil =
+
+        performance.now() +
+
+        UI_SELECT_GUARD_MS;
+
+}
+
+
+// Guard all pointer/touch interactions
+// occurring inside the HTML controls.
+
+arControls.addEventListener(
+
+    "pointerdown",
+
+    markUITouch,
+
+    true
+
+);
+
+
+arControls.addEventListener(
+
+    "touchstart",
+
+    markUITouch,
+
+    {
+        capture: true,
+        passive: true
+    }
+
+);
+
+
+// WebXR DOM-overlay-specific protection.
+
+arControls.addEventListener(
+
+    "beforexrselect",
+
+    (event) => {
+
+        event.preventDefault();
+
+
+        markUITouch();
+
+    }
+
+);
+
+
+// ==========================================
+// FOOD EVENTS
 // ==========================================
 
 burgerBtn.addEventListener(
@@ -2533,7 +2441,7 @@ sizeUpBtn.addEventListener(
 
 
 // ==========================================
-// MOVE EVENT
+// MOVE
 // ==========================================
 
 moveBtn.addEventListener(
@@ -2546,7 +2454,7 @@ moveBtn.addEventListener(
 
 
 // ==========================================
-// REMOVE EVENT
+// REMOVE
 // ==========================================
 
 removeBtn.addEventListener(
@@ -2559,7 +2467,7 @@ removeBtn.addEventListener(
 
 
 // ==========================================
-// CONFIRM EVENT
+// CONFIRM
 // ==========================================
 
 confirmBtn.addEventListener(
@@ -2572,7 +2480,7 @@ confirmBtn.addEventListener(
 
 
 // ==========================================
-// START / EXIT EVENTS
+// START / EXIT
 // ==========================================
 
 startARBtn.addEventListener(
@@ -2602,30 +2510,7 @@ exitARBtn.addEventListener(
 
 
 // ==========================================
-// PREVENT DOM BUTTON TAPS FROM ALSO
-// BECOMING XR WORLD TAPS
-// ==========================================
-//
-// This helps prevent pressing Burger/Pizza
-// or another HTML control from accidentally
-// placing or moving the 3D object.
-//
-
-arControls.addEventListener(
-
-    "beforexrselect",
-
-    (event) => {
-
-        event.preventDefault();
-
-    }
-
-);
-
-
-// ==========================================
-// WINDOW RESIZE
+// RESIZE
 // ==========================================
 
 window.addEventListener(
@@ -2668,7 +2553,7 @@ window.addEventListener(
 
 
 // ==========================================
-// APPLICATION INITIALIZATION
+// INITIALIZATION
 // ==========================================
 
 async function initializeApplication() {
@@ -2697,9 +2582,5 @@ async function initializeApplication() {
 
 }
 
-
-// ==========================================
-// START MENUAR
-// ==========================================
 
 initializeApplication();
