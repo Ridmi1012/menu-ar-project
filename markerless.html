@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
 
@@ -13,7 +14,7 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body class="ar-page">
+<body class="markerless-page">
 
     <header class="ar-header">
 
@@ -29,24 +30,35 @@
     </header>
 
 
-    <main class="ar-layout">
+    <main class="markerless-layout">
 
-        <!--
-            This temporary area will later contain
-            the WebXR camera and hit-test scene.
-        -->
-        <section class="camera-placeholder">
+        <section
+            class="xr-viewport"
+            id="xrViewport"
+        >
 
-            <div class="camera-message">
-
-                <span class="camera-icon">📱</span>
+            <div
+                class="camera-message"
+                id="xrIntro"
+            >
+                <span class="camera-icon">
+                    📱
+                </span>
 
                 <h2>AR Surface View</h2>
 
                 <p>
-                    Surface detection and camera view
-                    will appear here.
+                    Start AR, then move your tablet slowly
+                    across a well-lit table.
                 </p>
+
+                <button
+                    type="button"
+                    id="startARBtn"
+                    class="start-ar-button"
+                >
+                    Start AR
+                </button>
 
             </div>
 
@@ -55,8 +67,11 @@
 
         <section class="ar-controls">
 
-            <p class="status-message">
-                Select a food item to begin
+            <p
+                class="status-message"
+                id="statusMessage"
+            >
+                Checking WebXR support...
             </p>
 
 
@@ -92,6 +107,7 @@
                     <button
                         type="button"
                         class="control-button"
+                        id="rotateLeftBtn"
                         disabled
                     >
                         ↶ Rotate Left
@@ -100,6 +116,7 @@
                     <button
                         type="button"
                         class="control-button"
+                        id="rotateRightBtn"
                         disabled
                     >
                         Rotate Right ↷
@@ -113,6 +130,7 @@
                     <button
                         type="button"
                         class="control-button"
+                        id="sizeDownBtn"
                         disabled
                     >
                         − Size
@@ -121,6 +139,7 @@
                     <button
                         type="button"
                         class="control-button"
+                        id="sizeUpBtn"
                         disabled
                     >
                         + Size
@@ -132,6 +151,7 @@
                 <button
                     type="button"
                     class="remove-button"
+                    id="removeBtn"
                     disabled
                 >
                     Remove Food
@@ -141,6 +161,7 @@
                 <button
                     type="button"
                     class="confirm-button"
+                    id="confirmBtn"
                     disabled
                 >
                     Confirm Preview
@@ -152,7 +173,12 @@
 
     </main>
 
-    <script src="js/markerless-ar.js"></script>
+
+    <script
+        type="module"
+        src="js/markerless-ar.js"
+    ></script>
 
 </body>
+
 </html>
