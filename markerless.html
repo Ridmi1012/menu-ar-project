@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -11,19 +12,24 @@
 
     <title>MenuAR | View Food on Table</title>
 
+
+    <!-- Main Styles -->
     <link
         rel="stylesheet"
         href="css/style.css?v=6"
     >
 
+
     <!-- Three.js Import Map -->
     <script type="importmap">
+
         {
             "imports": {
                 "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
                 "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
             }
         }
+
     </script>
 
 </head>
@@ -31,8 +37,9 @@
 
 <body class="markerless-page">
 
+
     <!-- =====================================
-         NORMAL PAGE HEADER
+         PAGE HEADER
          ===================================== -->
 
     <header class="ar-header">
@@ -40,9 +47,11 @@
         <a
             href="index.html"
             class="back-button"
+            aria-label="Back to home"
         >
             ←
         </a>
+
 
         <div>
 
@@ -59,10 +68,16 @@
     </header>
 
 
+
+    <!-- =====================================
+         MAIN AREA
+         ===================================== -->
+
     <main class="markerless-layout">
 
+
         <!-- =================================
-             AR START AREA
+             PRE-AR / START AREA
              ================================= -->
 
         <section
@@ -70,23 +85,40 @@
             id="xrViewport"
         >
 
+
             <div
                 class="camera-message"
                 id="xrIntro"
             >
 
+
                 <span class="camera-icon">
                     📱
                 </span>
+
 
                 <h2>
                     AR Surface View
                 </h2>
 
+
                 <p>
-                    Start AR, then move your tablet
-                    slowly across a well-lit table.
+                    Move your device slowly across
+                    a well-lit table.
                 </p>
+
+
+                <!-- Compatibility feedback -->
+
+                <p
+                    id="xrSupportMessage"
+                    class="xr-support-message"
+                    hidden
+                >
+                </p>
+
+
+                <!-- Start -->
 
                 <button
                     type="button"
@@ -97,31 +129,41 @@
                     Loading...
                 </button>
 
+
             </div>
+
 
         </section>
 
 
+
         <!-- =================================
              AR CONTROL PANEL
+
+             Completely hidden before AR starts.
              ================================= -->
 
         <section
             class="ar-controls"
             id="arControls"
+            hidden
         >
 
-            <!-- Status / feedback -->
+
+            <!-- Status -->
 
             <p
                 class="status-message"
                 id="statusMessage"
             >
-                Loading MenuAR...
+                Ready
             </p>
 
 
-            <!-- Food selection -->
+
+            <!-- =================================
+                 FOOD SELECTION
+                 ================================= -->
 
             <p class="control-label">
                 Select Food
@@ -129,6 +171,7 @@
 
 
             <div class="food-selector">
+
 
                 <button
                     type="button"
@@ -147,13 +190,15 @@
                     🍕 Pizza
                 </button>
 
+
             </div>
+
 
 
             <!-- =================================
                  MANIPULATION CONTROLS
 
-                 Hidden until a model is placed.
+                 These appear after placement.
                  ================================= -->
 
             <div
@@ -161,9 +206,11 @@
                 id="interactionControls"
             >
 
+
                 <!-- Rotation -->
 
                 <div class="control-row">
+
 
                     <button
                         type="button"
@@ -184,12 +231,15 @@
                         Rotate Right ↷
                     </button>
 
+
                 </div>
+
 
 
                 <!-- Size -->
 
                 <div class="control-row">
+
 
                     <button
                         type="button"
@@ -210,7 +260,9 @@
                         + Size
                     </button>
 
+
                 </div>
+
 
 
                 <!-- Move -->
@@ -225,6 +277,7 @@
                 </button>
 
 
+
                 <!-- Remove -->
 
                 <button
@@ -235,6 +288,7 @@
                 >
                     Remove Food
                 </button>
+
 
 
                 <!-- Confirm -->
@@ -248,10 +302,14 @@
                     Confirm Preview
                 </button>
 
+
             </div>
 
 
-            <!-- Exit remains available in AR -->
+
+            <!-- =================================
+                 EXIT
+                 ================================= -->
 
             <button
                 type="button"
@@ -261,15 +319,22 @@
                 Exit AR
             </button>
 
+
         </section>
+
 
     </main>
 
 
+
+    <!-- Markerless AR Logic -->
+
     <script
         type="module"
-        src="js/markerless-ar.js?v=7"
-    ></script>
+        src="js/markerless-ar.js?v=8"
+    >
+    </script>
+
 
 </body>
 

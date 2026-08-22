@@ -5,6 +5,7 @@ import {
 } from "three/addons/loaders/GLTFLoader.js";
 
 
+
 // ==========================================
 // DOM REFERENCES
 // ==========================================
@@ -26,6 +27,12 @@ const exitARBtn =
 
 const xrViewport =
     document.getElementById("xrViewport");
+
+const xrIntro =
+    document.getElementById("xrIntro");
+
+const xrSupportMessage =
+    document.getElementById("xrSupportMessage");
 
 const arControls =
     document.getElementById("arControls");
@@ -53,6 +60,7 @@ const removeBtn =
 
 const confirmBtn =
     document.getElementById("confirmBtn");
+
 
 
 // ==========================================
@@ -88,11 +96,13 @@ const menuARState = {
 };
 
 
+
 // ==========================================
 // MODEL CONFIGURATION
 // ==========================================
 
 const MODEL_CONFIG = {
+
 
     burger: {
 
@@ -121,7 +131,9 @@ const MODEL_CONFIG = {
 
     }
 
+
 };
+
 
 
 // ==========================================
@@ -144,16 +156,15 @@ const MAX_SCALE_FACTOR =
     2.0;
 
 
-// Ignore XR world-select briefly after
-// touching HTML controls.
+// Prevent HTML control taps from also
+// being interpreted as XR placement taps.
 
 const UI_SELECT_GUARD_MS =
     650;
 
 
-// After pressing Move, require a short
-// intentional delay before accepting
-// the new world position.
+// Prevent the Move button tap itself
+// from immediately repositioning the model.
 
 const MOVE_ACTIVATION_DELAY_MS =
     700;
@@ -165,6 +176,7 @@ let ignoreXRSelectUntil =
 
 let moveModeStartedAt =
     0;
+
 
 
 // ==========================================
@@ -198,6 +210,7 @@ let referenceSpace =
     null;
 
 
+
 // ==========================================
 // MODEL TEMPLATES
 // ==========================================
@@ -213,14 +226,17 @@ const modelTemplates = {
 };
 
 
+
 // ==========================================
 // THREE.JS INITIALIZATION
 // ==========================================
 
 function initThreeJS() {
 
+
     scene =
         new THREE.Scene();
+
 
 
     camera =
@@ -238,6 +254,7 @@ function initThreeJS() {
         );
 
 
+
     renderer =
         new THREE.WebGLRenderer({
 
@@ -248,6 +265,7 @@ function initThreeJS() {
                 true
 
         });
+
 
 
     renderer.setPixelRatio(
@@ -263,6 +281,7 @@ function initThreeJS() {
     );
 
 
+
     renderer.setSize(
 
         window.innerWidth,
@@ -272,8 +291,10 @@ function initThreeJS() {
     );
 
 
+
     renderer.xr.enabled =
         true;
+
 
 
     renderer.domElement.classList.add(
@@ -281,14 +302,16 @@ function initThreeJS() {
     );
 
 
+
     xrViewport.appendChild(
         renderer.domElement
     );
 
 
-    // --------------------------------------
+
+    // ======================================
     // LIGHTING
-    // --------------------------------------
+    // ======================================
 
     const hemisphereLight =
         new THREE.HemisphereLight(
@@ -305,6 +328,7 @@ function initThreeJS() {
     scene.add(
         hemisphereLight
     );
+
 
 
     const directionalLight =
@@ -333,9 +357,10 @@ function initThreeJS() {
     );
 
 
-    // --------------------------------------
-    // RETICLE
-    // --------------------------------------
+
+    // ======================================
+    // HIT-TEST RETICLE
+    // ======================================
 
     const reticleGeometry =
         new THREE.RingGeometry(
@@ -354,6 +379,7 @@ function initThreeJS() {
     );
 
 
+
     const reticleMaterial =
         new THREE.MeshBasicMaterial({
 
@@ -366,6 +392,7 @@ function initThreeJS() {
         });
 
 
+
     reticle =
         new THREE.Mesh(
 
@@ -376,6 +403,7 @@ function initThreeJS() {
         );
 
 
+
     reticle.matrixAutoUpdate =
         false;
 
@@ -384,17 +412,20 @@ function initThreeJS() {
         false;
 
 
+
     scene.add(
         reticle
     );
 
 
-    // --------------------------------------
+
+    // ======================================
     // XR CONTROLLER
-    // --------------------------------------
+    // ======================================
 
     controller =
         renderer.xr.getController(0);
+
 
 
     controller.addEventListener(
@@ -406,9 +437,11 @@ function initThreeJS() {
     );
 
 
+
     scene.add(
         controller
     );
+
 
 
     renderer.setAnimationLoop(
@@ -418,11 +451,13 @@ function initThreeJS() {
 }
 
 
+
 // ==========================================
 // STATUS
 // ==========================================
 
 function setStatus(message) {
+
 
     if (
         statusMessage.textContent !==
@@ -437,11 +472,45 @@ function setStatus(message) {
 }
 
 
+
+// ==========================================
+// PRE-AR SUPPORT MESSAGE
+// ==========================================
+
+function showSupportMessage(message) {
+
+
+    xrSupportMessage.textContent =
+        message;
+
+
+    xrSupportMessage.hidden =
+        false;
+
+}
+
+
+
+function hideSupportMessage() {
+
+
+    xrSupportMessage.textContent =
+        "";
+
+
+    xrSupportMessage.hidden =
+        true;
+
+}
+
+
+
 // ==========================================
 // FOOD NAME
 // ==========================================
 
 function getFoodName(food) {
+
 
     return food === "burger"
         ? "Burger"
@@ -450,11 +519,13 @@ function getFoodName(food) {
 }
 
 
+
 // ==========================================
 // LOAD MODEL
 // ==========================================
 
 function loadModel(food) {
+
 
     return new Promise(
 
@@ -463,20 +534,25 @@ function loadModel(food) {
             reject
         ) => {
 
+
             const loader =
                 new GLTFLoader();
+
 
 
             const config =
                 MODEL_CONFIG[food];
 
 
+
             loader.load(
+
 
                 config.src,
 
 
                 (gltf) => {
+
 
                     modelTemplates[food] =
                         gltf.scene;
@@ -497,6 +573,7 @@ function loadModel(food) {
 
                 (error) => {
 
+
                     console.error(
                         `Failed to load ${food}:`,
                         error
@@ -509,6 +586,7 @@ function loadModel(food) {
 
                 }
 
+
             );
 
         }
@@ -518,44 +596,50 @@ function loadModel(food) {
 }
 
 
+
 // ==========================================
 // LOAD BOTH MODELS
 // ==========================================
 
 async function loadModels() {
 
-    try {
 
-        setStatus(
-            "Loading Burger and Pizza models..."
-        );
+    try {
 
 
         await Promise.all([
+
 
             loadModel(
                 "burger"
             ),
 
+
             loadModel(
                 "pizza"
             )
 
+
         ]);
+
 
 
         menuARState.modelsReady =
             true;
 
+
     } catch (error) {
+
 
         menuARState.modelsReady =
             false;
 
 
-        setStatus(
-            "3D models could not be loaded."
+
+        showSupportMessage(
+            "The 3D food models could not be loaded. Refresh the page and try again."
         );
+
 
 
         console.error(
@@ -568,15 +652,18 @@ async function loadModels() {
 }
 
 
+
 // ==========================================
 // FOOD BUTTON APPEARANCE
 // ==========================================
 
 function updateFoodButtons(food) {
 
+
     if (
         food === "burger"
     ) {
+
 
         burgerBtn.classList.add(
             "active"
@@ -587,7 +674,9 @@ function updateFoodButtons(food) {
             "active"
         );
 
+
     } else {
+
 
         pizzaBtn.classList.add(
             "active"
@@ -603,11 +692,13 @@ function updateFoodButtons(food) {
 }
 
 
+
 // ==========================================
 // SELECT / CHANGE FOOD
 // ==========================================
 
 function selectFood(food) {
+
 
     if (
         menuARState.appState ===
@@ -619,17 +710,21 @@ function selectFood(food) {
     }
 
 
+
     const previousFood =
         menuARState.selectedFood;
+
 
 
     menuARState.selectedFood =
         food;
 
 
+
     updateFoodButtons(
         food
     );
+
 
 
     const foodName =
@@ -638,23 +733,33 @@ function selectFood(food) {
         );
 
 
+
+    // ======================================
+    // REPLACE ALREADY PLACED MODEL
+    // ======================================
+
     if (
         menuARState.placedObject
     ) {
+
 
         if (
             previousFood ===
             food
         ) {
 
+
             if (
                 menuARState.appState ===
                 "MOVE_MODE"
             ) {
 
+
                 setMoveModeStatus();
 
+
             } else {
+
 
                 setStatus(
                     `${foodName} is already displayed.`
@@ -666,6 +771,7 @@ function selectFood(food) {
             return;
 
         }
+
 
 
         replacePlacedFood(
@@ -682,47 +788,40 @@ function selectFood(food) {
     }
 
 
+
+    // ======================================
+    // INSIDE AR BUT NOT PLACED YET
+    // ======================================
+
     if (
-        !xrSession
+        xrSession
     ) {
 
+
         if (
-            menuARState.xrSupported &&
-            menuARState.modelsReady
+            menuARState.appState ===
+            "SURFACE_FOUND"
         ) {
 
+
             setStatus(
-                `${foodName} selected. Ready to start AR.`
+                `${foodName} selected. Tap the white circle to place it.`
+            );
+
+
+        } else {
+
+
+            setStatus(
+                `${foodName} selected. Move your device slowly across the table.`
             );
 
         }
 
-
-        return;
-
     }
-
-
-    if (
-        menuARState.appState ===
-        "SURFACE_FOUND"
-    ) {
-
-        setStatus(
-            `${foodName} selected. Tap the white circle to place it.`
-        );
-
-
-        return;
-
-    }
-
-
-    setStatus(
-        `${foodName} selected. Move your tablet slowly to scan the table.`
-    );
 
 }
+
 
 
 // ==========================================
@@ -737,6 +836,7 @@ function replacePlacedFood(
 
 ) {
 
+
     if (
         !menuARState.placedObject
     ) {
@@ -746,8 +846,10 @@ function replacePlacedFood(
     }
 
 
+
     const template =
         modelTemplates[newFood];
+
 
 
     if (
@@ -759,30 +861,39 @@ function replacePlacedFood(
     }
 
 
+
     const oldModel =
         menuARState.placedObject;
+
 
 
     const newConfig =
         MODEL_CONFIG[newFood];
 
 
+
     const previousConfig =
         MODEL_CONFIG[previousFood];
 
 
-    // Save exact transform.
+
+    // --------------------------------------
+    // Preserve exact transform
+    // --------------------------------------
 
     const savedPosition =
         oldModel.position.clone();
+
 
 
     const savedQuaternion =
         oldModel.quaternion.clone();
 
 
+
     const savedScaleFactor =
         menuARState.scaleFactor;
+
 
 
     scene.remove(
@@ -790,8 +901,10 @@ function replacePlacedFood(
     );
 
 
+
     const newModel =
         template.clone(true);
+
 
 
     // Position
@@ -801,11 +914,13 @@ function replacePlacedFood(
     );
 
 
+
     newModel.position.y +=
 
         newConfig.surfaceOffset -
 
         previousConfig.surfaceOffset;
+
 
 
     // Rotation
@@ -815,7 +930,8 @@ function replacePlacedFood(
     );
 
 
-    // User scale
+
+    // Scale
 
     newModel.scale.setScalar(
 
@@ -826,17 +942,21 @@ function replacePlacedFood(
     );
 
 
+
     scene.add(
         newModel
     );
+
 
 
     menuARState.placedObject =
         newModel;
 
 
+
     menuARState.scaleFactor =
         savedScaleFactor;
+
 
 
     const foodName =
@@ -845,17 +965,22 @@ function replacePlacedFood(
         );
 
 
+
     if (
         menuARState.appState ===
         "MOVE_MODE"
     ) {
 
+
         setMoveModeStatus();
+
 
     } else {
 
+
         menuARState.appState =
             "PLACED";
+
 
 
         setStatus(
@@ -867,15 +992,22 @@ function replacePlacedFood(
 }
 
 
+
 // ==========================================
 // WEBXR SUPPORT
 // ==========================================
 
 async function checkXRSupport() {
 
+
+    // --------------------------------------
+    // Browser does not expose WebXR
+    // --------------------------------------
+
     if (
         !navigator.xr
     ) {
+
 
         menuARState.xrSupported =
             false;
@@ -885,9 +1017,11 @@ async function checkXRSupport() {
             "UNSUPPORTED";
 
 
-        setStatus(
-            "WebXR is not available in this browser."
+
+        showSupportMessage(
+            "Markerless AR is not supported on this device or browser."
         );
+
 
 
         updateStartButton();
@@ -898,7 +1032,9 @@ async function checkXRSupport() {
     }
 
 
+
     try {
+
 
         const supported =
 
@@ -907,37 +1043,51 @@ async function checkXRSupport() {
             );
 
 
+
         menuARState.xrSupported =
             supported;
+
 
 
         if (
             supported
         ) {
 
+
             menuARState.appState =
                 "READY_TO_SCAN";
 
+
+            hideSupportMessage();
+
+
         } else {
+
 
             menuARState.appState =
                 "UNSUPPORTED";
 
 
-            setStatus(
-                "Immersive AR is not supported on this device."
+
+            showSupportMessage(
+                "Markerless AR is not supported on this device or browser."
             );
 
         }
 
 
+
         updateStartButton();
+
 
     } catch (error) {
 
+
         console.error(
+            "WebXR support check failed:",
             error
         );
+
 
 
         menuARState.xrSupported =
@@ -948,9 +1098,11 @@ async function checkXRSupport() {
             "UNSUPPORTED";
 
 
-        setStatus(
-            "Unable to check WebXR support."
+
+        showSupportMessage(
+            "Unable to confirm markerless AR support on this device."
         );
+
 
 
         updateStartButton();
@@ -960,11 +1112,13 @@ async function checkXRSupport() {
 }
 
 
+
 // ==========================================
 // START BUTTON
 // ==========================================
 
 function updateStartButton() {
+
 
     const ready =
 
@@ -973,44 +1127,105 @@ function updateStartButton() {
         menuARState.modelsReady;
 
 
-    startARBtn.disabled =
-        !ready;
-
 
     if (
         ready
     ) {
 
+
+        startARBtn.disabled =
+            false;
+
+
         startARBtn.textContent =
-            "Start AR";
+            "Start";
 
 
-        setStatus(
-            `${getFoodName(menuARState.selectedFood)} selected. Ready to start AR.`
-        );
+        hideSupportMessage();
 
-    } else if (
+
+        return;
+
+    }
+
+
+
+    startARBtn.disabled =
+        true;
+
+
+
+    if (
         !menuARState.xrSupported
     ) {
 
-        startARBtn.textContent =
-            "AR Unsupported";
-
-    } else {
 
         startARBtn.textContent =
-            "Loading Models...";
+            "Not Supported";
+
+
+        return;
+
+    }
+
+
+
+    if (
+        !menuARState.modelsReady
+    ) {
+
+
+        startARBtn.textContent =
+            "Loading...";
 
     }
 
 }
 
 
+
 // ==========================================
-// START AR
+// SHOW AR INTERFACE
+// ==========================================
+
+function showARInterface() {
+
+
+    xrIntro.hidden =
+        true;
+
+
+    arControls.hidden =
+        false;
+
+}
+
+
+
+// ==========================================
+// SHOW NORMAL INTERFACE
+// ==========================================
+
+function showPreARInterface() {
+
+
+    arControls.hidden =
+        true;
+
+
+    xrIntro.hidden =
+        false;
+
+}
+
+
+
+// ==========================================
+// START AR SESSION
 // ==========================================
 
 async function startARSession() {
+
 
     if (
 
@@ -1025,7 +1240,23 @@ async function startARSession() {
     }
 
 
+
+    startARBtn.disabled =
+        true;
+
+
+
+    startARBtn.textContent =
+        "Starting...";
+
+
+
+    hideSupportMessage();
+
+
+
     try {
+
 
         xrSession =
 
@@ -1035,9 +1266,13 @@ async function startARSession() {
 
                 {
 
+
                     requiredFeatures: [
+
                         "hit-test"
+
                     ],
+
 
                     optionalFeatures: [
 
@@ -1046,6 +1281,7 @@ async function startARSession() {
                         "local-floor"
 
                     ],
+
 
                     domOverlay: {
 
@@ -1059,9 +1295,11 @@ async function startARSession() {
             );
 
 
+
         await renderer.xr.setSession(
             xrSession
         );
+
 
 
         viewerSpace =
@@ -1071,7 +1309,9 @@ async function startARSession() {
             );
 
 
+
         try {
+
 
             referenceSpace =
 
@@ -1079,7 +1319,9 @@ async function startARSession() {
                     "local-floor"
                 );
 
+
         } catch {
+
 
             referenceSpace =
 
@@ -1088,6 +1330,7 @@ async function startARSession() {
                 );
 
         }
+
 
 
         hitTestSource =
@@ -1100,6 +1343,7 @@ async function startARSession() {
             });
 
 
+
         xrSession.addEventListener(
 
             "end",
@@ -1109,20 +1353,25 @@ async function startARSession() {
         );
 
 
+
         menuARState.appState =
             "SCANNING";
+
 
 
         menuARState.surfaceFound =
             false;
 
 
+
         menuARState.scaleFactor =
             1;
 
 
+
         menuARState.currentRotation =
             0;
+
 
 
         document.body.classList.add(
@@ -1130,31 +1379,131 @@ async function startARSession() {
         );
 
 
+
+        showARInterface();
+
+
+
         hideInteractionControls();
 
 
-        setStatus(
-            `${getFoodName(menuARState.selectedFood)} selected. Move your tablet slowly across the table.`
+
+        updateFoodButtons(
+            menuARState.selectedFood
         );
+
+
+
+        setStatus(
+            `${getFoodName(menuARState.selectedFood)} selected. Move your device slowly across the table.`
+        );
+
 
     } catch (error) {
 
+
         console.error(
+            "Unable to start AR:",
             error
         );
+
 
 
         xrSession =
             null;
 
 
-        setStatus(
-            "AR could not start."
+
+        showPreARInterface();
+
+
+
+        // ----------------------------------
+        // Permission denied
+        // ----------------------------------
+
+        if (
+            error.name ===
+            "NotAllowedError"
+        ) {
+
+
+            showSupportMessage(
+                "AR permission was not granted. Allow camera and AR access, then try again."
+            );
+
+
+            startARBtn.disabled =
+                false;
+
+
+            startARBtn.textContent =
+                "Try Again";
+
+
+            return;
+
+        }
+
+
+
+        // ----------------------------------
+        // Required WebXR feature unavailable
+        // ----------------------------------
+
+        if (
+            error.name ===
+            "NotSupportedError"
+        ) {
+
+
+            menuARState.xrSupported =
+                false;
+
+
+            menuARState.appState =
+                "UNSUPPORTED";
+
+
+            showSupportMessage(
+                "This device or browser does not support the markerless AR features required by MenuAR."
+            );
+
+
+            startARBtn.disabled =
+                true;
+
+
+            startARBtn.textContent =
+                "Not Supported";
+
+
+            return;
+
+        }
+
+
+
+        // ----------------------------------
+        // Other failure
+        // ----------------------------------
+
+        showSupportMessage(
+            "Markerless AR could not start. Check browser permissions and try again."
         );
+
+
+        startARBtn.disabled =
+            false;
+
+
+        startARBtn.textContent =
+            "Try Again";
 
     }
 
 }
+
 
 
 // ==========================================
@@ -1163,9 +1512,11 @@ async function startARSession() {
 
 async function endARSession() {
 
+
     if (
         xrSession
     ) {
+
 
         await xrSession.end();
 
@@ -1174,11 +1525,13 @@ async function endARSession() {
 }
 
 
+
 // ==========================================
 // REMOVE FROM SCENE
 // ==========================================
 
 function removePlacedObjectFromScene() {
+
 
     if (
         !menuARState.placedObject
@@ -1189,9 +1542,11 @@ function removePlacedObjectFromScene() {
     }
 
 
+
     scene.remove(
         menuARState.placedObject
     );
+
 
 
     menuARState.placedObject =
@@ -1200,11 +1555,13 @@ function removePlacedObjectFromScene() {
 }
 
 
+
 // ==========================================
 // CONTROL VISIBILITY
 // ==========================================
 
 function showInteractionControls() {
+
 
     interactionControls.classList.add(
         "is-visible"
@@ -1213,7 +1570,9 @@ function showInteractionControls() {
 }
 
 
+
 function hideInteractionControls() {
+
 
     interactionControls.classList.remove(
         "is-visible"
@@ -1222,11 +1581,13 @@ function hideInteractionControls() {
 }
 
 
+
 // ==========================================
-// ENABLE MANIPULATION
+// ENABLE MANIPULATION CONTROLS
 // ==========================================
 
 function enableManipulationControls() {
+
 
     rotateLeftBtn.disabled =
         false;
@@ -1254,6 +1615,7 @@ function enableManipulationControls() {
 
     confirmBtn.disabled =
         false;
+
 
 
     moveBtn.textContent =
@@ -1265,17 +1627,20 @@ function enableManipulationControls() {
     );
 
 
+
     confirmBtn.textContent =
         "Confirm Preview";
 
 }
 
 
+
 // ==========================================
-// DISABLE MANIPULATION
+// DISABLE MANIPULATION CONTROLS
 // ==========================================
 
 function disableManipulationControls() {
+
 
     rotateLeftBtn.disabled =
         true;
@@ -1305,6 +1670,7 @@ function disableManipulationControls() {
         true;
 
 }
+
 
 
 // ==========================================
@@ -1313,6 +1679,7 @@ function disableManipulationControls() {
 
 function setMoveModeControls() {
 
+
     rotateLeftBtn.disabled =
         true;
 
@@ -1339,6 +1706,7 @@ function setMoveModeControls() {
 
     moveBtn.disabled =
         true;
+
 
 
     moveBtn.textContent =
@@ -1352,11 +1720,13 @@ function setMoveModeControls() {
 }
 
 
+
 // ==========================================
 // RESET CONTROLS
 // ==========================================
 
 function resetControls() {
+
 
     burgerBtn.disabled =
         false;
@@ -1366,10 +1736,13 @@ function resetControls() {
         false;
 
 
+
     disableManipulationControls();
 
 
+
     hideInteractionControls();
+
 
 
     moveBtn.textContent =
@@ -1381,10 +1754,12 @@ function resetControls() {
     );
 
 
+
     confirmBtn.textContent =
         "Confirm Preview";
 
 }
+
 
 
 // ==========================================
@@ -1393,13 +1768,16 @@ function resetControls() {
 
 function onARSessionEnded() {
 
+
     if (
         hitTestSource
     ) {
 
+
         hitTestSource.cancel();
 
     }
+
 
 
     hitTestSource =
@@ -1418,30 +1796,38 @@ function onARSessionEnded() {
         null;
 
 
+
     reticle.visible =
         false;
 
 
+
     removePlacedObjectFromScene();
+
 
 
     menuARState.surfaceFound =
         false;
 
 
+
     menuARState.scaleFactor =
         1;
+
 
 
     menuARState.currentRotation =
         0;
 
 
+
     menuARState.appState =
         "READY_TO_SCAN";
 
 
+
     resetControls();
+
 
 
     document.body.classList.remove(
@@ -1449,11 +1835,15 @@ function onARSessionEnded() {
     );
 
 
-    setStatus(
-        `${getFoodName(menuARState.selectedFood)} selected. Ready to start AR.`
-    );
+
+    showPreARInterface();
+
+
+
+    updateStartButton();
 
 }
+
 
 
 // ==========================================
@@ -1461,6 +1851,7 @@ function onARSessionEnded() {
 // ==========================================
 
 function placeSelectedFood() {
+
 
     if (
 
@@ -1475,12 +1866,15 @@ function placeSelectedFood() {
     }
 
 
+
     const food =
         menuARState.selectedFood;
 
 
+
     const template =
         modelTemplates[food];
+
 
 
     if (
@@ -1492,16 +1886,20 @@ function placeSelectedFood() {
     }
 
 
+
     const config =
         MODEL_CONFIG[food];
+
 
 
     const placedModel =
         template.clone(true);
 
 
+
     const placementPosition =
         new THREE.Vector3();
+
 
 
     placementPosition.setFromMatrixPosition(
@@ -1509,21 +1907,26 @@ function placeSelectedFood() {
     );
 
 
+
     placedModel.position.copy(
         placementPosition
     );
+
 
 
     placedModel.position.y +=
         config.surfaceOffset;
 
 
+
     const placementRotation =
         new THREE.Quaternion();
 
 
+
     const ignoredScale =
         new THREE.Vector3();
+
 
 
     reticle.matrix.decompose(
@@ -1537,13 +1940,16 @@ function placeSelectedFood() {
     );
 
 
+
     placedModel.quaternion.copy(
         placementRotation
     );
 
 
+
     menuARState.scaleFactor =
         1;
+
 
 
     placedModel.scale.setScalar(
@@ -1551,35 +1957,44 @@ function placeSelectedFood() {
     );
 
 
+
     scene.add(
         placedModel
     );
+
 
 
     menuARState.placedObject =
         placedModel;
 
 
+
     menuARState.appState =
         "PLACED";
+
 
 
     menuARState.currentRotation =
         0;
 
 
+
     menuARState.surfaceFound =
         false;
+
 
 
     reticle.visible =
         false;
 
 
+
     showInteractionControls();
 
 
+
     enableManipulationControls();
+
 
 
     setStatus(
@@ -1589,11 +2004,13 @@ function placeSelectedFood() {
 }
 
 
+
 // ==========================================
 // ROTATION
 // ==========================================
 
 function rotateLeft() {
+
 
     if (
         !canManipulate()
@@ -1604,13 +2021,16 @@ function rotateLeft() {
     }
 
 
+
     menuARState.placedObject.rotateY(
         ROTATION_STEP
     );
 
 
+
     menuARState.currentRotation +=
         ROTATION_STEP;
+
 
 
     setStatus(
@@ -1620,7 +2040,9 @@ function rotateLeft() {
 }
 
 
+
 function rotateRight() {
+
 
     if (
         !canManipulate()
@@ -1631,13 +2053,16 @@ function rotateRight() {
     }
 
 
+
     menuARState.placedObject.rotateY(
         -ROTATION_STEP
     );
 
 
+
     menuARState.currentRotation -=
         ROTATION_STEP;
+
 
 
     setStatus(
@@ -1647,11 +2072,13 @@ function rotateRight() {
 }
 
 
+
 // ==========================================
 // CAN MANIPULATE?
 // ==========================================
 
 function canManipulate() {
+
 
     return (
 
@@ -1666,11 +2093,13 @@ function canManipulate() {
 }
 
 
+
 // ==========================================
 // SIZE
 // ==========================================
 
 function changeSize(direction) {
+
 
     if (
         !canManipulate()
@@ -1681,6 +2110,7 @@ function changeSize(direction) {
     }
 
 
+
     const newFactor =
 
         menuARState.scaleFactor +
@@ -1689,6 +2119,7 @@ function changeSize(direction) {
             SCALE_STEP *
             direction
         );
+
 
 
     menuARState.scaleFactor =
@@ -1703,10 +2134,12 @@ function changeSize(direction) {
         );
 
 
+
     const config =
         MODEL_CONFIG[
             menuARState.selectedFood
         ];
+
 
 
     menuARState.placedObject.scale.setScalar(
@@ -1718,6 +2151,7 @@ function changeSize(direction) {
     );
 
 
+
     setStatus(
 
         `${getFoodName(menuARState.selectedFood)} size: ${Math.round(menuARState.scaleFactor * 100)}%.`
@@ -1727,11 +2161,13 @@ function changeSize(direction) {
 }
 
 
+
 // ==========================================
 // MOVE MODE
 // ==========================================
 
 function enterMoveMode() {
+
 
     if (
         !canManipulate()
@@ -1742,20 +2178,25 @@ function enterMoveMode() {
     }
 
 
+
     menuARState.appState =
         "MOVE_MODE";
+
 
 
     menuARState.surfaceFound =
         false;
 
 
+
     reticle.visible =
         false;
 
 
+
     moveModeStartedAt =
         performance.now();
+
 
 
     ignoreXRSelectUntil =
@@ -1765,7 +2206,9 @@ function enterMoveMode() {
         UI_SELECT_GUARD_MS;
 
 
+
     setMoveModeControls();
+
 
 
     setStatus(
@@ -1775,11 +2218,13 @@ function enterMoveMode() {
 }
 
 
+
 // ==========================================
 // MOVE MODE STATUS
 // ==========================================
 
 function setMoveModeStatus() {
+
 
     const foodName =
         getFoodName(
@@ -1787,15 +2232,19 @@ function setMoveModeStatus() {
         );
 
 
+
     if (
         menuARState.surfaceFound
     ) {
+
 
         setStatus(
             `${foodName} move mode — tap the white circle to reposition it.`
         );
 
+
     } else {
+
 
         setStatus(
             `${foodName} move mode — scan for a new position.`
@@ -1806,14 +2255,17 @@ function setMoveModeStatus() {
 }
 
 
+
 // ==========================================
 // REPOSITION MODEL
 // ==========================================
 //
-// ONLY POSITION MAY CHANGE HERE.
-//
+// ONLY THE POSITION IS ALLOWED TO CHANGE.
+// SCALE AND ROTATION ARE EXPLICITLY RESTORED.
+// ==========================================
 
 function repositionPlacedFood() {
+
 
     if (
 
@@ -1831,8 +2283,9 @@ function repositionPlacedFood() {
     }
 
 
+
     // --------------------------------------
-    // SNAPSHOT EXACT TRANSFORM
+    // Save exact transform
     // --------------------------------------
 
     const savedQuaternion =
@@ -1842,6 +2295,7 @@ function repositionPlacedFood() {
             .clone();
 
 
+
     const savedScale =
 
         menuARState.placedObject
@@ -1849,27 +2303,30 @@ function repositionPlacedFood() {
             .clone();
 
 
-    const savedScaleFactor =
 
+    const savedScaleFactor =
         menuARState.scaleFactor;
 
 
-    const savedRotation =
 
+    const savedRotation =
         menuARState.currentRotation;
 
 
+
     // --------------------------------------
-    // CALCULATE NEW POSITION
+    // Calculate new position
     // --------------------------------------
 
     const newPosition =
         new THREE.Vector3();
 
 
+
     newPosition.setFromMatrixPosition(
         reticle.matrix
     );
+
 
 
     const config =
@@ -1878,8 +2335,9 @@ function repositionPlacedFood() {
         ];
 
 
+
     // --------------------------------------
-    // CHANGE POSITION ONLY
+    // Change position
     // --------------------------------------
 
     menuARState.placedObject.position.copy(
@@ -1887,12 +2345,14 @@ function repositionPlacedFood() {
     );
 
 
+
     menuARState.placedObject.position.y +=
         config.surfaceOffset;
 
 
+
     // --------------------------------------
-    // EXPLICITLY RESTORE ROTATION
+    // Restore rotation
     // --------------------------------------
 
     menuARState.placedObject.quaternion.copy(
@@ -1900,8 +2360,9 @@ function repositionPlacedFood() {
     );
 
 
+
     // --------------------------------------
-    // EXPLICITLY RESTORE SCALE
+    // Restore size
     // --------------------------------------
 
     menuARState.placedObject.scale.copy(
@@ -1909,31 +2370,38 @@ function repositionPlacedFood() {
     );
 
 
+
     menuARState.scaleFactor =
         savedScaleFactor;
+
 
 
     menuARState.currentRotation =
         savedRotation;
 
 
+
     // --------------------------------------
-    // EXIT MOVE MODE
+    // Leave Move Mode
     // --------------------------------------
 
     menuARState.appState =
         "PLACED";
 
 
+
     menuARState.surfaceFound =
         false;
+
 
 
     reticle.visible =
         false;
 
 
+
     enableManipulationControls();
+
 
 
     setStatus(
@@ -1943,11 +2411,13 @@ function repositionPlacedFood() {
 }
 
 
+
 // ==========================================
 // REMOVE
 // ==========================================
 
 function removeFood() {
+
 
     if (
 
@@ -1963,33 +2433,42 @@ function removeFood() {
     }
 
 
+
     removePlacedObjectFromScene();
+
 
 
     menuARState.scaleFactor =
         1;
 
 
+
     menuARState.currentRotation =
         0;
+
 
 
     menuARState.surfaceFound =
         false;
 
 
+
     menuARState.appState =
         "SCANNING";
+
 
 
     reticle.visible =
         false;
 
 
+
     hideInteractionControls();
 
 
+
     disableManipulationControls();
+
 
 
     setStatus(
@@ -1999,11 +2478,13 @@ function removeFood() {
 }
 
 
+
 // ==========================================
-// CONFIRM
+// CONFIRM PREVIEW
 // ==========================================
 
 function confirmPreview() {
+
 
     if (
         !canManipulate()
@@ -2014,31 +2495,39 @@ function confirmPreview() {
     }
 
 
+
     menuARState.appState =
         "CONFIRMED";
+
 
 
     menuARState.surfaceFound =
         false;
 
 
+
     reticle.visible =
         false;
+
 
 
     burgerBtn.disabled =
         true;
 
 
+
     pizzaBtn.disabled =
         true;
+
 
 
     disableManipulationControls();
 
 
+
     confirmBtn.textContent =
         "✓ Preview Confirmed";
+
 
 
     setStatus(
@@ -2048,18 +2537,21 @@ function confirmPreview() {
 }
 
 
+
 // ==========================================
 // XR SELECT
 // ==========================================
 
 function onXRSelect() {
 
+
     const now =
         performance.now();
 
 
+
     // --------------------------------------
-    // IGNORE SELECT CAUSED BY UI TAP
+    // Ignore XR select caused by HTML UI tap
     // --------------------------------------
 
     if (
@@ -2072,8 +2564,9 @@ function onXRSelect() {
     }
 
 
+
     // --------------------------------------
-    // FIRST PLACEMENT
+    // Initial placement
     // --------------------------------------
 
     if (
@@ -2087,6 +2580,7 @@ function onXRSelect() {
 
     ) {
 
+
         placeSelectedFood();
 
 
@@ -2095,8 +2589,9 @@ function onXRSelect() {
     }
 
 
+
     // --------------------------------------
-    // MOVE MODE
+    // Move Mode
     // --------------------------------------
 
     if (
@@ -2110,9 +2605,6 @@ function onXRSelect() {
 
     ) {
 
-        // Require Move Mode to have been active
-        // long enough that the Move button tap
-        // cannot also be interpreted as a world tap.
 
         if (
 
@@ -2128,6 +2620,7 @@ function onXRSelect() {
         }
 
 
+
         repositionPlacedFood();
 
     }
@@ -2135,14 +2628,19 @@ function onXRSelect() {
 }
 
 
+
 // ==========================================
 // HIT TEST / RENDER LOOP
 // ==========================================
 
 function render(
+
     timestamp,
+
     frame
+
 ) {
+
 
     const shouldRunHitTest =
 
@@ -2154,6 +2652,7 @@ function render(
 
         menuARState.appState ===
             "MOVE_MODE";
+
 
 
     if (
@@ -2168,6 +2667,7 @@ function render(
 
     ) {
 
+
         const hitTestResults =
 
             frame.getHitTestResults(
@@ -2175,12 +2675,15 @@ function render(
             );
 
 
+
         if (
             hitTestResults.length > 0
         ) {
 
+
             const hit =
                 hitTestResults[0];
+
 
 
             const pose =
@@ -2189,12 +2692,15 @@ function render(
                 );
 
 
+
             if (
                 pose
             ) {
 
+
                 reticle.visible =
                     true;
+
 
 
                 reticle.matrix.fromArray(
@@ -2202,8 +2708,10 @@ function render(
                 );
 
 
+
                 menuARState.surfaceFound =
                     true;
+
 
 
                 if (
@@ -2215,8 +2723,10 @@ function render(
 
                 ) {
 
+
                     menuARState.appState =
                         "SURFACE_FOUND";
+
 
 
                     setStatus(
@@ -2226,10 +2736,12 @@ function render(
                 }
 
 
+
                 if (
                     menuARState.appState ===
                     "MOVE_MODE"
                 ) {
+
 
                     setMoveModeStatus();
 
@@ -2237,14 +2749,18 @@ function render(
 
             }
 
+
         } else {
+
 
             reticle.visible =
                 false;
 
 
+
             menuARState.surfaceFound =
                 false;
+
 
 
             if (
@@ -2252,16 +2768,20 @@ function render(
                 "MOVE_MODE"
             ) {
 
+
                 setMoveModeStatus();
 
+
             } else {
+
 
                 menuARState.appState =
                     "SCANNING";
 
 
+
                 setStatus(
-                    `${getFoodName(menuARState.selectedFood)} selected. Move your tablet slowly to scan the table.`
+                    `${getFoodName(menuARState.selectedFood)} selected. Move your device slowly across the table.`
                 );
 
             }
@@ -2271,14 +2791,17 @@ function render(
     }
 
 
+
     if (
         !shouldRunHitTest
     ) {
+
 
         reticle.visible =
             false;
 
     }
+
 
 
     renderer.render(
@@ -2289,11 +2812,13 @@ function render(
 }
 
 
+
 // ==========================================
-// UI → XR TAP GUARD
+// UI → XR TAP PROTECTION
 // ==========================================
 
 function markUITouch() {
+
 
     ignoreXRSelectUntil =
 
@@ -2304,8 +2829,9 @@ function markUITouch() {
 }
 
 
-// Guard all pointer/touch interactions
-// occurring inside the HTML controls.
+
+// Prevent HTML controls from accidentally
+// moving or placing the 3D model.
 
 arControls.addEventListener(
 
@@ -2318,6 +2844,7 @@ arControls.addEventListener(
 );
 
 
+
 arControls.addEventListener(
 
     "touchstart",
@@ -2325,20 +2852,25 @@ arControls.addEventListener(
     markUITouch,
 
     {
-        capture: true,
-        passive: true
+
+        capture:
+            true,
+
+        passive:
+            true
+
     }
 
 );
 
 
-// WebXR DOM-overlay-specific protection.
 
 arControls.addEventListener(
 
     "beforexrselect",
 
     (event) => {
+
 
         event.preventDefault();
 
@@ -2348,6 +2880,7 @@ arControls.addEventListener(
     }
 
 );
+
 
 
 // ==========================================
@@ -2360,6 +2893,7 @@ burgerBtn.addEventListener(
 
     () => {
 
+
         selectFood(
             "burger"
         );
@@ -2369,11 +2903,13 @@ burgerBtn.addEventListener(
 );
 
 
+
 pizzaBtn.addEventListener(
 
     "click",
 
     () => {
+
 
         selectFood(
             "pizza"
@@ -2382,6 +2918,7 @@ pizzaBtn.addEventListener(
     }
 
 );
+
 
 
 // ==========================================
@@ -2397,6 +2934,7 @@ rotateLeftBtn.addEventListener(
 );
 
 
+
 rotateRightBtn.addEventListener(
 
     "click",
@@ -2404,6 +2942,7 @@ rotateRightBtn.addEventListener(
     rotateRight
 
 );
+
 
 
 // ==========================================
@@ -2416,6 +2955,7 @@ sizeDownBtn.addEventListener(
 
     () => {
 
+
         changeSize(
             -1
         );
@@ -2425,11 +2965,13 @@ sizeDownBtn.addEventListener(
 );
 
 
+
 sizeUpBtn.addEventListener(
 
     "click",
 
     () => {
+
 
         changeSize(
             1
@@ -2438,6 +2980,7 @@ sizeUpBtn.addEventListener(
     }
 
 );
+
 
 
 // ==========================================
@@ -2453,6 +2996,7 @@ moveBtn.addEventListener(
 );
 
 
+
 // ==========================================
 // REMOVE
 // ==========================================
@@ -2464,6 +3008,7 @@ removeBtn.addEventListener(
     removeFood
 
 );
+
 
 
 // ==========================================
@@ -2479,8 +3024,9 @@ confirmBtn.addEventListener(
 );
 
 
+
 // ==========================================
-// START / EXIT
+// START
 // ==========================================
 
 startARBtn.addEventListener(
@@ -2489,6 +3035,7 @@ startARBtn.addEventListener(
 
     async () => {
 
+
         await startARSession();
 
     }
@@ -2496,17 +3043,24 @@ startARBtn.addEventListener(
 );
 
 
+
+// ==========================================
+// EXIT AR
+// ==========================================
+
 exitARBtn.addEventListener(
 
     "click",
 
     async () => {
 
+
         await endARSession();
 
     }
 
 );
+
 
 
 // ==========================================
@@ -2519,6 +3073,7 @@ window.addEventListener(
 
     () => {
 
+
         if (
             !camera ||
             !renderer
@@ -2529,6 +3084,7 @@ window.addEventListener(
         }
 
 
+
         camera.aspect =
 
             window.innerWidth /
@@ -2536,7 +3092,9 @@ window.addEventListener(
             window.innerHeight;
 
 
+
         camera.updateProjectionMatrix();
+
 
 
         renderer.setSize(
@@ -2552,21 +3110,33 @@ window.addEventListener(
 );
 
 
+
 // ==========================================
 // INITIALIZATION
 // ==========================================
 
 async function initializeApplication() {
 
+
+    // Initial page:
+    // no Burger/Pizza controls yet.
+
+    showPreARInterface();
+
+
+
     initThreeJS();
+
 
 
     resetControls();
 
 
+
     updateFoodButtons(
         "burger"
     );
+
 
 
     await Promise.all([
@@ -2578,9 +3148,11 @@ async function initializeApplication() {
     ]);
 
 
+
     updateStartButton();
 
 }
+
 
 
 initializeApplication();
