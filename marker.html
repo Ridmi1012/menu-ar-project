@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
 
@@ -8,52 +9,113 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>MenuAR | Marker Preview</title>
+    <title>MenuAR | Marker AR Preview</title>
 
     <link rel="stylesheet" href="css/style.css">
+
+    <!-- A-Frame -->
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+
+    <!-- AR.js - Marker Tracking Build -->
+    <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.7/aframe/build/aframe-ar.js"></script>
+
 </head>
 
-<body class="ar-page">
+<body class="marker-ar-page">
 
-    <header class="ar-header">
+    <!-- =========================
+         AR Scene
+         ========================= -->
 
-        <a href="index.html" class="back-button">
-            ←
-        </a>
+    <a-scene
+        embedded
+        vr-mode-ui="enabled: false"
+        renderer="antialias: true; alpha: true;"
+        arjs="
+            sourceType: webcam;
+            debugUIEnabled: false;
+        "
+    >
 
-        <div>
-            <h1>Marker AR Preview</h1>
-            <p>Point your camera at the AR marker</p>
-        </div>
+        <!-- 3D Assets -->
+        <a-assets>
 
-    </header>
+            <a-asset-item
+                id="burgerModel"
+                src="assets/models/burger.glb">
+            </a-asset-item>
+
+            <a-asset-item
+                id="pizzaModel"
+                src="assets/models/pizza.glb">
+            </a-asset-item>
+
+        </a-assets>
 
 
-    <main class="ar-layout">
+        <!-- Hiro Marker -->
+        <a-marker
+            id="hiroMarker"
+            preset="hiro"
+        >
 
-        <!--
-            This temporary area will later be replaced
-            by the real AR.js camera scene.
-        -->
-        <section class="camera-placeholder">
+            <!-- Selected food appears here -->
+            <a-entity
+                id="markerFoodModel"
+                gltf-model="#burgerModel"
+                position="0 0.35 0"
+                scale="0.7 0.7 0.7"
+            >
+            </a-entity>
 
-            <div class="camera-message">
+        </a-marker>
 
-                <span class="camera-icon">📷</span>
 
-                <h2>AR Camera</h2>
+        <!-- AR Camera -->
+        <a-entity camera></a-entity>
+
+    </a-scene>
+
+
+    <!-- =========================
+         UI Overlay
+         ========================= -->
+
+    <div class="marker-ui">
+
+        <header class="marker-top-bar">
+
+            <a
+                href="index.html"
+                class="back-button"
+            >
+                ←
+            </a>
+
+            <div>
+                <h1>Marker AR Preview</h1>
 
                 <p>
-                    The marker-based AR camera will
-                    appear here.
+                    Point your camera at the Hiro marker
                 </p>
-
             </div>
 
-        </section>
+        </header>
 
 
-        <section class="ar-controls">
+        <div class="marker-status-wrapper">
+
+            <p
+                id="markerStatus"
+                class="marker-status"
+            >
+                Looking for Hiro marker...
+            </p>
+
+        </div>
+
+
+        <section class="marker-control-panel">
 
             <p class="control-label">
                 Select Food
@@ -80,15 +142,17 @@
             </div>
 
             <p class="instruction">
-                Point your camera toward the printed
-                marker to display the selected food item.
+                Keep the full marker visible and move your
+                phone slowly if tracking is unstable.
             </p>
 
         </section>
 
-    </main>
+    </div>
+
 
     <script src="js/marker-ar.js"></script>
 
 </body>
+
 </html>
