@@ -13,33 +13,35 @@
 
     <link rel="stylesheet" href="css/style.css">
 
-    <!--
-        A-Frame 1.6.0 + AR.js 3.4.7
-        These versions are compatible with each other.
-    -->
+    <!-- A-Frame -->
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
 
+    <!-- AR.js -->
     <script
         src="https://raw.githack.com/AR-js-org/AR.js/3.4.7/aframe/build/aframe-ar.js">
     </script>
 
-</head>
+    <style>
+        /*
+            Remove A-Frame's VR button.
+            MenuAR uses AR only.
+        */
+        .a-enter-vr-button {
+            display: none !important;
+        }
+    </style>
 
+</head>
 
 <body class="marker-ar-page">
 
-
-    <!-- ======================================
+    <!-- =====================================
          MARKER AR SCENE
-         ====================================== -->
+         ===================================== -->
 
     <a-scene
-        id="markerScene"
-
         embedded
-
         vr-mode-ui="enabled: false"
-
         loading-screen="enabled: false"
 
         renderer="
@@ -70,29 +72,22 @@
         "
     >
 
-
-        <!-- ==================================
-             3D ASSETS
-             ================================== -->
+        <!-- =================================
+             ASSETS
+             ================================= -->
 
         <a-assets timeout="20000">
 
-            <!--
-                Version query prevents the tablet from
-                accidentally using the old cached Kenney GLB.
-            -->
-
             <a-asset-item
                 id="burgerModel"
-                src="assets/models/burger.glb?v=realistic-2"
+                src="assets/models/burger.glb?v=realistic-3"
                 response-type="arraybuffer"
             >
             </a-asset-item>
 
-
             <a-asset-item
                 id="pizzaModel"
-                src="assets/models/pizza.glb?v=realistic-2"
+                src="assets/models/pizza.glb?v=realistic-3"
                 response-type="arraybuffer"
             >
             </a-asset-item>
@@ -100,10 +95,9 @@
         </a-assets>
 
 
-
-        <!-- ==================================
-             LIGHTING FOR PBR FOOD MODELS
-             ================================== -->
+        <!-- =================================
+             LIGHTING
+             ================================= -->
 
         <a-entity
             light="
@@ -114,7 +108,6 @@
         >
         </a-entity>
 
-
         <a-entity
             light="
                 type: directional;
@@ -124,7 +117,6 @@
             position="-1 3 2"
         >
         </a-entity>
-
 
         <a-entity
             light="
@@ -137,14 +129,12 @@
         </a-entity>
 
 
-
-        <!-- ==================================
+        <!-- =================================
              HIRO MARKER
-             ================================== -->
+             ================================= -->
 
         <a-marker
             id="hiroMarker"
-
             preset="hiro"
 
             emitevents="true"
@@ -155,15 +145,10 @@
             smoothThreshold="2"
         >
 
-
             <!--
-                Food model.
-
-                Burger is the initial selection.
-
-                IMPORTANT:
-                The new realistic models require much
-                larger scale values than the Kenney models.
+                Initial Burger model.
+                Scale is calibrated specifically
+                for the marker scene.
             -->
 
             <a-entity
@@ -171,38 +156,37 @@
 
                 gltf-model="#burgerModel"
 
-                position="0 0.55 0"
+                position="0 0.18 0"
 
                 rotation="0 0 0"
 
-                scale="5 5 5"
+                scale="1.8 1.8 1.8"
             >
             </a-entity>
-
 
         </a-marker>
 
 
-
-        <!-- ==================================
+        <!-- =================================
              AR CAMERA
-             ================================== -->
+             ================================= -->
 
-        <a-entity camera></a-entity>
-
+        <a-entity
+            camera="
+                near: 0.01;
+                far: 1000;
+            "
+        >
+        </a-entity>
 
     </a-scene>
 
 
-
-    <!-- ======================================
-         HTML UI OVERLAY
-         ====================================== -->
+    <!-- =====================================
+         UI
+         ===================================== -->
 
     <div class="marker-ui">
-
-
-        <!-- Top bar -->
 
         <header class="marker-top-bar">
 
@@ -212,7 +196,6 @@
             >
                 ←
             </a>
-
 
             <div>
 
@@ -229,9 +212,6 @@
         </header>
 
 
-
-        <!-- Tracking / loading feedback -->
-
         <div class="marker-status-wrapper">
 
             <p
@@ -244,18 +224,13 @@
         </div>
 
 
-
-        <!-- Food controls -->
-
         <section class="marker-control-panel">
 
             <p class="control-label">
                 Select Food
             </p>
 
-
             <div class="food-selector">
-
 
                 <button
                     type="button"
@@ -265,7 +240,6 @@
                     🍔 Burger
                 </button>
 
-
                 <button
                     type="button"
                     class="food-button"
@@ -274,27 +248,20 @@
                     🍕 Pizza
                 </button>
 
-
             </div>
 
-
             <p class="instruction">
-                Keep the complete Hiro marker inside the
-                camera view. Hold the tablet in portrait
-                orientation and move it slowly until the
-                marker is detected.
+                Keep the complete Hiro marker visible.
+                Hold your device steady and move it slowly
+                until the marker is detected.
             </p>
 
         </section>
 
-
     </div>
 
 
-    <!-- Marker behaviour -->
-
-    <script src="js/marker-ar.js?v=8"></script>
-
+    <script src="js/marker-ar.js?v=9"></script>
 
 </body>
 

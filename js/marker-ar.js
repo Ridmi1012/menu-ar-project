@@ -22,15 +22,9 @@ const hiroMarker =
 const markerStatus =
     document.getElementById("markerStatus");
 
-const burgerModelAsset =
-    document.getElementById("burgerModel");
-
-const pizzaModelAsset =
-    document.getElementById("pizzaModel");
-
 
 // ------------------------------------------
-// Marker AR State
+// Application State
 // ------------------------------------------
 
 const markerARState = {
@@ -47,14 +41,17 @@ const markerARState = {
 
 
 // ------------------------------------------
-// Model Configuration
+// Marker Model Calibration
 // ------------------------------------------
 //
-// These values are intentionally different
-// from the old Kenney-model values.
+// IMPORTANT:
 //
-// They are starting calibration values for
-// the new realistic GLB assets.
+// These values are NOT the same as the
+// model-test.html values.
+//
+// Marker AR uses the marker as its world
+// reference, so the models need their own
+// marker-specific scales.
 //
 // ------------------------------------------
 
@@ -64,9 +61,9 @@ const MARKER_MODEL_CONFIG = {
 
         model: "#burgerModel",
 
-        scale: "5 5 5",
+        scale: "1.8 1.8 1.8",
 
-        position: "0 0.55 0",
+        position: "0 0.18 0",
 
         rotation: "0 0 0"
 
@@ -77,9 +74,9 @@ const MARKER_MODEL_CONFIG = {
 
         model: "#pizzaModel",
 
-        scale: "4 4 4",
+        scale: "1.2 1.2 1.2",
 
-        position: "0 0.42 0",
+        position: "0 0.06 0",
 
         rotation: "0 0 0"
 
@@ -89,10 +86,10 @@ const MARKER_MODEL_CONFIG = {
 
 
 // ------------------------------------------
-// Get Display Food Name
+// Food Name
 // ------------------------------------------
 
-function getFoodName() {
+function getMarkerFoodName() {
 
     return markerARState.selectedFood === "burger"
         ? "Burger"
@@ -102,64 +99,69 @@ function getFoodName() {
 
 
 // ------------------------------------------
-// Status Feedback
+// Status Message
 // ------------------------------------------
 
 function updateMarkerStatus() {
 
-    const foodName = getFoodName();
+    const foodName =
+        getMarkerFoodName();
 
 
-    // Model loading failed
     if (markerARState.modelError) {
 
         markerStatus.textContent =
             `${foodName} model could not be loaded.`;
 
-        markerStatus.classList.remove("detected");
+        markerStatus.classList.remove(
+            "detected"
+        );
 
         return;
 
     }
 
 
-    // Model is still loading
     if (!markerARState.currentModelLoaded) {
 
         markerStatus.textContent =
             `Loading ${foodName} model...`;
 
-        markerStatus.classList.remove("detected");
+        markerStatus.classList.remove(
+            "detected"
+        );
 
         return;
 
     }
 
 
-    // Marker currently detected
     if (markerARState.markerVisible) {
 
         markerStatus.textContent =
             `Marker detected — displaying ${foodName}.`;
 
-        markerStatus.classList.add("detected");
+        markerStatus.classList.add(
+            "detected"
+        );
 
         return;
 
     }
 
 
-    // Model ready but marker not detected
     markerStatus.textContent =
         `Looking for Hiro marker — ${foodName} ready.`;
 
-    markerStatus.classList.remove("detected");
+    markerStatus.classList.remove(
+        "detected"
+    );
 
 }
 
 
 // ------------------------------------------
-// Apply Selected Food Model
+// Apply Selected Model
 // ------------------------------------------
 
 function applyMarkerFoodModel(food) {
@@ -208,32 +210,28 @@ function applyMarkerFoodModel(food) {
 
 function selectMarkerFood(food) {
 
-    // Avoid unnecessary reload if already selected
-    if (
-        markerARState.selectedFood === food &&
-        markerARState.currentModelLoaded
-    ) {
-
-        return;
-
-    }
-
-
     markerARState.selectedFood = food;
 
 
-    // Update UI buttons
     if (food === "burger") {
 
-        markerBurgerBtn.classList.add("active");
+        markerBurgerBtn.classList.add(
+            "active"
+        );
 
-        markerPizzaBtn.classList.remove("active");
+        markerPizzaBtn.classList.remove(
+            "active"
+        );
 
     } else {
 
-        markerPizzaBtn.classList.add("active");
+        markerPizzaBtn.classList.add(
+            "active"
+        );
 
-        markerBurgerBtn.classList.remove("active");
+        markerBurgerBtn.classList.remove(
+            "active"
+        );
 
     }
 
@@ -243,14 +241,14 @@ function selectMarkerFood(food) {
 
     console.log(
         "Marker AR selected food:",
-        markerARState.selectedFood
+        food
     );
 
 }
 
 
 // ------------------------------------------
-// Food Selection Button Events
+// Burger Button
 // ------------------------------------------
 
 markerBurgerBtn.addEventListener(
@@ -262,6 +260,10 @@ markerBurgerBtn.addEventListener(
     }
 );
 
+
+// ------------------------------------------
+// Pizza Button
+// ------------------------------------------
 
 markerPizzaBtn.addEventListener(
     "click",
@@ -287,7 +289,7 @@ markerFoodModel.addEventListener(
 
 
         console.log(
-            `${getFoodName()} model loaded successfully`
+            `${getMarkerFoodName()} model loaded`
         );
 
 
@@ -298,7 +300,7 @@ markerFoodModel.addEventListener(
 
 
 // ------------------------------------------
-// Model Loading Error
+// Model Error
 // ------------------------------------------
 
 markerFoodModel.addEventListener(
@@ -311,7 +313,7 @@ markerFoodModel.addEventListener(
 
 
         console.error(
-            "Marker AR model loading error:",
+            "Marker model loading error:",
             event
         );
 
@@ -361,34 +363,6 @@ hiroMarker.addEventListener(
 
 
         updateMarkerStatus();
-
-    }
-);
-
-
-// ------------------------------------------
-// Asset Diagnostics
-// ------------------------------------------
-
-burgerModelAsset.addEventListener(
-    "loaded",
-    () => {
-
-        console.log(
-            "Burger GLB asset downloaded"
-        );
-
-    }
-);
-
-
-pizzaModelAsset.addEventListener(
-    "loaded",
-    () => {
-
-        console.log(
-            "Pizza GLB asset downloaded"
-        );
 
     }
 );
