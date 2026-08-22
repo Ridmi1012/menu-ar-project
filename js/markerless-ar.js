@@ -52,21 +52,29 @@ const confirmBtn =
 
 const menuARState = {
 
-    selectedFood: "burger",
+    selectedFood:
+        "burger",
 
-    appState: "INITIALIZING",
+    appState:
+        "INITIALIZING",
 
-    placedObject: null,
+    placedObject:
+        null,
 
-    currentScale: 1,
+    currentScale:
+        1,
 
-    currentRotation: 0,
+    currentRotation:
+        0,
 
-    surfaceFound: false,
+    surfaceFound:
+        false,
 
-    modelsReady: false,
+    modelsReady:
+        false,
 
-    xrSupported: false
+    xrSupported:
+        false
 
 };
 
@@ -120,13 +128,17 @@ let reticle;
 
 let controller;
 
-let xrSession = null;
+let xrSession =
+    null;
 
-let hitTestSource = null;
+let hitTestSource =
+    null;
 
-let viewerSpace = null;
+let viewerSpace =
+    null;
 
-let referenceSpace = null;
+let referenceSpace =
+    null;
 
 
 // ==========================================
@@ -135,9 +147,11 @@ let referenceSpace = null;
 
 const modelTemplates = {
 
-    burger: null,
+    burger:
+        null,
 
-    pizza: null
+    pizza:
+        null
 
 };
 
@@ -417,9 +431,13 @@ async function loadModels() {
 
         await Promise.all([
 
-            loadModel("burger"),
+            loadModel(
+                "burger"
+            ),
 
-            loadModel("pizza")
+            loadModel(
+                "pizza"
+            )
 
         ]);
 
@@ -454,28 +472,10 @@ async function loadModels() {
 
 
 // ==========================================
-// Food Selection
+// Update Food Selection UI
 // ==========================================
 
-function selectFood(food) {
-
-    if (
-        menuARState.placedObject
-    ) {
-
-        setStatus(
-            "A food item is already placed."
-        );
-
-
-        return;
-
-    }
-
-
-    menuARState.selectedFood =
-        food;
-
+function updateFoodButtons(food) {
 
     if (
         food === "burger"
@@ -503,10 +503,70 @@ function selectFood(food) {
 
     }
 
+}
+
+
+// ==========================================
+// Select / Change Food
+// ==========================================
+
+function selectFood(food) {
+
+    const previousFood =
+        menuARState.selectedFood;
+
+
+    menuARState.selectedFood =
+        food;
+
+
+    updateFoodButtons(
+        food
+    );
+
 
     const foodName =
-        getFoodName(food);
+        getFoodName(
+            food
+        );
 
+
+    // --------------------------------------
+    // If a model is already placed,
+    // replace it at the same AR position.
+    // --------------------------------------
+
+    if (
+        menuARState.placedObject
+    ) {
+
+        if (
+            previousFood === food
+        ) {
+
+            setStatus(
+                `${foodName} is already displayed.`
+            );
+
+
+            return;
+
+        }
+
+
+        replacePlacedFood(
+            food
+        );
+
+
+        return;
+
+    }
+
+
+    // --------------------------------------
+    // No model has been placed yet.
+    // --------------------------------------
 
     if (!xrSession) {
 
@@ -536,6 +596,165 @@ function selectFood(food) {
         );
 
     }
+
+}
+
+
+// ==========================================
+// Replace Placed Food
+// ==========================================
+
+function replacePlacedFood(food) {
+
+    if (
+        !menuARState.placedObject
+    ) {
+
+        return;
+
+    }
+
+
+    const template =
+        modelTemplates[food];
+
+
+    if (!template) {
+
+        setStatus(
+            "Selected model is not ready."
+        );
+
+
+        return;
+
+    }
+
+
+    const config =
+        MODEL_CONFIG[food];
+
+
+    const oldModel =
+        menuARState.placedObject;
+
+
+    // --------------------------------------
+    // Preserve Transform
+    // --------------------------------------
+
+    const savedPosition =
+        oldModel.position.clone();
+
+
+    const savedQuaternion =
+        oldModel.quaternion.clone();
+
+
+    // --------------------------------------
+    // Remove Previous Model
+    // --------------------------------------
+
+    scene.remove(
+        oldModel
+    );
+
+
+    // --------------------------------------
+    // Clone New Model
+    // --------------------------------------
+
+    const newModel =
+        template.clone(true);
+
+
+    // --------------------------------------
+    // Restore Position
+    // --------------------------------------
+
+    newModel.position.copy(
+        savedPosition
+    );
+
+
+    // Slightly account for model-specific
+    // surface height differences.
+
+    const previousConfig =
+        MODEL_CONFIG[
+            menuARState.selectedFood === "burger"
+                ? "pizza"
+                : "burger"
+        ];
+
+
+    if (
+        previousConfig
+    ) {
+
+        newModel.position.y -=
+            previousConfig.surfaceOffset;
+
+    }
+
+
+    newModel.position.y +=
+        config.surfaceOffset;
+
+
+    // --------------------------------------
+    // Restore Orientation
+    // --------------------------------------
+
+    newModel.quaternion.copy(
+        savedQuaternion
+    );
+
+
+    // --------------------------------------
+    // Apply Correct Base Scale
+    // --------------------------------------
+
+    newModel.scale.setScalar(
+        config.scale
+    );
+
+
+    // --------------------------------------
+    // Add Replacement Model
+    // --------------------------------------
+
+    scene.add(
+        newModel
+    );
+
+
+    menuARState.placedObject =
+        newModel;
+
+
+    menuARState.currentScale =
+        config.scale;
+
+
+    menuARState.appState =
+        "PLACED";
+
+
+    const foodName =
+        getFoodName(
+            food
+        );
+
+
+    setStatus(
+        `Changed to ${foodName}.`
+    );
+
+
+    console.log(
+        `Placed food changed to ${foodName}.`
+    );
 
 }
 
@@ -581,7 +800,9 @@ async function checkXRSupport() {
             supported;
 
 
-        if (supported) {
+        if (
+            supported
+        ) {
 
             menuARState.appState =
                 "READY_TO_SCAN";
@@ -644,7 +865,9 @@ function updateStartButton() {
         !ready;
 
 
-    if (ready) {
+    if (
+        ready
+    ) {
 
         startARBtn.textContent =
             "Start AR";
@@ -748,8 +971,10 @@ async function startARSession() {
 
         hitTestSource =
             await xrSession.requestHitTestSource({
+
                 space:
                     viewerSpace
+
             });
 
 
@@ -772,8 +997,14 @@ async function startARSession() {
         );
 
 
+        const foodName =
+            getFoodName(
+                menuARState.selectedFood
+            );
+
+
         setStatus(
-            "Move your tablet slowly across a well-lit table."
+            `${foodName} selected. Move your tablet slowly across the table.`
         );
 
 
@@ -808,7 +1039,9 @@ async function startARSession() {
 
 async function endARSession() {
 
-    if (xrSession) {
+    if (
+        xrSession
+    ) {
 
         await xrSession.end();
 
@@ -857,7 +1090,7 @@ function removePlacedObject() {
 
 
 // ==========================================
-// Reset Interaction Controls
+// Reset Controls
 // ==========================================
 
 function resetInteractionControls() {
@@ -902,10 +1135,6 @@ function resetInteractionControls() {
 
 function onARSessionEnded() {
 
-    // --------------------------------------
-    // Stop Hit Testing
-    // --------------------------------------
-
     if (
         hitTestSource
     ) {
@@ -931,20 +1160,12 @@ function onARSessionEnded() {
         null;
 
 
-    // --------------------------------------
-    // Remove AR Objects
-    // --------------------------------------
-
     reticle.visible =
         false;
 
 
     removePlacedObject();
 
-
-    // --------------------------------------
-    // Reset Application State
-    // --------------------------------------
 
     menuARState.surfaceFound =
         false;
@@ -953,10 +1174,6 @@ function onARSessionEnded() {
     menuARState.appState =
         "READY_TO_SCAN";
 
-
-    // --------------------------------------
-    // Reset UI
-    // --------------------------------------
 
     resetInteractionControls();
 
@@ -978,7 +1195,7 @@ function onARSessionEnded() {
 
 
     console.log(
-        "WebXR AR session ended and scene reset."
+        "WebXR session ended and scene reset."
     );
 
 }
@@ -1008,7 +1225,9 @@ function placeSelectedFood() {
         modelTemplates[food];
 
 
-    if (!template) {
+    if (
+        !template
+    ) {
 
         return;
 
@@ -1083,7 +1302,7 @@ function placeSelectedFood() {
 
 
     // --------------------------------------
-    // Add to Scene
+    // Add Model to Scene
     // --------------------------------------
 
     scene.add(
@@ -1107,28 +1326,30 @@ function placeSelectedFood() {
         0;
 
 
-    // --------------------------------------
-    // Stop Placement Mode
-    // --------------------------------------
-
     reticle.visible =
         false;
 
 
+    // IMPORTANT:
+    // Keep the food buttons enabled so
+    // Burger/Pizza can still be switched.
+
     burgerBtn.disabled =
-        true;
+        false;
 
 
     pizzaBtn.disabled =
-        true;
+        false;
 
 
     const foodName =
-        getFoodName(food);
+        getFoodName(
+            food
+        );
 
 
     setStatus(
-        `${foodName} placed successfully.`
+        `${foodName} placed. You can change the dish.`
     );
 
 
@@ -1195,7 +1416,9 @@ function render(
                 );
 
 
-            if (pose) {
+            if (
+                pose
+            ) {
 
                 reticle.visible =
                     true;
@@ -1304,7 +1527,7 @@ pizzaBtn.addEventListener(
 
 
 // ==========================================
-// Start / Exit AR Events
+// Start / Exit Events
 // ==========================================
 
 startARBtn.addEventListener(
