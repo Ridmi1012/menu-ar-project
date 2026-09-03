@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -11,10 +12,12 @@
 
     <title>MenuAR | View Food on Table</title>
 
+
     <link
         rel="stylesheet"
-        href="css/style.css?v=6"
+        href="css/style.css?v=8"
     >
+
 
     <!-- Three.js Import Map -->
     <script type="importmap">
@@ -26,23 +29,624 @@
         }
     </script>
 
+
+    <style>
+
+        /* ==================================
+           SUPPORT MESSAGE
+           ================================== */
+
+        .xr-support-message {
+
+            max-width: 320px;
+
+            margin: 16px auto 0;
+
+            padding: 10px 12px;
+
+            border-radius: 10px;
+
+            background:
+                rgba(255, 255, 255, 0.10);
+
+            color: #ffffff;
+
+            font-size: 12px;
+
+            line-height: 1.45;
+
+        }
+
+
+        /* ==================================
+           ORDER BADGE
+           ================================== */
+
+        .order-badge {
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            gap: 10px;
+
+            margin-bottom: 10px;
+
+            padding: 9px 11px;
+
+            border:
+                1px solid
+                #f0d2bb;
+
+            border-radius: 11px;
+
+            background: #fff8f1;
+
+        }
+
+
+        .order-badge[hidden] {
+
+            display: none !important;
+
+        }
+
+
+        .order-badge-text {
+
+            color: #9b4b17;
+
+            font-size: 11px;
+            font-weight: 700;
+
+        }
+
+
+        /* ==================================
+           SIZE SELECTOR
+           ================================== */
+
+        .size-section {
+
+            margin-top: 9px;
+
+        }
+
+
+        .size-title {
+
+            margin-bottom: 7px;
+
+            color: #666666;
+
+            font-size: 11px;
+            font-weight: 700;
+
+            text-align: center;
+
+        }
+
+
+        .size-selector {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 7px;
+
+        }
+
+
+        .size-option {
+
+            min-height: 38px;
+
+            padding: 7px 5px;
+
+            border:
+                1px solid
+                #dddddd;
+
+            border-radius: 10px;
+
+            background: #ffffff;
+
+            color: #555555;
+
+            font-size: 11px;
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition:
+                transform 160ms ease,
+                border-color 180ms ease,
+                background-color 180ms ease,
+                color 180ms ease;
+
+        }
+
+
+        .size-option:active {
+
+            transform: scale(0.96);
+
+        }
+
+
+        .size-option.active {
+
+            border-color: #e85d04;
+
+            background: #fff2e5;
+
+            color: #d95400;
+
+        }
+
+
+        /* ==================================
+           ADD TO ORDER
+           ================================== */
+
+        .add-order-button {
+
+            width: 100%;
+
+            min-height: 44px;
+
+            margin-top: 10px;
+
+            border: none;
+
+            border-radius: 11px;
+
+            background: #e85d04;
+
+            color: #ffffff;
+
+            font-size: 13px;
+            font-weight: 700;
+
+            cursor: pointer;
+
+        }
+
+
+        /* ==================================
+           ORDER REVIEW
+           ================================== */
+
+        .order-review-panel {
+
+            padding: 4px 0 2px;
+
+        }
+
+
+        .order-review-panel[hidden] {
+
+            display: none !important;
+
+        }
+
+
+        .order-review-panel h3 {
+
+            margin-bottom: 5px;
+
+            color: #29231f;
+
+            font-size: 17px;
+
+            text-align: center;
+
+        }
+
+
+        .order-review-note {
+
+            margin-bottom: 10px;
+
+            color: #77706a;
+
+            font-size: 11px;
+
+            line-height: 1.45;
+
+            text-align: center;
+
+        }
+
+
+        /* ==================================
+           ORDER SUMMARY
+           ================================== */
+
+        .order-summary {
+
+            display: flex;
+            flex-direction: column;
+
+            gap: 7px;
+
+            margin-bottom: 11px;
+
+        }
+
+
+        .order-summary-row {
+
+            display: flex;
+
+            justify-content: space-between;
+            align-items: center;
+
+            gap: 10px;
+
+            padding: 9px 10px;
+
+            border:
+                1px solid
+                #eee3da;
+
+            border-radius: 10px;
+
+            background: #fffaf5;
+
+        }
+
+
+        .order-summary-name {
+
+            color: #413832;
+
+            font-size: 11px;
+            font-weight: 700;
+
+        }
+
+
+        .order-summary-count {
+
+            color: #d95400;
+
+            font-size: 11px;
+            font-weight: 800;
+
+        }
+
+
+        /* ==================================
+           ORDER ACTIONS
+           ================================== */
+
+        .order-actions {
+
+            display: grid;
+
+            grid-template-columns:
+                1fr 1fr;
+
+            gap: 8px;
+
+        }
+
+
+        .add-another-button,
+        .place-order-button {
+
+            min-height: 43px;
+
+            padding: 8px;
+
+            border-radius: 11px;
+
+            font-size: 11px;
+            font-weight: 700;
+
+            cursor: pointer;
+
+        }
+
+
+        .add-another-button {
+
+            border:
+                1px solid
+                #e0c6b2;
+
+            background: #ffffff;
+
+            color: #8d542d;
+
+        }
+
+
+        .place-order-button {
+
+            border: none;
+
+            background: #e85d04;
+
+            color: #ffffff;
+
+        }
+
+
+        /* ==================================
+           CANCEL ORDER
+           ================================== */
+
+        .cancel-order-button {
+
+            width: 100%;
+
+            min-height: 42px;
+
+            margin-top: 10px;
+
+            border:
+                1px solid
+                #d7d7d7;
+
+            border-radius: 11px;
+
+            background:
+                rgba(255, 255, 255, 0.95);
+
+            color: #8a4646;
+
+            font-size: 12px;
+            font-weight: 700;
+
+            cursor: pointer;
+
+        }
+
+
+        .cancel-order-button:disabled {
+
+            opacity: 0.65;
+
+            cursor: default;
+
+        }
+
+
+        /* ==================================
+           FINAL ORDER
+           ================================== */
+
+        .order-complete-panel {
+
+            padding: 5px 0;
+
+            text-align: center;
+
+        }
+
+
+        .order-complete-panel[hidden] {
+
+            display: none !important;
+
+        }
+
+
+        .order-checkmark {
+
+            width: 54px;
+            height: 54px;
+
+            display: flex;
+
+            justify-content: center;
+            align-items: center;
+
+            margin:
+                0 auto
+                10px;
+
+            border-radius: 50%;
+
+            background: #eaf7ed;
+
+            color: #238247;
+
+            font-size: 27px;
+            font-weight: 800;
+
+        }
+
+
+        .order-complete-panel h3 {
+
+            margin-bottom: 5px;
+
+            color: #29231f;
+
+            font-size: 18px;
+
+        }
+
+
+        .order-complete-panel > p {
+
+            margin-bottom: 12px;
+
+            color: #77706a;
+
+            font-size: 11px;
+
+            line-height: 1.45;
+
+        }
+
+
+        /* ==================================
+           DONE BUTTON
+           ================================== */
+
+        .done-button {
+
+            width: 100%;
+
+            min-height: 44px;
+
+            margin-top: 5px;
+
+            border: none;
+
+            border-radius: 11px;
+
+            background: #238247;
+
+            color: #ffffff;
+
+            font-size: 13px;
+            font-weight: 800;
+
+            cursor: pointer;
+
+        }
+
+
+        .done-button:disabled {
+
+            opacity: 0.65;
+
+            cursor: default;
+
+        }
+
+
+        .order-complete-pop {
+
+            animation:
+                orderCompletePop
+                520ms
+                ease-out
+                both;
+
+        }
+
+
+        @keyframes orderCompletePop {
+
+            0% {
+
+                opacity: 0;
+
+                transform:
+                    translateY(10px)
+                    scale(0.96);
+
+            }
+
+
+            70% {
+
+                opacity: 1;
+
+                transform:
+                    translateY(0)
+                    scale(1.02);
+
+            }
+
+
+            100% {
+
+                opacity: 1;
+
+                transform: scale(1);
+
+            }
+
+        }
+
+
+        /* ==================================
+           PANEL ENTRANCE
+           ================================== */
+
+        .ar-controls.xr-panel-enter {
+
+            animation:
+                xrPanelEnter
+                320ms
+                ease-out
+                both;
+
+        }
+
+
+        @keyframes xrPanelEnter {
+
+            from {
+
+                opacity: 0;
+
+                transform:
+                    translateY(18px);
+
+            }
+
+
+            to {
+
+                opacity: 1;
+
+                transform:
+                    translateY(0);
+
+            }
+
+        }
+
+
+        @media
+        (prefers-reduced-motion: reduce) {
+
+            .ar-controls.xr-panel-enter,
+            .order-complete-pop {
+
+                animation: none;
+
+            }
+
+
+            .size-option {
+
+                transition: none;
+
+            }
+
+        }
+
+    </style>
+
 </head>
 
 
 <body class="markerless-page">
 
-    <!-- =====================================
-         NORMAL PAGE HEADER
-         ===================================== -->
 
     <header class="ar-header">
+
 
         <a
             href="index.html"
             class="back-button"
+            aria-label="Back to home"
         >
             ←
         </a>
+
 
         <div>
 
@@ -51,42 +655,56 @@
             </h1>
 
             <p>
-                Place food on a real surface
+                Build your order before you decide
             </p>
 
         </div>
 
+
     </header>
+
 
 
     <main class="markerless-layout">
 
-        <!-- =================================
-             AR START AREA
-             ================================= -->
+
+        <!-- PRE AR -->
 
         <section
             class="xr-viewport"
             id="xrViewport"
         >
 
+
             <div
                 class="camera-message"
                 id="xrIntro"
             >
 
+
                 <span class="camera-icon">
                     📱
                 </span>
 
+
                 <h2>
-                    AR Surface View
+                    See It on Your Table
                 </h2>
 
+
                 <p>
-                    Start AR, then move your tablet
-                    slowly across a well-lit table.
+                    Move your device slowly across
+                    a well-lit, textured table.
                 </p>
+
+
+                <p
+                    id="xrSupportMessage"
+                    class="xr-support-message"
+                    hidden
+                >
+                </p>
+
 
                 <button
                     type="button"
@@ -97,123 +715,142 @@
                     Loading...
                 </button>
 
+
             </div>
+
 
         </section>
 
 
-        <!-- =================================
-             AR CONTROL PANEL
-             ================================= -->
+
+        <!-- AR CONTROLS -->
 
         <section
             class="ar-controls"
             id="arControls"
+            hidden
         >
 
-            <!-- Status / feedback -->
 
             <p
                 class="status-message"
                 id="statusMessage"
             >
-                Loading MenuAR...
+                Ready
             </p>
 
 
-            <!-- Food selection -->
 
-            <p class="control-label">
-                Select Food
-            </p>
+            <div
+                class="order-badge"
+                id="orderBadge"
+                hidden
+            >
 
-
-            <div class="food-selector">
-
-                <button
-                    type="button"
-                    class="food-button active"
-                    id="burgerBtn"
+                <span
+                    class="order-badge-text"
+                    id="orderBadgeText"
                 >
-                    🍔 Burger
-                </button>
-
-
-                <button
-                    type="button"
-                    class="food-button"
-                    id="pizzaBtn"
-                >
-                    🍕 Pizza
-                </button>
+                    Your Order · 1 item
+                </span>
 
             </div>
 
 
-            <!-- =================================
-                 MANIPULATION CONTROLS
 
-                 Hidden until a model is placed.
-                 ================================= -->
+            <!-- DISH SELECTION -->
+
+            <div id="dishSelectionArea">
+
+
+                <p class="control-label">
+                    Choose Your Dish
+                </p>
+
+
+                <div class="food-selector">
+
+
+                    <button
+                        type="button"
+                        class="food-button active"
+                        id="burgerBtn"
+                    >
+                        🍔 Burger
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="food-button"
+                        id="pizzaBtn"
+                    >
+                        🍕 Pizza
+                    </button>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- DISH CONTROLS -->
 
             <div
                 class="interaction-controls"
                 id="interactionControls"
             >
 
-                <!-- Rotation -->
 
-                <div class="control-row">
-
-                    <button
-                        type="button"
-                        class="control-button"
-                        id="rotateLeftBtn"
-                        disabled
-                    >
-                        ↶ Rotate Left
-                    </button>
+                <div class="size-section">
 
 
-                    <button
-                        type="button"
-                        class="control-button"
-                        id="rotateRightBtn"
-                        disabled
-                    >
-                        Rotate Right ↷
-                    </button>
+                    <p class="size-title">
+                        Choose a Size
+                    </p>
+
+
+                    <div class="size-selector">
+
+
+                        <button
+                            type="button"
+                            class="size-option"
+                            id="sizeSmallBtn"
+                            disabled
+                        >
+                            Small
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="size-option active"
+                            id="sizeMediumBtn"
+                            disabled
+                        >
+                            Medium
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="size-option"
+                            id="sizeLargeBtn"
+                            disabled
+                        >
+                            Large
+                        </button>
+
+
+                    </div>
+
 
                 </div>
 
 
-                <!-- Size -->
-
-                <div class="control-row">
-
-                    <button
-                        type="button"
-                        class="control-button"
-                        id="sizeDownBtn"
-                        disabled
-                    >
-                        − Size
-                    </button>
-
-
-                    <button
-                        type="button"
-                        class="control-button"
-                        id="sizeUpBtn"
-                        disabled
-                    >
-                        + Size
-                    </button>
-
-                </div>
-
-
-                <!-- Move -->
 
                 <button
                     type="button"
@@ -221,11 +858,10 @@
                     id="moveBtn"
                     disabled
                 >
-                    ↔ Move
+                    ↔ Move Dish
                 </button>
 
 
-                <!-- Remove -->
 
                 <button
                     type="button"
@@ -233,43 +869,151 @@
                     id="removeBtn"
                     disabled
                 >
-                    Remove Food
+                    Remove Dish
                 </button>
 
 
-                <!-- Confirm -->
 
                 <button
                     type="button"
-                    class="confirm-button"
-                    id="confirmBtn"
+                    class="add-order-button"
+                    id="addToOrderBtn"
                     disabled
                 >
-                    Confirm Preview
+                    Add to Order
                 </button>
+
 
             </div>
 
 
-            <!-- Exit remains available in AR -->
+
+            <!-- ORDER REVIEW -->
+
+            <div
+                class="order-review-panel"
+                id="orderReviewPanel"
+                hidden
+            >
+
+
+                <h3>
+                    Your Order
+                </h3>
+
+
+                <p class="order-review-note">
+                    Your selected dishes will stay
+                    on the table while you build your order.
+                </p>
+
+
+                <div
+                    class="order-summary"
+                    id="orderSummary"
+                >
+                </div>
+
+
+                <div class="order-actions">
+
+
+                    <button
+                        type="button"
+                        class="add-another-button"
+                        id="addAnotherBtn"
+                    >
+                        + Add Another Dish
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="place-order-button"
+                        id="placeOrderBtn"
+                    >
+                        Place Order
+                    </button>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- ORDER COMPLETE -->
+
+            <div
+                class="order-complete-panel"
+                id="orderCompletePanel"
+                hidden
+                aria-live="polite"
+            >
+
+
+                <div class="order-checkmark">
+                    ✓
+                </div>
+
+
+                <h3>
+                    Order Confirmed
+                </h3>
+
+
+                <p>
+                    Your selected dishes are shown
+                    on the table.
+                </p>
+
+
+                <div
+                    class="order-summary"
+                    id="finalOrderSummary"
+                >
+                </div>
+
+
+                <button
+                    type="button"
+                    class="done-button"
+                    id="doneBtn"
+                >
+                    Done
+                </button>
+
+
+            </div>
+
+
+
+            <!-- CANCEL -->
 
             <button
                 type="button"
-                class="exit-ar-button"
-                id="exitARBtn"
+                class="cancel-order-button"
+                id="cancelOrderBtn"
             >
-                Exit AR
+                Cancel Order
             </button>
 
+
         </section>
+
 
     </main>
 
 
+    <!-- IMPORTANT CACHE VERSION -->
+
     <script
         type="module"
-        src="js/markerless-ar.js?v=7"
-    ></script>
+        src="js/markerless-ar.js?v=18"
+    >
+    </script>
+
 
 </body>
 
