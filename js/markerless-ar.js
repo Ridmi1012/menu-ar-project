@@ -11,162 +11,90 @@ import {
 // ==========================================
 
 const burgerBtn =
-    document.getElementById(
-        "burgerBtn"
-    );
-
+    document.getElementById("burgerBtn");
 
 const pizzaBtn =
-    document.getElementById(
-        "pizzaBtn"
-    );
-
-
-const sizeSmallBtn =
-    document.getElementById(
-        "sizeSmallBtn"
-    );
-
-
-const sizeMediumBtn =
-    document.getElementById(
-        "sizeMediumBtn"
-    );
-
-
-const sizeLargeBtn =
-    document.getElementById(
-        "sizeLargeBtn"
-    );
-
+    document.getElementById("pizzaBtn");
 
 const statusMessage =
-    document.getElementById(
-        "statusMessage"
-    );
-
+    document.getElementById("statusMessage");
 
 const startARBtn =
-    document.getElementById(
-        "startARBtn"
-    );
-
+    document.getElementById("startARBtn");
 
 const exitARBtn =
-    document.getElementById(
-        "exitARBtn"
-    );
-
+    document.getElementById("exitARBtn");
 
 const xrViewport =
-    document.getElementById(
-        "xrViewport"
-    );
-
+    document.getElementById("xrViewport");
 
 const xrIntro =
-    document.getElementById(
-        "xrIntro"
-    );
-
+    document.getElementById("xrIntro");
 
 const xrSupportMessage =
-    document.getElementById(
-        "xrSupportMessage"
-    );
-
+    document.getElementById("xrSupportMessage");
 
 const arControls =
-    document.getElementById(
-        "arControls"
-    );
+    document.getElementById("arControls");
 
-
-const selectionArea =
-    document.getElementById(
-        "selectionArea"
-    );
-
+const dishSelectionArea =
+    document.getElementById("dishSelectionArea");
 
 const interactionControls =
-    document.getElementById(
-        "interactionControls"
-    );
+    document.getElementById("interactionControls");
 
+const sizeSmallBtn =
+    document.getElementById("sizeSmallBtn");
+
+const sizeMediumBtn =
+    document.getElementById("sizeMediumBtn");
+
+const sizeLargeBtn =
+    document.getElementById("sizeLargeBtn");
 
 const moveBtn =
-    document.getElementById(
-        "moveBtn"
-    );
-
+    document.getElementById("moveBtn");
 
 const removeBtn =
-    document.getElementById(
-        "removeBtn"
-    );
-
+    document.getElementById("removeBtn");
 
 const addToOrderBtn =
-    document.getElementById(
-        "addToOrderBtn"
-    );
-
+    document.getElementById("addToOrderBtn");
 
 const orderBadge =
-    document.getElementById(
-        "orderBadge"
-    );
+    document.getElementById("orderBadge");
 
+const orderBadgeText =
+    document.getElementById("orderBadgeText");
 
-const orderActionsPanel =
-    document.getElementById(
-        "orderActionsPanel"
-    );
+const reviewOrderBtn =
+    document.getElementById("reviewOrderBtn");
 
+const orderReviewPanel =
+    document.getElementById("orderReviewPanel");
 
-const orderActionMessage =
-    document.getElementById(
-        "orderActionMessage"
-    );
-
+const orderSummary =
+    document.getElementById("orderSummary");
 
 const addAnotherBtn =
-    document.getElementById(
-        "addAnotherBtn"
-    );
-
+    document.getElementById("addAnotherBtn");
 
 const placeOrderBtn =
-    document.getElementById(
-        "placeOrderBtn"
-    );
-
-
-const cancelOrderBtn =
-    document.getElementById(
-        "cancelOrderBtn"
-    );
-
+    document.getElementById("placeOrderBtn");
 
 const orderCompletePanel =
-    document.getElementById(
-        "orderCompletePanel"
-    );
-
+    document.getElementById("orderCompletePanel");
 
 const finalOrderSummary =
-    document.getElementById(
-        "finalOrderSummary"
-    );
+    document.getElementById("finalOrderSummary");
 
 
 
 // ==========================================
-// SIZE PRESETS
+// SIZE OPTIONS
 // ==========================================
 
 const SIZE_PRESETS = {
-
 
     small: {
 
@@ -200,7 +128,6 @@ const SIZE_PRESETS = {
 
     }
 
-
 };
 
 
@@ -212,75 +139,55 @@ const SIZE_PRESETS = {
 // MULTI-STEP STATE MANAGEMENT:
 //
 // INITIALIZING
-//
 // READY_TO_SCAN
-//
 // SCANNING
-//
 // SURFACE_FOUND
-//
-// SURFACE_BLOCKED
-//
 // PLACING
-//
 // PLACED
-//
 // MOVE_MODE
-//
-// ORDER_ACTIONS
-//
+// ORDER_REVIEW
 // ORDER_CONFIRMED
-//
 // UNSUPPORTED
 //
 // ==========================================
 
 const menuARState = {
 
-
     selectedFood:
         "burger",
-
 
     selectedSize:
         "medium",
 
-
     appState:
         "INITIALIZING",
-
 
     placedObject:
         null,
 
-
     activeShadow:
         null,
-
 
     confirmedItems:
         [],
 
+    orderPlaced:
+        false,
+
+    nextItemId:
+        1,
 
     surfaceFound:
         false,
 
-
-    placementAllowed:
-        false,
-
-
     modelsReady:
         false,
-
 
     xrSupported:
         false,
 
-
-    nextItemId:
-        1
-
+    placementBlocked:
+        false
 
 };
 
@@ -310,8 +217,8 @@ const MODEL_CONFIG = {
         shadowDepth:
             0.23,
 
-        collisionRadius:
-            0.09
+        collisionPadding:
+            0.07
 
     },
 
@@ -333,29 +240,13 @@ const MODEL_CONFIG = {
         shadowDepth:
             0.35,
 
-        collisionRadius:
-            0.14
+        collisionPadding:
+            0.07
 
     }
 
 
 };
-
-
-
-// ==========================================
-// COLLISION SETTINGS
-// ==========================================
-//
-// Small extra gap so dishes do not look
-// visually merged even when they are only
-// just touching.
-//
-// metres
-// ==========================================
-
-const COLLISION_MARGIN =
-    0.035;
 
 
 
@@ -404,7 +295,7 @@ let placementAnimation =
 
 
 // ==========================================
-// FINAL ORDER ANIMATION
+// ORDER CONFIRMATION ANIMATION
 // ==========================================
 
 let orderPulseAnimation =
@@ -430,7 +321,20 @@ let shadowGeometry =
 
 
 // ==========================================
-// THREE / WEBXR VARIABLES
+// RETICLE COLORS
+// ==========================================
+
+const RETICLE_AVAILABLE_COLOR =
+    0xffffff;
+
+
+const RETICLE_BLOCKED_COLOR =
+    0xff4d4d;
+
+
+
+// ==========================================
+// THREE / WEBXR
 // ==========================================
 
 let scene;
@@ -440,8 +344,6 @@ let camera;
 let renderer;
 
 let reticle;
-
-let reticleMaterial;
 
 let controller;
 
@@ -464,7 +366,7 @@ let referenceSpace =
 
 
 // ==========================================
-// AUDIO
+// WEB AUDIO
 // ==========================================
 
 let audioContext =
@@ -489,7 +391,7 @@ const modelTemplates = {
 
 
 // ==========================================
-// CREATE SOFT SHADOW TEXTURE
+// SOFT SHADOW TEXTURE
 // ==========================================
 
 function createSoftShadowTexture() {
@@ -533,41 +435,26 @@ function createSoftShadowTexture() {
 
 
     gradient.addColorStop(
-
         0,
-
         "rgba(0, 0, 0, 0.58)"
-
     );
 
 
-
     gradient.addColorStop(
-
         0.35,
-
         "rgba(0, 0, 0, 0.34)"
-
     );
 
 
-
     gradient.addColorStop(
-
         0.72,
-
         "rgba(0, 0, 0, 0.12)"
-
     );
 
 
-
     gradient.addColorStop(
-
         1,
-
         "rgba(0, 0, 0, 0)"
-
     );
 
 
@@ -578,12 +465,10 @@ function createSoftShadowTexture() {
 
 
     context.fillRect(
-
         0,
         0,
         256,
         256
-
     );
 
 
@@ -607,7 +492,7 @@ function createSoftShadowTexture() {
 
 
 // ==========================================
-// INITIALIZE THREE.JS
+// THREE.JS INITIALIZATION
 // ==========================================
 
 function initThreeJS() {
@@ -680,10 +565,8 @@ function initThreeJS() {
         THREE.SRGBColorSpace;
 
 
-
     renderer.toneMapping =
         THREE.ACESFilmicToneMapping;
-
 
 
     renderer.toneMappingExposure =
@@ -719,7 +602,6 @@ function initThreeJS() {
         );
 
 
-
     scene.add(
         hemisphereLight
     );
@@ -734,7 +616,6 @@ function initThreeJS() {
             2.0
 
         );
-
 
 
     directionalLight.position.set(
@@ -774,7 +655,6 @@ function initThreeJS() {
         );
 
 
-
     shadowGeometry.rotateX(
         -Math.PI / 2
     );
@@ -797,18 +677,17 @@ function initThreeJS() {
         );
 
 
-
     reticleGeometry.rotateX(
         -Math.PI / 2
     );
 
 
 
-    reticleMaterial =
+    const reticleMaterial =
         new THREE.MeshBasicMaterial({
 
             color:
-                0xffffff,
+                RETICLE_AVAILABLE_COLOR,
 
             side:
                 THREE.DoubleSide
@@ -830,7 +709,6 @@ function initThreeJS() {
 
     reticle.matrixAutoUpdate =
         false;
-
 
 
     reticle.visible =
@@ -878,33 +756,7 @@ function initThreeJS() {
 
 
 // ==========================================
-// RETICLE COLOUR
-// ==========================================
-
-function showValidReticle() {
-
-
-    reticleMaterial.color.setHex(
-        0xffffff
-    );
-
-}
-
-
-
-function showBlockedReticle() {
-
-
-    reticleMaterial.color.setHex(
-        0xff3b30
-    );
-
-}
-
-
-
-// ==========================================
-// SHADOW CREATION
+// CREATE A SHADOW FOR ONE DISH
 // ==========================================
 
 function createShadowMesh(
@@ -948,7 +800,6 @@ function createShadowMesh(
         );
 
 
-
     shadow.renderOrder =
         1;
 
@@ -973,7 +824,7 @@ function createShadowMesh(
 
 
 // ==========================================
-// SHADOW SIZE
+// UPDATE ONE SHADOW
 // ==========================================
 
 function updateShadowAppearance(
@@ -1001,7 +852,6 @@ function updateShadowAppearance(
         MODEL_CONFIG[food];
 
 
-
     const size =
         SIZE_PRESETS[sizeKey];
 
@@ -1018,7 +868,6 @@ function updateShadowAppearance(
         1
 
     );
-
 
 
     shadow.material.opacity =
@@ -1051,10 +900,8 @@ function positionShadowFromReticle(
         new THREE.Vector3();
 
 
-
     const quaternion =
         new THREE.Quaternion();
-
 
 
     const ignoredScale =
@@ -1079,7 +926,6 @@ function positionShadowFromReticle(
     );
 
 
-
     shadow.quaternion.copy(
         quaternion
     );
@@ -1088,13 +934,10 @@ function positionShadowFromReticle(
 
     const surfaceNormal =
         new THREE.Vector3(
-
             0,
             1,
             0
-
         );
-
 
 
     surfaceNormal.applyQuaternion(
@@ -1116,10 +959,23 @@ function positionShadowFromReticle(
 
 
 // ==========================================
-// COLLISION RADIUS
+// COLLISION / SPACING
+// ==========================================
+//
+// Each dish is treated as occupying a small
+// circular footprint on the table.
+//
+// This prevents:
+//
+// - Burger on burger
+// - Pizza on pizza
+// - Burger overlapping pizza
+// - Moving a dish into another dish
+//
+// Rotation is intentionally NOT used.
 // ==========================================
 
-function getCollisionRadius(
+function getDishCollisionRadius(
 
     food,
 
@@ -1128,13 +984,43 @@ function getCollisionRadius(
 ) {
 
 
+    const config =
+        MODEL_CONFIG[food];
+
+
+    const size =
+        SIZE_PRESETS[sizeKey];
+
+
+
+    const halfWidth =
+        (
+            config.shadowWidth *
+            size.factor
+        ) / 2;
+
+
+    const halfDepth =
+        (
+            config.shadowDepth *
+            size.factor
+        ) / 2;
+
+
+
+    const footprintRadius =
+        Math.max(
+            halfWidth,
+            halfDepth
+        );
+
+
+
     return (
 
-        MODEL_CONFIG[food]
-            .collisionRadius *
+        footprintRadius +
 
-        SIZE_PRESETS[sizeKey]
-            .factor
+        config.collisionPadding
 
     );
 
@@ -1143,29 +1029,45 @@ function getCollisionRadius(
 
 
 // ==========================================
-// IS POSITION AVAILABLE?
-// ==========================================
-//
-// Only X/Z distance matters because the
-// dishes are being placed on the table.
-//
-// Existing confirmed dishes are checked.
-//
+// GET HORIZONTAL POSITION
 // ==========================================
 
-function isPositionAvailable(
+function getHorizontalPosition(
+    object
+) {
+
+
+    return new THREE.Vector2(
+
+        object.position.x,
+
+        object.position.z
+
+    );
+
+}
+
+
+
+// ==========================================
+// CHECK COLLISION
+// ==========================================
+
+function isPositionBlocked(
 
     position,
 
     food,
 
-    sizeKey
+    sizeKey,
+
+    ignoredItem = null
 
 ) {
 
 
     const newRadius =
-        getCollisionRadius(
+        getDishCollisionRadius(
 
             food,
 
@@ -1175,10 +1077,32 @@ function isPositionAvailable(
 
 
 
+    const newPosition =
+        new THREE.Vector2(
+
+            position.x,
+
+            position.z
+
+        );
+
+
+
     for (
         const item of
         menuARState.confirmedItems
     ) {
+
+
+        if (
+            item ===
+            ignoredItem
+        ) {
+
+            continue;
+
+        }
+
 
 
         if (
@@ -1192,36 +1116,26 @@ function isPositionAvailable(
 
 
         const existingPosition =
-            item.object.position;
+            getHorizontalPosition(
+                item.object
+            );
 
 
 
-        const deltaX =
+        const existingRadius =
+            getDishCollisionRadius(
 
-            position.x -
+                item.food,
 
-            existingPosition.x;
+                item.sizeKey
 
-
-
-        const deltaZ =
-
-            position.z -
-
-            existingPosition.z;
+            );
 
 
 
         const distance =
-
-            Math.sqrt(
-
-                deltaX *
-                deltaX +
-
-                deltaZ *
-                deltaZ
-
+            newPosition.distanceTo(
+                existingPosition
             );
 
 
@@ -1230,9 +1144,7 @@ function isPositionAvailable(
 
             newRadius +
 
-            item.collisionRadius +
-
-            COLLISION_MARGIN;
+            existingRadius;
 
 
 
@@ -1242,7 +1154,7 @@ function isPositionAvailable(
         ) {
 
 
-            return false;
+            return true;
 
         }
 
@@ -1250,14 +1162,90 @@ function isPositionAvailable(
 
 
 
-    return true;
+    return false;
 
 }
 
 
 
 // ==========================================
-// AUDIO CONTEXT
+// RETICLE COLLISION STATE
+// ==========================================
+
+function updateReticlePlacementState() {
+
+
+    if (
+        !reticle.visible
+    ) {
+
+        return;
+
+    }
+
+
+
+    if (
+
+        menuARState.appState !==
+            "SURFACE_FOUND" &&
+
+        menuARState.appState !==
+            "MOVE_MODE"
+
+    ) {
+
+        return;
+
+    }
+
+
+
+    const position =
+        new THREE.Vector3();
+
+
+
+    position.setFromMatrixPosition(
+        reticle.matrix
+    );
+
+
+
+    const blocked =
+        isPositionBlocked(
+
+            position,
+
+            menuARState.selectedFood,
+
+            menuARState.selectedSize
+
+        );
+
+
+
+    menuARState.placementBlocked =
+        blocked;
+
+
+
+    reticle.material.color.set(
+
+        blocked
+
+            ? RETICLE_BLOCKED_COLOR
+
+            : RETICLE_AVAILABLE_COLOR
+
+    );
+
+}
+
+
+
+// ==========================================
+// AUDIO INITIALIZATION
 // ==========================================
 
 function ensureAudioContext() {
@@ -1312,7 +1300,7 @@ function ensureAudioContext() {
 
 
 // ==========================================
-// PLAY GENERATED TONE
+// GENERATED TONE
 // ==========================================
 
 function playTone(
@@ -1376,11 +1364,8 @@ function playTone(
     oscillator.frequency.exponentialRampToValueAtTime(
 
         Math.max(
-
             endFrequency,
-
             1
-
         ),
 
         now +
@@ -1427,7 +1412,6 @@ function playTone(
     );
 
 
-
     gain.connect(
         audioContext.destination
     );
@@ -1437,7 +1421,6 @@ function playTone(
     oscillator.start(
         now
     );
-
 
 
     oscillator.stop(
@@ -1472,7 +1455,6 @@ function playPlacementSound() {
     );
 
 
-
     playTone(
 
         420,
@@ -1492,7 +1474,7 @@ function playPlacementSound() {
 
 
 // ==========================================
-// ADDED TO ORDER SOUND
+// ADD-TO-ORDER SOUND
 // ==========================================
 
 function playAddedSound() {
@@ -1536,7 +1518,6 @@ function playOrderConfirmationSound() {
     );
 
 
-
     playTone(
 
         659,
@@ -1550,7 +1531,6 @@ function playOrderConfirmationSound() {
         0.10
 
     );
-
 
 
     playTone(
@@ -1572,7 +1552,7 @@ function playOrderConfirmationSound() {
 
 
 // ==========================================
-// STATUS MESSAGE
+// STATUS
 // ==========================================
 
 function setStatus(message) {
@@ -1604,7 +1584,6 @@ function showSupportMessage(message) {
         message;
 
 
-
     xrSupportMessage.hidden =
         false;
 
@@ -1617,7 +1596,6 @@ function hideSupportMessage() {
 
     xrSupportMessage.textContent =
         "";
-
 
 
     xrSupportMessage.hidden =
@@ -1634,8 +1612,7 @@ function hideSupportMessage() {
 function getFoodName(food) {
 
 
-    return food ===
-        "burger"
+    return food === "burger"
         ? "Burger"
         : "Pizza";
 
@@ -1644,25 +1621,41 @@ function getFoodName(food) {
 
 
 // ==========================================
-// MODEL SCALE
+// CURRENT SIZE
 // ==========================================
 
-function getModelScale(
+function getCurrentSizePreset() {
 
-    food,
 
-    sizeKey
+    return SIZE_PRESETS[
+        menuARState.selectedSize
+    ];
 
-) {
+}
+
+
+
+// ==========================================
+// CURRENT MODEL SCALE
+// ==========================================
+
+function getCurrentModelScale(food) {
+
+
+    const config =
+        MODEL_CONFIG[food];
+
+
+    const size =
+        getCurrentSizePreset();
+
 
 
     return (
 
-        MODEL_CONFIG[food]
-            .baseScale *
+        config.baseScale *
 
-        SIZE_PRESETS[sizeKey]
-            .factor
+        size.factor
 
     );
 
@@ -1705,9 +1698,7 @@ function loadModel(food) {
 
 
                     console.log(
-
                         `${food} model loaded.`
-
                     );
 
 
@@ -1732,7 +1723,6 @@ function loadModel(food) {
                     );
 
 
-
                     reject(
                         error
                     );
@@ -1751,7 +1741,7 @@ function loadModel(food) {
 
 
 // ==========================================
-// LOAD ALL MODELS
+// LOAD MODELS
 // ==========================================
 
 async function loadModels() {
@@ -1796,13 +1786,9 @@ async function loadModels() {
         );
 
 
-
         console.error(
-
             "Model loading failed:",
-
             error
-
         );
 
     }
@@ -1819,27 +1805,32 @@ function updateFoodButtons(food) {
 
 
     const burgerActive =
-        food ===
-        "burger";
+        food === "burger";
 
 
 
     burgerBtn.classList.toggle(
-
         "active",
-
         burgerActive
+    );
 
+
+    pizzaBtn.classList.toggle(
+        "active",
+        !burgerActive
     );
 
 
 
-    pizzaBtn.classList.toggle(
+    burgerBtn.setAttribute(
+        "aria-pressed",
+        burgerActive
+    );
 
-        "active",
 
+    pizzaBtn.setAttribute(
+        "aria-pressed",
         !burgerActive
-
     );
 
 }
@@ -1851,6 +1842,11 @@ function updateFoodButtons(food) {
 // ==========================================
 
 function updateSizeButtons() {
+
+
+    const selected =
+        menuARState.selectedSize;
+
 
 
     const buttons = {
@@ -1880,13 +1876,20 @@ function updateSizeButtons() {
         ) => {
 
 
+            const active =
+                key === selected;
+
+
+
             button.classList.toggle(
-
                 "active",
+                active
+            );
 
-                key ===
-                    menuARState.selectedSize
 
+            button.setAttribute(
+                "aria-pressed",
+                active
             );
 
         }
@@ -1898,59 +1901,189 @@ function updateSizeButtons() {
 
 
 // ==========================================
-// ENABLE / DISABLE SELECTION
+// ORDER GROUPING
 // ==========================================
 
-function setSelectionEnabled(enabled) {
+function getGroupedOrderItems() {
 
 
-    burgerBtn.disabled =
-        !enabled;
+    const grouped =
+        new Map();
 
 
-    pizzaBtn.disabled =
-        !enabled;
+
+    menuARState.confirmedItems.forEach(
+
+        (item) => {
 
 
-    sizeSmallBtn.disabled =
-        !enabled;
+            const key =
+                `${item.sizeKey}-${item.food}`;
 
 
-    sizeMediumBtn.disabled =
-        !enabled;
+
+            if (
+                !grouped.has(key)
+            ) {
 
 
-    sizeLargeBtn.disabled =
-        !enabled;
+                grouped.set(
+
+                    key,
+
+                    {
+
+                        food:
+                            item.food,
+
+                        sizeKey:
+                            item.sizeKey,
+
+                        count:
+                            0
+
+                    }
+
+                );
+
+            }
+
+
+
+            grouped.get(key).count +=
+                1;
+
+        }
+
+    );
+
+
+
+    return Array.from(
+        grouped.values()
+    );
 
 }
 
 
 
 // ==========================================
-// SELECT FOOD
+// RENDER ORDER SUMMARY
 // ==========================================
 
-function selectFood(food) {
+function renderOrderSummary(
+    container
+) {
 
 
-    const validStates = [
+    container.innerHTML =
+        "";
 
-        "SCANNING",
 
-        "SURFACE_FOUND",
 
-        "SURFACE_BLOCKED"
+    const groups =
+        getGroupedOrderItems();
 
-    ];
+
+
+    groups.forEach(
+
+        (group) => {
+
+
+            const row =
+                document.createElement(
+                    "div"
+                );
+
+
+            row.className =
+                "order-summary-row";
+
+
+
+            const name =
+                document.createElement(
+                    "span"
+                );
+
+
+            name.className =
+                "order-summary-name";
+
+
+            name.textContent =
+
+                `${SIZE_PRESETS[group.sizeKey].label} ${getFoodName(group.food)}`;
+
+
+
+            const count =
+                document.createElement(
+                    "span"
+                );
+
+
+            count.className =
+                "order-summary-count";
+
+
+            count.textContent =
+                `${group.count} ×`;
+
+
+
+            row.appendChild(
+                name
+            );
+
+
+            row.appendChild(
+                count
+            );
+
+
+
+            container.appendChild(
+                row
+            );
+
+        }
+
+    );
+
+}
+
+
+
+// ==========================================
+// ORDER BADGE
+// ==========================================
+
+function updateOrderBadge() {
+
+
+    const count =
+        menuARState.confirmedItems.length;
 
 
 
     if (
-        !validStates.includes(
-            menuARState.appState
-        )
+
+        count === 0 ||
+
+        menuARState.appState ===
+            "ORDER_REVIEW" ||
+
+        menuARState.appState ===
+            "ORDER_CONFIRMED"
+
     ) {
+
+
+        orderBadge.hidden =
+            true;
+
 
         return;
 
@@ -1958,22 +2091,28 @@ function selectFood(food) {
 
 
 
-    menuARState.selectedFood =
-        food;
+    orderBadge.hidden =
+        false;
 
 
 
-    updateFoodButtons(
-        food
-    );
+    orderBadgeText.textContent =
+
+        `Your Order · ${count} ${count === 1 ? "item" : "items"}`;
 
 
 
-    setStatus(
+    reviewOrderBtn.disabled =
 
-        `${getFoodName(food)} selected. Choose a size and find a spot on the table.`
+        Boolean(
+            menuARState.placedObject
+        ) ||
 
-    );
+        menuARState.appState ===
+            "PLACING" ||
+
+        menuARState.appState ===
+            "MOVE_MODE";
 
 }
 
@@ -1983,25 +2122,18 @@ function selectFood(food) {
 // SELECT SIZE
 // ==========================================
 
-function selectSize(sizeKey) {
-
-
-    const validStates = [
-
-        "SCANNING",
-
-        "SURFACE_FOUND",
-
-        "SURFACE_BLOCKED"
-
-    ];
-
+function selectPreviewSize(
+    sizeKey
+) {
 
 
     if (
-        !validStates.includes(
-            menuARState.appState
-        )
+
+        menuARState.appState !==
+            "PLACED" ||
+
+        !menuARState.placedObject
+
     ) {
 
         return;
@@ -2019,9 +2151,31 @@ function selectSize(sizeKey) {
 
 
 
+    menuARState.placedObject.scale.setScalar(
+
+        getCurrentModelScale(
+            menuARState.selectedFood
+        )
+
+    );
+
+
+
+    updateShadowAppearance(
+
+        menuARState.activeShadow,
+
+        menuARState.selectedFood,
+
+        menuARState.selectedSize
+
+    );
+
+
+
     setStatus(
 
-        `${SIZE_PRESETS[sizeKey].label} ${getFoodName(menuARState.selectedFood)} selected. Find a spot on the table.`
+        `${getCurrentSizePreset().label} ${getFoodName(menuARState.selectedFood)} selected.`
 
     );
 
@@ -2030,7 +2184,323 @@ function selectSize(sizeKey) {
 
 
 // ==========================================
-// XR SUPPORT
+// SELECT FOOD
+// ==========================================
+
+function selectFood(food) {
+
+
+    if (
+
+        menuARState.appState ===
+            "ORDER_REVIEW" ||
+
+        menuARState.appState ===
+            "ORDER_CONFIRMED" ||
+
+        menuARState.appState ===
+            "PLACING"
+
+    ) {
+
+        return;
+
+    }
+
+
+
+    const previousFood =
+        menuARState.selectedFood;
+
+
+
+    menuARState.selectedFood =
+        food;
+
+
+
+    updateFoodButtons(
+        food
+    );
+
+
+
+    const foodName =
+        getFoodName(
+            food
+        );
+
+
+
+    if (
+        menuARState.placedObject
+    ) {
+
+
+        if (
+            previousFood ===
+            food
+        ) {
+
+
+            setStatus(
+
+                `${foodName} is already selected.`
+
+            );
+
+
+            return;
+
+        }
+
+
+
+        replacePlacedFood(
+
+            food,
+
+            previousFood
+
+        );
+
+
+
+        return;
+
+    }
+
+
+
+    if (
+        xrSession
+    ) {
+
+
+        if (
+            menuARState.appState ===
+            "SURFACE_FOUND"
+        ) {
+
+
+            setStatus(
+
+                `Perfect — tap the ${menuARState.placementBlocked ? "available spot" : "white circle"} to place your ${foodName}.`
+
+            );
+
+
+        } else {
+
+
+            setStatus(
+
+                `${foodName} selected. Find a spot on the table.`
+
+            );
+
+        }
+
+    }
+
+}
+
+
+
+// ==========================================
+// REPLACE ACTIVE FOOD
+// ==========================================
+
+function replacePlacedFood(
+
+    newFood,
+
+    previousFood
+
+) {
+
+
+    if (
+        !menuARState.placedObject
+    ) {
+
+        return;
+
+    }
+
+
+
+    const template =
+        modelTemplates[newFood];
+
+
+
+    if (
+        !template
+    ) {
+
+        return;
+
+    }
+
+
+
+    const oldModel =
+        menuARState.placedObject;
+
+
+
+    const newConfig =
+        MODEL_CONFIG[newFood];
+
+
+    const previousConfig =
+        MODEL_CONFIG[previousFood];
+
+
+
+    const savedPosition =
+        oldModel.position.clone();
+
+
+
+    const savedScale =
+        oldModel.scale.clone();
+
+
+
+    // ======================================
+    // CHECK NEW MODEL FOOTPRINT
+    // ======================================
+
+    const blocked =
+        isPositionBlocked(
+
+            savedPosition,
+
+            newFood,
+
+            menuARState.selectedSize
+
+        );
+
+
+
+    if (
+        blocked
+    ) {
+
+
+        setStatus(
+
+            `The ${getFoodName(newFood)} is too large for this spot. Use Move Dish to choose another spot.`
+
+        );
+
+
+        return;
+
+    }
+
+
+
+    scene.remove(
+        oldModel
+    );
+
+
+
+    const newModel =
+        template.clone(true);
+
+
+
+    newModel.position.copy(
+        savedPosition
+    );
+
+
+    newModel.position.y +=
+
+        newConfig.surfaceOffset -
+
+        previousConfig.surfaceOffset;
+
+
+
+    newModel.scale.setScalar(
+
+        getCurrentModelScale(
+            newFood
+        )
+
+    );
+
+
+
+    scene.add(
+        newModel
+    );
+
+
+
+    menuARState.placedObject =
+        newModel;
+
+
+
+    updateShadowAppearance(
+
+        menuARState.activeShadow,
+
+        newFood,
+
+        menuARState.selectedSize
+
+    );
+
+
+
+    const sizeName =
+        getCurrentSizePreset().label;
+
+
+
+    if (
+        menuARState.appState ===
+            "MOVE_MODE"
+    ) {
+
+
+        setStatus(
+
+            `Changed to ${getFoodName(newFood)} — ${sizeName} size kept. Choose a new spot.`
+
+        );
+
+
+    } else {
+
+
+        menuARState.appState =
+            "PLACED";
+
+
+
+        setStatus(
+
+            `Changed to ${getFoodName(newFood)} — ${sizeName} size kept.`
+
+        );
+
+    }
+
+}
+
+
+
+// ==========================================
+// WEBXR SUPPORT
 // ==========================================
 
 async function checkXRSupport() {
@@ -2120,11 +2590,8 @@ async function checkXRSupport() {
 
 
         console.error(
-
             "WebXR support check failed:",
-
             error
-
         );
 
 
@@ -2219,7 +2686,7 @@ function updateStartButton() {
 
 
 // ==========================================
-// SHOW AR UI
+// AR INTERFACE
 // ==========================================
 
 function showARInterface() {
@@ -2253,7 +2720,7 @@ function showARInterface() {
 
 
 // ==========================================
-// SHOW START UI
+// PRE-AR INTERFACE
 // ==========================================
 
 function showPreARInterface() {
@@ -2271,7 +2738,7 @@ function showPreARInterface() {
 
 
 // ==========================================
-// START AR SESSION
+// START XR SESSION
 // ==========================================
 
 async function startARSession() {
@@ -2304,10 +2771,6 @@ async function startARSession() {
 
 
 
-    hideSupportMessage();
-
-
-
     try {
 
 
@@ -2318,7 +2781,6 @@ async function startARSession() {
                 "immersive-ar",
 
                 {
-
 
                     requiredFeatures: [
 
@@ -2407,22 +2869,12 @@ async function startARSession() {
 
 
 
-        // Reset ordering state.
-
         menuARState.appState =
             "SCANNING";
 
 
         menuARState.surfaceFound =
             false;
-
-
-        menuARState.placementAllowed =
-            false;
-
-
-        menuARState.selectedFood =
-            "burger";
 
 
         menuARState.selectedSize =
@@ -2433,8 +2885,16 @@ async function startARSession() {
             [];
 
 
+        menuARState.orderPlaced =
+            false;
+
+
         menuARState.nextItemId =
             1;
+
+
+        menuARState.placementBlocked =
+            false;
 
 
 
@@ -2448,11 +2908,11 @@ async function startARSession() {
 
 
 
-        selectionArea.hidden =
+        dishSelectionArea.hidden =
             false;
 
 
-        orderActionsPanel.hidden =
+        orderReviewPanel.hidden =
             true;
 
 
@@ -2465,14 +2925,8 @@ async function startARSession() {
 
 
 
-        setSelectionEnabled(
-            true
-        );
-
-
-
         updateFoodButtons(
-            "burger"
+            menuARState.selectedFood
         );
 
 
@@ -2485,7 +2939,7 @@ async function startARSession() {
 
         setStatus(
 
-            "Choose a dish and size, then move your device slowly over the table."
+            `Choose a dish and move your device slowly over the table.`
 
         );
 
@@ -2494,11 +2948,8 @@ async function startARSession() {
 
 
         console.error(
-
             "Unable to start AR:",
-
             error
-
         );
 
 
@@ -2596,7 +3047,7 @@ async function startARSession() {
 
 
 // ==========================================
-// END AR SESSION
+// END AR
 // ==========================================
 
 async function endARSession() {
@@ -2664,7 +3115,7 @@ function removeActivePreviewFromScene() {
 
 
 // ==========================================
-// CLEAR CONFIRMED ORDER
+// CLEAR CONFIRMED ITEMS
 // ==========================================
 
 function clearConfirmedItemsFromScene() {
@@ -2713,7 +3164,7 @@ function clearConfirmedItemsFromScene() {
 
 
 // ==========================================
-// CONTROL VISIBILITY
+// INTERACTION CONTROLS
 // ==========================================
 
 function showInteractionControls() {
@@ -2739,10 +3190,22 @@ function hideInteractionControls() {
 
 
 // ==========================================
-// PLACED DISH CONTROLS
+// ENABLE CONTROLS
 // ==========================================
 
-function enablePlacedControls() {
+function enableManipulationControls() {
+
+
+    sizeSmallBtn.disabled =
+        false;
+
+
+    sizeMediumBtn.disabled =
+        false;
+
+
+    sizeLargeBtn.disabled =
+        false;
 
 
     moveBtn.disabled =
@@ -2754,6 +3217,15 @@ function enablePlacedControls() {
 
 
     addToOrderBtn.disabled =
+        false;
+
+
+
+    burgerBtn.disabled =
+        false;
+
+
+    pizzaBtn.disabled =
         false;
 
 
@@ -2770,7 +3242,23 @@ function enablePlacedControls() {
 
 
 
-function disablePlacedControls() {
+// ==========================================
+// DISABLE CONTROLS
+// ==========================================
+
+function disableManipulationControls() {
+
+
+    sizeSmallBtn.disabled =
+        true;
+
+
+    sizeMediumBtn.disabled =
+        true;
+
+
+    sizeLargeBtn.disabled =
+        true;
 
 
     moveBtn.disabled =
@@ -2795,7 +3283,15 @@ function disablePlacedControls() {
 function setMoveModeControls() {
 
 
-    moveBtn.disabled =
+    sizeSmallBtn.disabled =
+        true;
+
+
+    sizeMediumBtn.disabled =
+        true;
+
+
+    sizeLargeBtn.disabled =
         true;
 
 
@@ -2806,6 +3302,10 @@ function setMoveModeControls() {
     addToOrderBtn.disabled =
         true;
 
+
+
+    moveBtn.disabled =
+        true;
 
 
     moveBtn.textContent =
@@ -2821,55 +3321,19 @@ function setMoveModeControls() {
 
 
 // ==========================================
-// ORDER BADGE
-// ==========================================
-
-function updateOrderBadge() {
-
-
-    const count =
-        menuARState.confirmedItems.length;
-
-
-
-    if (
-        count ===
-        0
-    ) {
-
-
-        orderBadge.hidden =
-            true;
-
-
-        return;
-
-    }
-
-
-
-    orderBadge.hidden =
-        false;
-
-
-
-    orderBadge.textContent =
-
-        `Your Order · ${count} ${count === 1 ? "item" : "items"}`;
-
-}
-
-
-
-// ==========================================
 // RESET UI
 // ==========================================
 
 function resetControls() {
 
 
-    menuARState.selectedFood =
-        "burger";
+    burgerBtn.disabled =
+        false;
+
+
+    pizzaBtn.disabled =
+        false;
+
 
 
     menuARState.selectedSize =
@@ -2877,33 +3341,22 @@ function resetControls() {
 
 
 
-    updateFoodButtons(
-        "burger"
-    );
-
-
     updateSizeButtons();
 
 
 
-    setSelectionEnabled(
-        true
-    );
-
-
-
-    disablePlacedControls();
+    disableManipulationControls();
 
 
     hideInteractionControls();
 
 
 
-    selectionArea.hidden =
+    dishSelectionArea.hidden =
         false;
 
 
-    orderActionsPanel.hidden =
+    orderReviewPanel.hidden =
         true;
 
 
@@ -2980,12 +3433,20 @@ function onARSessionEnded() {
         false;
 
 
-    menuARState.placementAllowed =
+    menuARState.selectedSize =
+        "medium";
+
+
+    menuARState.orderPlaced =
         false;
 
 
     menuARState.nextItemId =
         1;
+
+
+    menuARState.placementBlocked =
+        false;
 
 
     menuARState.appState =
@@ -3030,11 +3491,8 @@ function easeOutCubic(t) {
         1 -
 
         Math.pow(
-
             1 - t,
-
             3
-
         )
 
     );
@@ -3062,20 +3520,14 @@ function easeOutBack(t) {
 
         c3 *
         Math.pow(
-
             t - 1,
-
             3
-
         ) +
 
         c1 *
         Math.pow(
-
             t - 1,
-
             2
-
         )
 
     );
@@ -3114,12 +3566,20 @@ function startPlacementAnimation(
     );
 
 
-
     model.position.y =
 
         finalY +
 
         PLACEMENT_LIFT;
+
+
+
+    burgerBtn.disabled =
+        true;
+
+
+    pizzaBtn.disabled =
+        true;
 
 
 
@@ -3142,39 +3602,30 @@ function startPlacementAnimation(
 
     placementAnimation = {
 
-
         model:
             model,
-
 
         food:
             food,
 
-
         startTime:
             null,
-
 
         duration:
             PLACEMENT_DURATION,
 
-
         startScale:
             startScale,
 
-
         finalScale:
             finalScale,
-
 
         startY:
             finalY +
             PLACEMENT_LIFT,
 
-
         finalY:
             finalY
-
 
     };
 
@@ -3182,7 +3633,7 @@ function startPlacementAnimation(
 
     setStatus(
 
-        `Placing your ${getFoodName(food)}...`
+        `Serving your ${getFoodName(food)} preview...`
 
     );
 
@@ -3252,7 +3703,6 @@ function updatePlacementAnimation(
         );
 
 
-
     const scaleEase =
         easeOutBack(
             progress
@@ -3295,9 +3745,7 @@ function updatePlacementAnimation(
     ) {
 
 
-        menuARState.activeShadow
-            .material
-            .opacity =
+        menuARState.activeShadow.material.opacity =
 
             SHADOW_OPACITY *
 
@@ -3311,6 +3759,11 @@ function updatePlacementAnimation(
         progress >=
         1
     ) {
+
+
+        const completedFood =
+            placementAnimation.food;
+
 
 
         placementAnimation.model.position.y =
@@ -3334,9 +3787,12 @@ function updatePlacementAnimation(
 
 
 
-        setSelectionEnabled(
-            false
-        );
+        burgerBtn.disabled =
+            false;
+
+
+        pizzaBtn.disabled =
+            false;
 
 
 
@@ -3344,8 +3800,11 @@ function updatePlacementAnimation(
 
 
 
-        enablePlacedControls();
+        enableManipulationControls();
 
+
+
+        updateSizeButtons();
 
 
         updateOrderBadge();
@@ -3354,7 +3813,7 @@ function updatePlacementAnimation(
 
         setStatus(
 
-            `${SIZE_PRESETS[menuARState.selectedSize].label} ${getFoodName(menuARState.selectedFood)} placed. Move it if needed, then add it to your order.`
+            `Your ${getCurrentSizePreset().label} ${getFoodName(completedFood)} is ready. Adjust it, then add it to your order.`
 
         );
 
@@ -3369,7 +3828,7 @@ function updatePlacementAnimation(
 
 
 // ==========================================
-// PLACE SELECTED FOOD
+// PLACE FOOD
 // ==========================================
 
 function placeSelectedFood() {
@@ -3378,8 +3837,6 @@ function placeSelectedFood() {
     if (
 
         !reticle.visible ||
-
-        !menuARState.placementAllowed ||
 
         menuARState.placedObject
 
@@ -3393,11 +3850,6 @@ function placeSelectedFood() {
 
     const food =
         menuARState.selectedFood;
-
-
-
-    const sizeKey =
-        menuARState.selectedSize;
 
 
 
@@ -3421,11 +3873,6 @@ function placeSelectedFood() {
 
 
 
-    const placedModel =
-        template.clone(true);
-
-
-
     const placementPosition =
         new THREE.Vector3();
 
@@ -3434,6 +3881,56 @@ function placeSelectedFood() {
     placementPosition.setFromMatrixPosition(
         reticle.matrix
     );
+
+
+
+    // ======================================
+    // COLLISION CHECK
+    // ======================================
+
+    const blocked =
+        isPositionBlocked(
+
+            placementPosition,
+
+            food,
+
+            menuARState.selectedSize
+
+        );
+
+
+
+    if (
+        blocked
+    ) {
+
+
+        menuARState.placementBlocked =
+            true;
+
+
+
+        setStatus(
+
+            "That spot is too close to another dish. Choose another spot."
+
+        );
+
+
+        return;
+
+    }
+
+
+
+    menuARState.placementBlocked =
+        false;
+
+
+
+    const placedModel =
+        template.clone(true);
 
 
 
@@ -3453,41 +3950,16 @@ function placeSelectedFood() {
 
 
 
-    const placementRotation =
-        new THREE.Quaternion();
-
-
-
-    const ignoredScale =
-        new THREE.Vector3();
-
-
-
-    reticle.matrix.decompose(
-
-        new THREE.Vector3(),
-
-        placementRotation,
-
-        ignoredScale
-
-    );
-
-
-
-    placedModel.quaternion.copy(
-        placementRotation
-    );
+    /*
+       No manual rotation is applied.
+       The dish keeps its natural orientation.
+    */
 
 
 
     const finalScale =
-        getModelScale(
-
-            food,
-
-            sizeKey
-
+        getCurrentModelScale(
+            food
         );
 
 
@@ -3503,12 +3975,14 @@ function placeSelectedFood() {
 
 
 
+    // Create a unique shadow for this dish.
+
     const shadow =
         createShadowMesh(
 
             food,
 
-            sizeKey
+            menuARState.selectedSize
 
         );
 
@@ -3540,10 +4014,6 @@ function placeSelectedFood() {
         false;
 
 
-    menuARState.placementAllowed =
-        false;
-
-
 
     reticle.visible =
         false;
@@ -3554,7 +4024,7 @@ function placeSelectedFood() {
 
 
 
-    disablePlacedControls();
+    disableManipulationControls();
 
 
 
@@ -3575,19 +4045,35 @@ function placeSelectedFood() {
 
 
 // ==========================================
-// ENTER MOVE MODE
+// CAN MANIPULATE
+// ==========================================
+
+function canManipulate() {
+
+
+    return (
+
+        menuARState.placedObject !==
+            null &&
+
+        menuARState.appState ===
+            "PLACED"
+
+    );
+
+}
+
+
+
+// ==========================================
+// MOVE MODE
 // ==========================================
 
 function enterMoveMode() {
 
 
     if (
-
-        menuARState.appState !==
-            "PLACED" ||
-
-        !menuARState.placedObject
-
+        !canManipulate()
     ) {
 
         return;
@@ -3604,8 +4090,9 @@ function enterMoveMode() {
         false;
 
 
-    menuARState.placementAllowed =
+    menuARState.placementBlocked =
         false;
+
 
 
     reticle.visible =
@@ -3644,7 +4131,7 @@ function enterMoveMode() {
 
     setStatus(
 
-        "Choose a new open spot on the table."
+        "Choose a new spot on the table, then tap the available circle."
 
     );
 
@@ -3653,7 +4140,59 @@ function enterMoveMode() {
 
 
 // ==========================================
-// REPOSITION ACTIVE FOOD
+// MOVE STATUS
+// ==========================================
+
+function setMoveModeStatus() {
+
+
+    if (
+        menuARState.placementBlocked
+    ) {
+
+
+        setStatus(
+
+            "That spot is too close to another dish. Find a different spot."
+
+        );
+
+
+        return;
+
+    }
+
+
+
+    if (
+        menuARState.surfaceFound
+    ) {
+
+
+        setStatus(
+
+            "New spot available — tap the circle to move your dish."
+
+        );
+
+
+    } else {
+
+
+        setStatus(
+
+            "Move your device slowly to find a new spot."
+
+        );
+
+    }
+
+}
+
+
+
+// ==========================================
+// REPOSITION FOOD
 // ==========================================
 
 function repositionPlacedFood() {
@@ -3666,33 +4205,13 @@ function repositionPlacedFood() {
 
         !menuARState.placedObject ||
 
-        !reticle.visible ||
-
-        !menuARState.placementAllowed
+        !reticle.visible
 
     ) {
 
         return;
 
     }
-
-
-
-    // Preserve exact size and orientation.
-
-    const savedQuaternion =
-
-        menuARState.placedObject
-            .quaternion
-            .clone();
-
-
-
-    const savedScale =
-
-        menuARState.placedObject
-            .scale
-            .clone();
 
 
 
@@ -3707,6 +4226,47 @@ function repositionPlacedFood() {
 
 
 
+    const blocked =
+        isPositionBlocked(
+
+            newPosition,
+
+            menuARState.selectedFood,
+
+            menuARState.selectedSize
+
+        );
+
+
+
+    if (
+        blocked
+    ) {
+
+
+        menuARState.placementBlocked =
+            true;
+
+
+
+        setStatus(
+
+            "That spot is too close to another dish. Choose another spot."
+
+        );
+
+
+        return;
+
+    }
+
+
+
+    menuARState.placementBlocked =
+        false;
+
+
+
     const config =
         MODEL_CONFIG[
             menuARState.selectedFood
@@ -3714,34 +4274,14 @@ function repositionPlacedFood() {
 
 
 
-    menuARState.placedObject
-        .position
-        .copy(
-            newPosition
-        );
+    menuARState.placedObject.position.copy(
+        newPosition
+    );
 
 
 
-    menuARState.placedObject
-        .position
-        .y +=
+    menuARState.placedObject.position.y +=
         config.surfaceOffset;
-
-
-
-    menuARState.placedObject
-        .quaternion
-        .copy(
-            savedQuaternion
-        );
-
-
-
-    menuARState.placedObject
-        .scale
-        .copy(
-            savedScale
-        );
 
 
 
@@ -3755,7 +4295,6 @@ function repositionPlacedFood() {
         );
 
 
-
         updateShadowAppearance(
 
             menuARState.activeShadow,
@@ -3765,7 +4304,6 @@ function repositionPlacedFood() {
             menuARState.selectedSize
 
         );
-
 
 
         menuARState.activeShadow.visible =
@@ -3783,16 +4321,12 @@ function repositionPlacedFood() {
         false;
 
 
-    menuARState.placementAllowed =
-        false;
-
-
     reticle.visible =
         false;
 
 
 
-    enablePlacedControls();
+    enableManipulationControls();
 
 
 
@@ -3823,7 +4357,7 @@ function removeFood() {
 
 
 
-    const removedName =
+    const removedFood =
         getFoodName(
             menuARState.selectedFood
         );
@@ -3834,16 +4368,17 @@ function removeFood() {
 
 
 
-    menuARState.appState =
-        "SCANNING";
-
-
     menuARState.surfaceFound =
         false;
 
 
-    menuARState.placementAllowed =
+    menuARState.appState =
+        "SCANNING";
+
+
+    menuARState.placementBlocked =
         false;
+
 
 
     reticle.visible =
@@ -3854,14 +4389,7 @@ function removeFood() {
     hideInteractionControls();
 
 
-
-    disablePlacedControls();
-
-
-
-    setSelectionEnabled(
-        true
-    );
+    disableManipulationControls();
 
 
 
@@ -3869,11 +4397,29 @@ function removeFood() {
 
 
 
-    setStatus(
+    if (
+        menuARState.confirmedItems.length >
+        0
+    ) {
 
-        `${removedName} removed. Choose a dish and size when you're ready.`
 
-    );
+        setStatus(
+
+            `${removedFood} removed. Place another dish or review your current order.`
+
+        );
+
+
+    } else {
+
+
+        setStatus(
+
+            `${removedFood} removed. Choose another spot when you're ready.`
+
+        );
+
+    }
 
 }
 
@@ -3887,12 +4433,7 @@ function addCurrentItemToOrder() {
 
 
     if (
-
-        menuARState.appState !==
-            "PLACED" ||
-
-        !menuARState.placedObject
-
+        !canManipulate()
     ) {
 
         return;
@@ -3903,38 +4444,27 @@ function addCurrentItemToOrder() {
 
     const item = {
 
-
         id:
             menuARState.nextItemId++,
-
 
         food:
             menuARState.selectedFood,
 
-
         sizeKey:
             menuARState.selectedSize,
-
 
         object:
             menuARState.placedObject,
 
-
         shadow:
-            menuARState.activeShadow,
-
-
-        collisionRadius:
-            getCollisionRadius(
-
-                menuARState.selectedFood,
-
-                menuARState.selectedSize
-
-            )
-
+            menuARState.activeShadow
 
     };
+
+
+
+    item.object.userData.orderLocked =
+        true;
 
 
 
@@ -3944,8 +4474,8 @@ function addCurrentItemToOrder() {
 
 
 
-    // Keep the model and shadow in scene,
-    // but it is no longer editable.
+    // The dish remains in the Three.js scene,
+    // but is no longer the active dish.
 
     menuARState.placedObject =
         null;
@@ -3956,15 +4486,45 @@ function addCurrentItemToOrder() {
 
 
 
+    playAddedSound();
+
+
+
+    showOrderReview(
+
+        `${SIZE_PRESETS[item.sizeKey].label} ${getFoodName(item.food)} added to your order.`
+
+    );
+
+}
+
+
+
+// ==========================================
+// SHOW ORDER REVIEW
+// ==========================================
+
+function showOrderReview(
+    message = "Review your order."
+) {
+
+
+    if (
+        menuARState.confirmedItems.length ===
+        0
+    ) {
+
+        return;
+
+    }
+
+
+
     menuARState.appState =
-        "ORDER_ACTIONS";
+        "ORDER_REVIEW";
 
 
     menuARState.surfaceFound =
-        false;
-
-
-    menuARState.placementAllowed =
         false;
 
 
@@ -3973,42 +4533,35 @@ function addCurrentItemToOrder() {
 
 
 
-    playAddedSound();
-
-
-
-    selectionArea.hidden =
+    dishSelectionArea.hidden =
         true;
-
 
 
     hideInteractionControls();
 
 
 
-    disablePlacedControls();
+    orderBadge.hidden =
+        true;
 
 
+    orderCompletePanel.hidden =
+        true;
 
-    orderActionsPanel.hidden =
+
+    orderReviewPanel.hidden =
         false;
 
 
 
-    orderActionMessage.textContent =
-
-        `${SIZE_PRESETS[item.sizeKey].label} ${getFoodName(item.food)} added.`;
-
-
-
-    updateOrderBadge();
+    renderOrderSummary(
+        orderSummary
+    );
 
 
 
     setStatus(
-
-        "Dish added to your order. Add another dish or place your order."
-
+        message
     );
 
 }
@@ -4041,12 +4594,12 @@ function addAnotherDish() {
         false;
 
 
-    menuARState.placementAllowed =
-        false;
-
-
     menuARState.selectedSize =
         "medium";
+
+
+    menuARState.placementBlocked =
+        false;
 
 
     reticle.visible =
@@ -4054,22 +4607,25 @@ function addAnotherDish() {
 
 
 
-    selectionArea.hidden =
+    burgerBtn.disabled =
         false;
 
 
-    orderActionsPanel.hidden =
+    pizzaBtn.disabled =
+        false;
+
+
+
+    dishSelectionArea.hidden =
+        false;
+
+
+    orderReviewPanel.hidden =
         true;
 
 
     orderCompletePanel.hidden =
         true;
-
-
-
-    setSelectionEnabled(
-        true
-    );
 
 
 
@@ -4091,7 +4647,7 @@ function addAnotherDish() {
 
     setStatus(
 
-        "Choose your next dish and size, then find an open spot on the table."
+        "Choose your next dish, then find another spot on the table."
 
     );
 
@@ -4100,98 +4656,29 @@ function addAnotherDish() {
 
 
 // ==========================================
-// CANCEL ORDER
+// REVIEW EXISTING ORDER
 // ==========================================
 
-function cancelOrder() {
+function reviewCurrentOrder() {
 
 
-    removeActivePreviewFromScene();
+    if (
 
+        menuARState.confirmedItems.length ===
+            0 ||
 
+        menuARState.placedObject
 
-    clearConfirmedItemsFromScene();
+    ) {
 
+        return;
 
-
-    orderPulseAnimation =
-        null;
-
-
-
-    menuARState.appState =
-        "SCANNING";
-
-
-    menuARState.surfaceFound =
-        false;
-
-
-    menuARState.placementAllowed =
-        false;
-
-
-    menuARState.selectedFood =
-        "burger";
-
-
-    menuARState.selectedSize =
-        "medium";
-
-
-    menuARState.nextItemId =
-        1;
+    }
 
 
 
-    reticle.visible =
-        false;
-
-
-
-    selectionArea.hidden =
-        false;
-
-
-    orderActionsPanel.hidden =
-        true;
-
-
-    orderCompletePanel.hidden =
-        true;
-
-
-
-    hideInteractionControls();
-
-
-
-    disablePlacedControls();
-
-
-
-    setSelectionEnabled(
-        true
-    );
-
-
-
-    updateFoodButtons(
-        "burger"
-    );
-
-
-    updateSizeButtons();
-
-
-    updateOrderBadge();
-
-
-
-    setStatus(
-
-        "Order cancelled. Choose a dish to start again."
-
+    showOrderReview(
+        "Here is your current order."
     );
 
 }
@@ -4199,172 +4686,7 @@ function cancelOrder() {
 
 
 // ==========================================
-// GROUP FINAL ORDER
-// ==========================================
-
-function getGroupedOrderItems() {
-
-
-    const grouped =
-        new Map();
-
-
-
-    menuARState.confirmedItems.forEach(
-
-        (item) => {
-
-
-            const key =
-
-                `${item.sizeKey}-${item.food}`;
-
-
-
-            if (
-                !grouped.has(key)
-            ) {
-
-
-                grouped.set(
-
-                    key,
-
-                    {
-
-
-                        food:
-                            item.food,
-
-
-                        sizeKey:
-                            item.sizeKey,
-
-
-                        count:
-                            0
-
-
-                    }
-
-                );
-
-            }
-
-
-
-            grouped.get(key).count +=
-                1;
-
-        }
-
-    );
-
-
-
-    return Array.from(
-        grouped.values()
-    );
-
-}
-
-
-
-// ==========================================
-// FINAL SUMMARY
-// ==========================================
-
-function renderFinalOrderSummary() {
-
-
-    finalOrderSummary.innerHTML =
-        "";
-
-
-
-    const groups =
-        getGroupedOrderItems();
-
-
-
-    groups.forEach(
-
-        (group) => {
-
-
-            const row =
-                document.createElement(
-                    "div"
-                );
-
-
-
-            row.className =
-                "order-summary-row";
-
-
-
-            const name =
-                document.createElement(
-                    "span"
-                );
-
-
-
-            name.className =
-                "order-summary-name";
-
-
-
-            name.textContent =
-
-                `${SIZE_PRESETS[group.sizeKey].label} ${getFoodName(group.food)}`;
-
-
-
-            const count =
-                document.createElement(
-                    "span"
-                );
-
-
-
-            count.className =
-                "order-summary-count";
-
-
-
-            count.textContent =
-                `${group.count} ×`;
-
-
-
-            row.appendChild(
-                name
-            );
-
-
-
-            row.appendChild(
-                count
-            );
-
-
-
-            finalOrderSummary.appendChild(
-                row
-            );
-
-        }
-
-    );
-
-}
-
-
-
-// ==========================================
-// FINAL ORDER PULSE
+// FINAL ORDER MODEL PULSE
 // ==========================================
 
 function startOrderPulseAnimation() {
@@ -4383,18 +4705,14 @@ function startOrderPulseAnimation() {
 
     orderPulseAnimation = {
 
-
         startTime:
             null,
-
 
         durationPerItem:
             420,
 
-
         stagger:
             130,
-
 
         baseScales:
 
@@ -4405,7 +4723,6 @@ function startOrderPulseAnimation() {
 
             )
 
-
     };
 
 }
@@ -4413,7 +4730,7 @@ function startOrderPulseAnimation() {
 
 
 // ==========================================
-// UPDATE FINAL PULSE
+// UPDATE FINAL MODEL PULSES
 // ==========================================
 
 function updateOrderPulseAnimation(
@@ -4506,8 +4823,7 @@ function updateOrderPulseAnimation(
 
                     localElapsed /
 
-                    orderPulseAnimation
-                        .durationPerItem,
+                    orderPulseAnimation.durationPerItem,
 
                     0,
 
@@ -4525,11 +4841,8 @@ function updateOrderPulseAnimation(
                     0.065 *
 
                     Math.sin(
-
                         Math.PI *
-
                         progress
-
                     )
                 );
 
@@ -4538,7 +4851,6 @@ function updateOrderPulseAnimation(
             item.object.scale.copy(
                 baseScale
             );
-
 
 
             item.object.scale.multiplyScalar(
@@ -4557,15 +4869,11 @@ function updateOrderPulseAnimation(
 
         (
             Math.max(
-
                 itemCount - 1,
-
                 0
-
             ) *
 
             orderPulseAnimation.stagger
-
         );
 
 
@@ -4609,13 +4917,21 @@ function updateOrderPulseAnimation(
 // ==========================================
 // PLACE ORDER
 // ==========================================
+//
+// Prototype confirmation only.
+// No server/payment/order backend is called.
+// ==========================================
 
 function placeOrder() {
 
 
     if (
+
         menuARState.confirmedItems.length ===
-        0
+            0 ||
+
+        menuARState.placedObject
+
     ) {
 
         return;
@@ -4628,11 +4944,15 @@ function placeOrder() {
         "ORDER_CONFIRMED";
 
 
+    menuARState.orderPlaced =
+        true;
+
+
     menuARState.surfaceFound =
         false;
 
 
-    menuARState.placementAllowed =
+    menuARState.placementBlocked =
         false;
 
 
@@ -4641,21 +4961,20 @@ function placeOrder() {
 
 
 
-    selectionArea.hidden =
+    dishSelectionArea.hidden =
         true;
 
 
-    orderActionsPanel.hidden =
-        true;
+    hideInteractionControls();
+
 
 
     orderBadge.hidden =
         true;
 
 
-
-    hideInteractionControls();
-
+    orderReviewPanel.hidden =
+        true;
 
 
     orderCompletePanel.hidden =
@@ -4663,7 +4982,9 @@ function placeOrder() {
 
 
 
-    renderFinalOrderSummary();
+    renderOrderSummary(
+        finalOrderSummary
+    );
 
 
 
@@ -4683,14 +5004,14 @@ function placeOrder() {
 
 
 
-    const count =
+    const itemCount =
         menuARState.confirmedItems.length;
 
 
 
     setStatus(
 
-        `Order confirmed — ${count} ${count === 1 ? "dish" : "dishes"} selected.`
+        `Order confirmed — ${itemCount} ${itemCount === 1 ? "dish" : "dishes"} selected.`
 
     );
 
@@ -4729,8 +5050,6 @@ function onXRSelect() {
 
 
 
-    // Initial placement.
-
     if (
 
         menuARState.appState ===
@@ -4738,11 +5057,27 @@ function onXRSelect() {
 
         !menuARState.placedObject &&
 
-        reticle.visible &&
-
-        menuARState.placementAllowed
+        reticle.visible
 
     ) {
+
+
+        if (
+            menuARState.placementBlocked
+        ) {
+
+
+            setStatus(
+
+                "That spot is too close to another dish. Choose another spot."
+
+            );
+
+
+            return;
+
+        }
+
 
 
         placeSelectedFood();
@@ -4754,8 +5089,6 @@ function onXRSelect() {
 
 
 
-    // Reposition.
-
     if (
 
         menuARState.appState ===
@@ -4763,9 +5096,7 @@ function onXRSelect() {
 
         menuARState.placedObject &&
 
-        reticle.visible &&
-
-        menuARState.placementAllowed
+        reticle.visible
 
     ) {
 
@@ -4785,6 +5116,24 @@ function onXRSelect() {
 
 
 
+        if (
+            menuARState.placementBlocked
+        ) {
+
+
+            setStatus(
+
+                "That spot is too close to another dish. Choose another spot."
+
+            );
+
+
+            return;
+
+        }
+
+
+
         repositionPlacedFood();
 
     }
@@ -4794,7 +5143,7 @@ function onXRSelect() {
 
 
 // ==========================================
-// HIT TEST / RENDER LOOP
+// RENDER / HIT TEST
 // ==========================================
 
 function render(
@@ -4811,7 +5160,6 @@ function render(
     );
 
 
-
     updateOrderPulseAnimation(
         timestamp
     );
@@ -4825,9 +5173,6 @@ function render(
 
         menuARState.appState ===
             "SURFACE_FOUND" ||
-
-        menuARState.appState ===
-            "SURFACE_BLOCKED" ||
 
         menuARState.appState ===
             "MOVE_MODE";
@@ -4865,7 +5210,6 @@ function render(
                 hitTestResults[0];
 
 
-
             const pose =
                 hit.getPose(
                     referenceSpace
@@ -4889,63 +5233,38 @@ function render(
 
 
 
-                const candidatePosition =
-                    new THREE.Vector3();
-
-
-
-                candidatePosition.setFromMatrixPosition(
-                    reticle.matrix
-                );
-
-
-
-                const positionAvailable =
-
-                    isPositionAvailable(
-
-                        candidatePosition,
-
-                        menuARState.selectedFood,
-
-                        menuARState.selectedSize
-
-                    );
-
-
-
                 menuARState.surfaceFound =
                     true;
 
 
 
-                menuARState.placementAllowed =
-                    positionAvailable;
+                updateReticlePlacementState();
 
 
-
-                // ==================================
-                // VALID OPEN POSITION
-                // ==================================
 
                 if (
-                    positionAvailable
+
+                    !menuARState.placedObject &&
+
+                    menuARState.appState !==
+                        "MOVE_MODE"
+
                 ) {
 
 
-                    showValidReticle();
+                    menuARState.appState =
+                        "SURFACE_FOUND";
 
 
 
                     if (
-                        menuARState.appState ===
-                        "MOVE_MODE"
+                        menuARState.placementBlocked
                     ) {
 
 
                         setStatus(
 
-                            "Open spot found — tap the white circle to move your dish."
+                            "That spot is too close to another dish. Move the circle to a clear area."
 
                         );
 
@@ -4953,62 +5272,25 @@ function render(
                     } else {
 
 
-                        menuARState.appState =
-                            "SURFACE_FOUND";
-
-
-
                         setStatus(
 
-                            `Tap the white circle to place your ${SIZE_PRESETS[menuARState.selectedSize].label} ${getFoodName(menuARState.selectedFood)}.`
+                            `Perfect — tap the circle to place your ${getFoodName(menuARState.selectedFood)}.`
 
                         );
 
                     }
-
 
                 }
 
 
-                // ==================================
-                // COLLISION / OCCUPIED POSITION
-                // ==================================
 
-                else {
-
-
-                    showBlockedReticle();
+                if (
+                    menuARState.appState ===
+                    "MOVE_MODE"
+                ) {
 
 
-
-                    if (
-                        menuARState.appState ===
-                        "MOVE_MODE"
-                    ) {
-
-
-                        setStatus(
-
-                            "That spot is too close to another dish. Choose an open spot."
-
-                        );
-
-
-                    } else {
-
-
-                        menuARState.appState =
-                            "SURFACE_BLOCKED";
-
-
-
-                        setStatus(
-
-                            "That spot is already occupied. Move the red circle to an open space."
-
-                        );
-
-                    }
+                    setMoveModeStatus();
 
                 }
 
@@ -5022,12 +5304,11 @@ function render(
                 false;
 
 
-
             menuARState.surfaceFound =
                 false;
 
 
-            menuARState.placementAllowed =
+            menuARState.placementBlocked =
                 false;
 
 
@@ -5038,11 +5319,7 @@ function render(
             ) {
 
 
-                setStatus(
-
-                    "Move your device slowly to find a new spot."
-
-                );
+                setMoveModeStatus();
 
 
             } else {
@@ -5089,7 +5366,7 @@ function render(
 
 
 // ==========================================
-// PROTECT XR FROM HTML BUTTON TAPS
+// UI → XR TAP PROTECTION
 // ==========================================
 
 function markUITouch() {
@@ -5147,7 +5424,6 @@ arControls.addEventListener(
         event.preventDefault();
 
 
-
         markUITouch();
 
     }
@@ -5157,7 +5433,7 @@ arControls.addEventListener(
 
 
 // ==========================================
-// FOOD EVENTS
+// FOOD BUTTONS
 // ==========================================
 
 burgerBtn.addEventListener(
@@ -5195,7 +5471,7 @@ pizzaBtn.addEventListener(
 
 
 // ==========================================
-// SIZE EVENTS
+// SIZE BUTTONS
 // ==========================================
 
 sizeSmallBtn.addEventListener(
@@ -5205,7 +5481,7 @@ sizeSmallBtn.addEventListener(
     () => {
 
 
-        selectSize(
+        selectPreviewSize(
             "small"
         );
 
@@ -5222,7 +5498,7 @@ sizeMediumBtn.addEventListener(
     () => {
 
 
-        selectSize(
+        selectPreviewSize(
             "medium"
         );
 
@@ -5239,7 +5515,7 @@ sizeLargeBtn.addEventListener(
     () => {
 
 
-        selectSize(
+        selectPreviewSize(
             "large"
         );
 
@@ -5306,6 +5582,20 @@ addAnotherBtn.addEventListener(
 
 
 // ==========================================
+// REVIEW ORDER
+// ==========================================
+
+reviewOrderBtn.addEventListener(
+
+    "click",
+
+    reviewCurrentOrder
+
+);
+
+
+
+// ==========================================
 // PLACE ORDER
 // ==========================================
 
@@ -5314,20 +5604,6 @@ placeOrderBtn.addEventListener(
     "click",
 
     placeOrder
-
-);
-
-
-
-// ==========================================
-// CANCEL ORDER
-// ==========================================
-
-cancelOrderBtn.addEventListener(
-
-    "click",
-
-    cancelOrder
 
 );
 
@@ -5345,7 +5621,6 @@ startARBtn.addEventListener(
 
 
         ensureAudioContext();
-
 
 
         await startARSession();
@@ -5424,7 +5699,7 @@ window.addEventListener(
 
 
 // ==========================================
-// INITIALIZATION
+// INITIALIZE
 // ==========================================
 
 async function initializeApplication() {
@@ -5439,6 +5714,15 @@ async function initializeApplication() {
 
 
     resetControls();
+
+
+
+    updateFoodButtons(
+        "burger"
+    );
+
+
+    updateSizeButtons();
 
 
 
