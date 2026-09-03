@@ -342,13 +342,26 @@ let referenceSpace =
     null;
 
 
-// The most recent XRHitTestResult produced by the
-// render loop. Used at the moment of placement (or
-// re-placement) to create an anchor for that exact
-// real-world point.
-
 let latestHitTestResult =
     null;
+
+
+
+// ==========================================
+// SESSION CLEANUP FLAGS
+// ==========================================
+//
+// Prevents Exit Preview from trying to close
+// the same XR session more than once.
+// Also prevents cleanup from running twice.
+// ==========================================
+
+let isEndingXRSession =
+    false;
+
+
+let isCleaningUpXRSession =
+    false;
 
 
 
@@ -746,7 +759,7 @@ function initThreeJS() {
 
 
 // ==========================================
-// CREATE A SHADOW FOR ONE DISH
+// CREATE SHADOW
 // ==========================================
 
 function createShadowMesh(
@@ -815,7 +828,7 @@ function createShadowMesh(
 
 
 // ==========================================
-// UPDATE ONE SHADOW
+// UPDATE SHADOW
 // ==========================================
 
 function updateShadowAppearance(
@@ -841,7 +854,6 @@ function updateShadowAppearance(
 
     const config =
         MODEL_CONFIG[food];
-
 
 
     const size =
@@ -871,7 +883,7 @@ function updateShadowAppearance(
 
 
 // ==========================================
-// POSITION SHADOW AT RETICLE
+// POSITION SHADOW
 // ==========================================
 
 function positionShadowFromReticle(
@@ -893,10 +905,8 @@ function positionShadowFromReticle(
         new THREE.Vector3();
 
 
-
     const quaternion =
         new THREE.Quaternion();
-
 
 
     const ignoredScale =
@@ -919,7 +929,6 @@ function positionShadowFromReticle(
     shadow.position.copy(
         position
     );
-
 
 
     shadow.quaternion.copy(
@@ -956,36 +965,20 @@ function positionShadowFromReticle(
 
 
 // ==========================================
-// ANCHOR-BASED DRIFT CORRECTION
-// ==========================================
-//
-// On surfaces with little visual texture (plain
-// wood, glass, a plain tablecloth) the device's
-// visual-inertial tracking has fewer features to
-// lock onto. If it re-estimates its position, any
-// object placed using only a single hit-test pose
-// stays fixed relative to the *old* estimate, so
-// the whole scene appears to shift together while
-// the distances between objects stay correct —
-// exactly the symptom described.
-//
-// WebXR anchors fix this: instead of remembering a
-// plain position, each dish asks the tracking
-// system to keep pinning a specific real-world
-// point. Every frame we re-read that anchor's pose
-// and move the dish (and its shadow) to match, so
-// each item is corrected independently and stays
-// where it was actually placed.
+// WEBXR ANCHORS
 // ==========================================
 
-async function createAnchorForHitResult(hitResult) {
+async function createAnchorForHitResult(
+    hitResult
+) {
 
 
     if (
 
         !hitResult ||
 
-        typeof hitResult.createAnchor !== "function"
+        typeof hitResult.createAnchor !==
+            "function"
 
     ) {
 
@@ -1006,12 +999,11 @@ async function createAnchorForHitResult(hitResult) {
 
         console.warn(
 
-            "Anchor creation failed, falling back to static placement:",
+            "Anchor creation failed. Static placement will be used.",
 
             error
 
         );
-
 
 
         return null;
@@ -1022,7 +1014,9 @@ async function createAnchorForHitResult(hitResult) {
 
 
 
-function deleteAnchorFromObject(object) {
+function deleteAnchorFromObject(
+    object
+) {
 
 
     if (
@@ -1044,7 +1038,10 @@ function deleteAnchorFromObject(object) {
 
         } catch (error) {
 
-            // Anchor may already be invalid — safe to ignore.
+
+            console.warn(
+                "Anchor was already unavailable."
+            );
 
         }
 
@@ -1091,7 +1088,6 @@ function applyAnchorTracking(
 
 
     const anchorPose =
-
         frame.getPose(
 
             object.userData.anchor.anchorSpace,
@@ -1113,7 +1109,6 @@ function applyAnchorTracking(
 
 
     const matrix =
-
         new THREE.Matrix4().fromArray(
 
             anchorPose.transform.matrix
@@ -1126,10 +1121,8 @@ function applyAnchorTracking(
         new THREE.Vector3();
 
 
-
     const quaternion =
         new THREE.Quaternion();
-
 
 
     const ignoredScale =
@@ -1150,7 +1143,6 @@ function applyAnchorTracking(
 
 
     const up =
-
         new THREE.Vector3(
             0,
             1,
@@ -1162,9 +1154,7 @@ function applyAnchorTracking(
 
 
     const offsetY =
-
         object.userData.surfaceOffset ||
-
         0;
 
 
@@ -1174,7 +1164,6 @@ function applyAnchorTracking(
     );
 
 
-
     object.position.addScaledVector(
 
         up,
@@ -1182,7 +1171,6 @@ function applyAnchorTracking(
         offsetY
 
     );
-
 
 
     object.quaternion.copy(
@@ -1316,7 +1304,6 @@ function playTone(
         audioContext.createOscillator();
 
 
-
     const gain =
         audioContext.createGain();
 
@@ -1388,17 +1375,14 @@ function playTone(
     );
 
 
-
     gain.connect(
         audioContext.destination
     );
 
 
-
     oscillator.start(
         now
     );
-
 
 
     oscillator.stop(
@@ -1414,115 +1398,73 @@ function playTone(
 
 
 // ==========================================
-// PLACEMENT SOUND
+// SOUNDS
 // ==========================================
 
 function playPlacementSound() {
 
 
     playTone(
-
         220,
-
         125,
-
         0.18,
-
         0.045
-
     );
 
 
     playTone(
-
         420,
-
         320,
-
         0.10,
-
         0.018,
-
         0.03
-
     );
 
 }
 
 
-
-// ==========================================
-// ADD-TO-ORDER SOUND
-// ==========================================
 
 function playAddedSound() {
 
 
     playTone(
-
         430,
-
         520,
-
         0.11,
-
         0.025
-
     );
 
 }
 
 
 
-// ==========================================
-// FINAL ORDER SOUND
-// ==========================================
-
 function playOrderConfirmationSound() {
 
 
     playTone(
-
         523,
-
         523,
-
         0.13,
-
         0.035,
-
         0
-
     );
 
 
     playTone(
-
         659,
-
         659,
-
         0.15,
-
         0.038,
-
         0.10
-
     );
 
 
     playTone(
-
         784,
-
         784,
-
         0.22,
-
         0.040,
-
         0.21
-
     );
 
 }
@@ -1533,7 +1475,9 @@ function playOrderConfirmationSound() {
 // STATUS
 // ==========================================
 
-function setStatus(message) {
+function setStatus(
+    message
+) {
 
 
     if (
@@ -1555,7 +1499,9 @@ function setStatus(message) {
 // SUPPORT MESSAGE
 // ==========================================
 
-function showSupportMessage(message) {
+function showSupportMessage(
+    message
+) {
 
 
     xrSupportMessage.textContent =
@@ -1587,7 +1533,9 @@ function hideSupportMessage() {
 // FOOD NAME
 // ==========================================
 
-function getFoodName(food) {
+function getFoodName(
+    food
+) {
 
 
     return food === "burger"
@@ -1617,12 +1565,13 @@ function getCurrentSizePreset() {
 // CURRENT MODEL SCALE
 // ==========================================
 
-function getCurrentModelScale(food) {
+function getCurrentModelScale(
+    food
+) {
 
 
     const config =
         MODEL_CONFIG[food];
-
 
 
     const size =
@@ -1646,7 +1595,9 @@ function getCurrentModelScale(food) {
 // LOAD MODEL
 // ==========================================
 
-function loadModel(food) {
+function loadModel(
+    food
+) {
 
 
     return new Promise(
@@ -1675,11 +1626,9 @@ function loadModel(food) {
                         gltf.scene;
 
 
-
                     console.log(
                         `${food} model loaded.`
                     );
-
 
 
                     resolve();
@@ -1700,7 +1649,6 @@ function loadModel(food) {
                         error
 
                     );
-
 
 
                     reject(
@@ -1732,16 +1680,13 @@ async function loadModels() {
 
         await Promise.all([
 
-
             loadModel(
                 "burger"
             ),
 
-
             loadModel(
                 "pizza"
             )
-
 
         ]);
 
@@ -1782,7 +1727,9 @@ async function loadModels() {
 // FOOD BUTTONS
 // ==========================================
 
-function updateFoodButtons(food) {
+function updateFoodButtons(
+    food
+) {
 
 
     const burgerActive =
@@ -2029,7 +1976,6 @@ function renderOrderSummary(
             );
 
 
-
             container.appendChild(
                 row
             );
@@ -2173,7 +2119,9 @@ function selectPreviewSize(
 // SELECT FOOD
 // ==========================================
 
-function selectFood(food) {
+function selectFood(
+    food
+) {
 
 
     if (
@@ -2249,7 +2197,6 @@ function selectFood(food) {
             previousFood
 
         );
-
 
 
         return;
@@ -2335,10 +2282,8 @@ function replacePlacedFood(
         menuARState.placedObject;
 
 
-
     const newConfig =
         MODEL_CONFIG[newFood];
-
 
 
     const previousConfig =
@@ -2348,7 +2293,6 @@ function replacePlacedFood(
 
     const savedPosition =
         oldModel.position.clone();
-
 
 
     const savedQuaternion =
@@ -2401,10 +2345,6 @@ function replacePlacedFood(
         newConfig.surfaceOffset;
 
 
-
-    // Same physical spot as before, so the existing
-    // anchor (if any) is still valid — carry it over
-    // instead of losing tracking on a food swap.
 
     if (
         oldModel.userData.anchor
@@ -2511,7 +2451,6 @@ async function checkXRSupport() {
         );
 
 
-
         updateStartButton();
 
 
@@ -2554,7 +2493,6 @@ async function checkXRSupport() {
 
             menuARState.appState =
                 "UNSUPPORTED";
-
 
 
             showSupportMessage(
@@ -2732,7 +2670,11 @@ async function startARSession() {
 
         !menuARState.xrSupported ||
 
-        !menuARState.modelsReady
+        !menuARState.modelsReady ||
+
+        xrSession ||
+
+        isEndingXRSession
 
     ) {
 
@@ -2743,6 +2685,10 @@ async function startARSession() {
 
 
     ensureAudioContext();
+
+
+
+    hideSupportMessage();
 
 
 
@@ -2758,7 +2704,7 @@ async function startARSession() {
     try {
 
 
-        xrSession =
+        const newSession =
 
             await navigator.xr.requestSession(
 
@@ -2798,15 +2744,20 @@ async function startARSession() {
 
 
 
+        xrSession =
+            newSession;
+
+
+
         await renderer.xr.setSession(
-            xrSession
+            newSession
         );
 
 
 
         viewerSpace =
 
-            await xrSession.requestReferenceSpace(
+            await newSession.requestReferenceSpace(
                 "viewer"
             );
 
@@ -2817,17 +2768,17 @@ async function startARSession() {
 
             referenceSpace =
 
-                await xrSession.requestReferenceSpace(
+                await newSession.requestReferenceSpace(
                     "local-floor"
                 );
 
 
-        } catch {
+        } catch (error) {
 
 
             referenceSpace =
 
-                await xrSession.requestReferenceSpace(
+                await newSession.requestReferenceSpace(
                     "local"
                 );
 
@@ -2837,7 +2788,7 @@ async function startARSession() {
 
         hitTestSource =
 
-            await xrSession.requestHitTestSource({
+            await newSession.requestHitTestSource({
 
                 space:
                     viewerSpace
@@ -2846,13 +2797,27 @@ async function startARSession() {
 
 
 
-        xrSession.addEventListener(
+        newSession.addEventListener(
 
             "end",
 
-            onARSessionEnded
+            onARSessionEnded,
+
+            {
+                once:
+                    true
+            }
 
         );
+
+
+
+        isEndingXRSession =
+            false;
+
+
+        isCleaningUpXRSession =
+            false;
 
 
 
@@ -2920,9 +2885,18 @@ async function startARSession() {
 
 
 
+        exitARBtn.disabled =
+            false;
+
+
+        exitARBtn.textContent =
+            "Exit Preview";
+
+
+
         setStatus(
 
-            `Choose a dish and move your device slowly over the table.`
+            "Choose a dish and move your device slowly over the table."
 
         );
 
@@ -2939,6 +2913,36 @@ async function startARSession() {
 
         xrSession =
             null;
+
+
+        viewerSpace =
+            null;
+
+
+        referenceSpace =
+            null;
+
+
+        hitTestSource =
+            null;
+
+
+        latestHitTestResult =
+            null;
+
+
+        isEndingXRSession =
+            false;
+
+
+        isCleaningUpXRSession =
+            false;
+
+
+
+        document.body.classList.remove(
+            "xr-session-active"
+        );
 
 
 
@@ -3030,18 +3034,96 @@ async function startARSession() {
 
 
 // ==========================================
-// END AR
+// END AR SESSION
+// ==========================================
+//
+// FIX:
+// The previous version relied only on session.end()
+// and the browser's "end" event.
+//
+// Some Android WebXR browsers may enter a shutdown
+// state where another click or delayed cleanup causes
+// an error.
+//
+// This version:
+// 1. Prevents duplicate exit requests.
+// 2. Disables the Exit button during shutdown.
+// 3. Waits for WebXR session.end().
+// 4. Uses the normal "end" event for cleanup.
+// 5. Has a safe fallback cleanup if end() rejects.
 // ==========================================
 
 async function endARSession() {
 
 
     if (
-        xrSession
+        !xrSession
     ) {
 
+        showPreARInterface();
 
-        await xrSession.end();
+        updateStartButton();
+
+        return;
+
+    }
+
+
+
+    if (
+        isEndingXRSession
+    ) {
+
+        return;
+
+    }
+
+
+
+    isEndingXRSession =
+        true;
+
+
+
+    exitARBtn.disabled =
+        true;
+
+
+    exitARBtn.textContent =
+        "Exiting...";
+
+
+
+    const sessionToEnd =
+        xrSession;
+
+
+
+    try {
+
+
+        await sessionToEnd.end();
+
+
+        // onARSessionEnded() will normally be
+        // triggered automatically by the XR
+        // session "end" event.
+
+
+    } catch (error) {
+
+
+        console.warn(
+
+            "XR session could not end normally. Running safe cleanup.",
+
+            error
+
+        );
+
+
+
+        onARSessionEnded();
 
     }
 
@@ -3123,7 +3205,6 @@ function clearConfirmedItemsFromScene() {
                 deleteAnchorFromObject(
                     item.object
                 );
-
 
 
                 scene.remove(
@@ -3215,7 +3296,6 @@ function enableManipulationControls() {
         false;
 
 
-
     burgerBtn.disabled =
         false;
 
@@ -3298,7 +3378,6 @@ function setMoveModeControls() {
         true;
 
 
-
     moveBtn.disabled =
         true;
 
@@ -3331,9 +3410,18 @@ function resetControls() {
 
 
 
+    menuARState.selectedFood =
+        "burger";
+
+
     menuARState.selectedSize =
         "medium";
 
+
+
+    updateFoodButtons(
+        menuARState.selectedFood
+    );
 
 
     updateSizeButtons();
@@ -3364,6 +3452,28 @@ function resetControls() {
 
 
 
+    if (
+        orderSummary
+    ) {
+
+        orderSummary.innerHTML =
+            "";
+
+    }
+
+
+
+    if (
+        finalOrderSummary
+    ) {
+
+        finalOrderSummary.innerHTML =
+            "";
+
+    }
+
+
+
     moveBtn.textContent =
         "↔ Move Dish";
 
@@ -3371,6 +3481,15 @@ function resetControls() {
     moveBtn.classList.remove(
         "active"
     );
+
+
+
+    exitARBtn.disabled =
+        false;
+
+
+    exitARBtn.textContent =
+        "Exit Preview";
 
 }
 
@@ -3383,92 +3502,262 @@ function resetControls() {
 function onARSessionEnded() {
 
 
+    // Prevent cleanup from executing twice.
     if (
-        hitTestSource
+        isCleaningUpXRSession
     ) {
 
-
-        hitTestSource.cancel();
+        return;
 
     }
 
 
 
-    hitTestSource =
-        null;
-
-
-    viewerSpace =
-        null;
-
-
-    referenceSpace =
-        null;
-
-
-    xrSession =
-        null;
-
-
-    latestHitTestResult =
-        null;
+    isCleaningUpXRSession =
+        true;
 
 
 
-    reticle.visible =
-        false;
+    try {
+
+
+        // ==================================
+        // STOP HIT TEST
+        // ==================================
+
+        if (
+            hitTestSource
+        ) {
+
+
+            try {
+
+
+                hitTestSource.cancel();
+
+
+            } catch (error) {
+
+
+                console.warn(
+                    "Hit-test source was already closed."
+                );
+
+            }
+
+        }
 
 
 
-    removeActivePreviewFromScene();
+        hitTestSource =
+            null;
+
+
+        viewerSpace =
+            null;
+
+
+        referenceSpace =
+            null;
+
+
+        latestHitTestResult =
+            null;
 
 
 
-    clearConfirmedItemsFromScene();
+        // ==================================
+        // REMOVE RETICLE
+        // ==================================
+
+        if (
+            reticle
+        ) {
+
+
+            reticle.visible =
+                false;
+
+        }
 
 
 
-    menuARState.surfaceFound =
-        false;
+        // ==================================
+        // REMOVE MODELS / ANCHORS
+        // ==================================
+
+        removeActivePreviewFromScene();
 
 
-    menuARState.selectedSize =
-        "medium";
-
-
-    menuARState.orderPlaced =
-        false;
-
-
-    menuARState.nextItemId =
-        1;
-
-
-    menuARState.appState =
-        "READY_TO_SCAN";
+        clearConfirmedItemsFromScene();
 
 
 
-    orderPulseAnimation =
-        null;
+        // ==================================
+        // RESET APPLICATION STATE
+        // ==================================
+
+        menuARState.surfaceFound =
+            false;
+
+
+        menuARState.selectedFood =
+            "burger";
+
+
+        menuARState.selectedSize =
+            "medium";
+
+
+        menuARState.orderPlaced =
+            false;
+
+
+        menuARState.nextItemId =
+            1;
+
+
+        menuARState.appState =
+            "READY_TO_SCAN";
+
+
+        placementAnimation =
+            null;
+
+
+        orderPulseAnimation =
+            null;
+
+
+        ignoreXRSelectUntil =
+            0;
+
+
+        moveModeStartedAt =
+            0;
 
 
 
-    resetControls();
+        // ==================================
+        // IMPORTANT
+        // Clear the session only after
+        // scene/session cleanup is completed.
+        // ==================================
+
+        xrSession =
+            null;
 
 
 
-    document.body.classList.remove(
-        "xr-session-active"
-    );
+        document.body.classList.remove(
+            "xr-session-active"
+        );
 
 
 
-    showPreARInterface();
+        resetControls();
 
 
 
-    updateStartButton();
+        showPreARInterface();
+
+
+
+        hideSupportMessage();
+
+
+
+        // ==================================
+        // RESTORE START BUTTON
+        // ==================================
+
+        updateStartButton();
+
+
+
+        // ==================================
+        // RETURN PAGE TO TOP
+        // ==================================
+
+        try {
+
+
+            window.scrollTo({
+
+                top:
+                    0,
+
+                left:
+                    0,
+
+                behavior:
+                    "auto"
+
+            });
+
+
+        } catch (error) {
+
+
+            window.scrollTo(
+                0,
+                0
+            );
+
+        }
+
+
+    } catch (error) {
+
+
+        console.error(
+
+            "Error while cleaning up AR session:",
+
+            error
+
+        );
+
+
+
+        // Even if a cleanup step fails,
+        // make sure the user can see the
+        // normal Start AR screen again.
+
+        xrSession =
+            null;
+
+
+        document.body.classList.remove(
+            "xr-session-active"
+        );
+
+
+        showPreARInterface();
+
+
+        updateStartButton();
+
+
+    } finally {
+
+
+        isEndingXRSession =
+            false;
+
+
+        isCleaningUpXRSession =
+            false;
+
+
+        exitARBtn.disabled =
+            false;
+
+
+        exitARBtn.textContent =
+            "Exit Preview";
+
+    }
 
 }
 
@@ -3478,7 +3767,9 @@ function onARSessionEnded() {
 // EASING
 // ==========================================
 
-function easeOutCubic(t) {
+function easeOutCubic(
+    t
+) {
 
 
     return (
@@ -3496,7 +3787,9 @@ function easeOutCubic(t) {
 
 
 
-function easeOutBack(t) {
+function easeOutBack(
+    t
+) {
 
 
     const c1 =
@@ -3849,7 +4142,6 @@ function placeSelectedFood() {
         menuARState.selectedFood;
 
 
-
     const template =
         modelTemplates[food];
 
@@ -3867,7 +4159,6 @@ function placeSelectedFood() {
 
     const config =
         MODEL_CONFIG[food];
-
 
 
     const placedModel =
@@ -3904,7 +4195,6 @@ function placeSelectedFood() {
 
     const placementRotation =
         new THREE.Quaternion();
-
 
 
     const ignoredScale =
@@ -3953,8 +4243,6 @@ function placeSelectedFood() {
 
 
 
-    // Create a unique shadow for this dish.
-
     const shadow =
         createShadowMesh(
 
@@ -3992,7 +4280,6 @@ function placeSelectedFood() {
         false;
 
 
-
     reticle.visible =
         false;
 
@@ -4001,15 +4288,13 @@ function placeSelectedFood() {
     hideInteractionControls();
 
 
-
     disableManipulationControls();
 
 
 
-    // Pin this dish to the exact real-world point it
-    // was placed at, so tracking re-calibration on a
-    // low-texture table corrects it individually
-    // instead of the whole scene drifting together.
+    // ======================================
+    // OPTIONAL WEBXR ANCHOR
+    // ======================================
 
     createAnchorForHitResult(
 
@@ -4064,16 +4349,20 @@ function placeSelectedFood() {
             } else {
 
 
-                // The dish was removed before the
-                // anchor finished resolving.
-
                 try {
 
 
                     anchor.delete();
 
 
-                } catch (error) {}
+                } catch (error) {
+
+
+                    console.warn(
+                        "Unused anchor was already unavailable."
+                    );
+
+                }
 
             }
 
@@ -4309,10 +4598,6 @@ function repositionPlacedFood() {
 
 
 
-    // The dish now sits on a new real-world spot, so
-    // the old anchor no longer applies — drop it and
-    // pin a fresh one at the new location.
-
     deleteAnchorFromObject(
         objectBeingMoved
     );
@@ -4353,7 +4638,14 @@ function repositionPlacedFood() {
                     anchor.delete();
 
 
-                } catch (error) {}
+                } catch (error) {
+
+
+                    console.warn(
+                        "Unused movement anchor was already unavailable."
+                    );
+
+                }
 
             }
 
@@ -4548,10 +4840,6 @@ function addCurrentItemToOrder() {
     );
 
 
-
-    // The dish remains in the Three.js scene,
-    // still tracked by its anchor, but it is no
-    // longer the active dish.
 
     menuARState.placedObject =
         null;
@@ -4990,10 +5278,6 @@ function updateOrderPulseAnimation(
 // ==========================================
 // PLACE ORDER
 // ==========================================
-//
-// Prototype confirmation only.
-// No server/payment/order backend is called.
-// ==========================================
 
 function placeOrder() {
 
@@ -5089,7 +5373,6 @@ function placeOrder() {
     startOrderPulseAnimation();
 
 
-
     playOrderConfirmationSound();
 
 }
@@ -5176,7 +5459,7 @@ function onXRSelect() {
 
 
 // ==========================================
-// RENDER / HIT TEST
+// RENDER / WEBXR HIT TEST
 // ==========================================
 
 function render(
@@ -5200,11 +5483,9 @@ function render(
 
 
 
-    // Re-pin every anchored dish to its tracked
-    // real-world point every frame. This is what
-    // keeps items steady (individually corrected)
-    // instead of the whole order drifting together
-    // when the surface is hard to track.
+    // ======================================
+    // ANCHOR TRACKING
+    // ======================================
 
     if (
 
@@ -5265,6 +5546,10 @@ function render(
     }
 
 
+
+    // ======================================
+    // SPATIAL TRACKING / HIT TESTING
+    // ======================================
 
     const shouldRunHitTest =
 
@@ -5389,7 +5674,6 @@ function render(
                 null;
 
 
-
             reticle.visible =
                 false;
 
@@ -5401,7 +5685,7 @@ function render(
 
             if (
                 menuARState.appState ===
-                "MOVE_MODE"
+                    "MOVE_MODE"
             ) {
 
 
