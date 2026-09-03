@@ -72,7 +72,7 @@
             display: flex;
 
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
 
             gap: 10px;
 
@@ -105,30 +105,6 @@
 
             font-size: 11px;
             font-weight: 700;
-
-        }
-
-
-        .review-order-button {
-
-            min-height: 32px;
-
-            padding: 5px 11px;
-
-            border:
-                1px solid
-                #e85d04;
-
-            border-radius: 9px;
-
-            background: #ffffff;
-
-            color: #d95400;
-
-            font-size: 10px;
-            font-weight: 700;
-
-            cursor: pointer;
 
         }
 
@@ -358,7 +334,7 @@
 
 
         /* ==================================
-           ORDER ACTION BUTTONS
+           ORDER ACTIONS
            ================================== */
 
         .order-actions {
@@ -410,7 +386,54 @@
             background:
                 #e85d04;
 
-            color: #ffffff;
+            color:
+                #ffffff;
+
+        }
+
+
+        /* ==================================
+           CANCEL ORDER
+           ================================== */
+
+        .cancel-order-button {
+
+            width: 100%;
+
+            min-height: 42px;
+
+            margin-top: 10px;
+
+            border:
+                1px solid
+                #d7d7d7;
+
+            border-radius: 11px;
+
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.95
+                );
+
+            color:
+                #8a4646;
+
+            font-size: 12px;
+            font-weight: 700;
+
+            cursor: pointer;
+
+        }
+
+
+        .cancel-order-button:disabled {
+
+            opacity: 0.65;
+
+            cursor: default;
 
         }
 
@@ -483,6 +506,45 @@
             font-size: 11px;
 
             line-height: 1.45;
+
+        }
+
+
+        /* ==================================
+           DONE BUTTON
+           ================================== */
+
+        .done-button {
+
+            width: 100%;
+
+            min-height: 44px;
+
+            margin-top: 5px;
+
+            border: none;
+
+            border-radius: 11px;
+
+            background:
+                #238247;
+
+            color:
+                #ffffff;
+
+            font-size: 13px;
+            font-weight: 800;
+
+            cursor: pointer;
+
+        }
+
+
+        .done-button:disabled {
+
+            opacity: 0.65;
+
+            cursor: default;
 
         }
 
@@ -671,7 +733,7 @@
 
 
         <!-- =================================
-             PRE-AR
+             PRE-AR SCREEN
              ================================= -->
 
         <section
@@ -728,7 +790,7 @@
 
 
         <!-- =================================
-             XR CONTROL PANEL
+             AR CONTROL PANEL
              ================================= -->
 
         <section
@@ -737,6 +799,8 @@
             hidden
         >
 
+
+            <!-- STATUS -->
 
             <p
                 class="status-message"
@@ -747,7 +811,10 @@
 
 
 
-            <!-- CURRENT ORDER BADGE -->
+            <!-- =================================
+                 ORDER COUNT ONLY
+                 No Review Order button
+                 ================================= -->
 
             <div
                 class="order-badge"
@@ -764,20 +831,13 @@
                 </span>
 
 
-                <button
-                    type="button"
-                    class="review-order-button"
-                    id="reviewOrderBtn"
-                >
-                    Review Order
-                </button>
-
-
             </div>
 
 
 
-            <!-- DISH SELECTION -->
+            <!-- =================================
+                 DISH SELECTION
+                 ================================= -->
 
             <div id="dishSelectionArea">
 
@@ -815,7 +875,9 @@
 
 
 
-            <!-- ACTIVE DISH CONTROLS -->
+            <!-- =================================
+                 ACTIVE DISH CONTROLS
+                 ================================= -->
 
             <div
                 class="interaction-controls"
@@ -907,7 +969,11 @@
 
 
 
-            <!-- ORDER REVIEW -->
+            <!-- =================================
+                 ORDER REVIEW
+                 Automatically appears after
+                 Add to Order
+                 ================================= -->
 
             <div
                 class="order-review-panel"
@@ -962,7 +1028,9 @@
 
 
 
-            <!-- ORDER COMPLETE -->
+            <!-- =================================
+                 ORDER COMPLETE
+                 ================================= -->
 
             <div
                 class="order-complete-panel"
@@ -995,18 +1063,32 @@
                 </div>
 
 
+                <!-- ONLY shown after confirmation -->
+
+                <button
+                    type="button"
+                    class="done-button"
+                    id="doneBtn"
+                >
+                    Done
+                </button>
+
+
             </div>
 
 
 
-            <!-- EXIT -->
+            <!-- =================================
+                 CANCEL ORDER
+                 Hidden after final confirmation
+                 ================================= -->
 
             <button
                 type="button"
-                class="exit-ar-button"
-                id="exitARBtn"
+                class="cancel-order-button"
+                id="cancelOrderBtn"
             >
-                Exit Preview
+                Cancel Order
             </button>
 
 
@@ -1016,10 +1098,11 @@
     </main>
 
 
-    <!-- Changed from v=12 to v=13 -->
+    <!-- New cache version -->
+
     <script
         type="module"
-        src="js/markerless-ar.js?v=13"
+        src="js/markerless-ar.js?v=14"
     >
     </script>
 

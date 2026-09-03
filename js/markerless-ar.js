@@ -22,8 +22,11 @@ const statusMessage =
 const startARBtn =
     document.getElementById("startARBtn");
 
-const exitARBtn =
-    document.getElementById("exitARBtn");
+const cancelOrderBtn =
+    document.getElementById("cancelOrderBtn");
+
+const doneBtn =
+    document.getElementById("doneBtn");
 
 const xrViewport =
     document.getElementById("xrViewport");
@@ -66,9 +69,6 @@ const orderBadge =
 
 const orderBadgeText =
     document.getElementById("orderBadgeText");
-
-const reviewOrderBtn =
-    document.getElementById("reviewOrderBtn");
 
 const orderReviewPanel =
     document.getElementById("orderReviewPanel");
@@ -135,8 +135,6 @@ const SIZE_PRESETS = {
 // ==========================================
 // APPLICATION STATE
 // ==========================================
-//
-// MULTI-STEP STATE MANAGEMENT:
 //
 // INITIALIZING
 // READY_TO_SCAN
@@ -348,12 +346,7 @@ let latestHitTestResult =
 
 
 // ==========================================
-// SESSION CLEANUP FLAGS
-// ==========================================
-//
-// Prevents Exit Preview from trying to close
-// the same XR session more than once.
-// Also prevents cleanup from running twice.
+// XR END / NAVIGATION STATE
 // ==========================================
 
 let isEndingXRSession =
@@ -361,6 +354,13 @@ let isEndingXRSession =
 
 
 let isCleaningUpXRSession =
+    false;
+
+
+// false = normal Cancel Order
+// true  = Done after final confirmation
+
+let navigateHomeAfterSessionEnd =
     false;
 
 
@@ -1209,7 +1209,7 @@ function applyAnchorTracking(
 
 
 // ==========================================
-// AUDIO INITIALIZATION
+// AUDIO
 // ==========================================
 
 function ensureAudioContext() {
@@ -1262,10 +1262,6 @@ function ensureAudioContext() {
 }
 
 
-
-// ==========================================
-// GENERATED TONE
-// ==========================================
 
 function playTone(
 
@@ -1396,10 +1392,6 @@ function playTone(
 }
 
 
-
-// ==========================================
-// SOUNDS
-// ==========================================
 
 function playPlacementSound() {
 
@@ -1547,7 +1539,7 @@ function getFoodName(
 
 
 // ==========================================
-// CURRENT SIZE
+// SIZE
 // ==========================================
 
 function getCurrentSizePreset() {
@@ -1560,10 +1552,6 @@ function getCurrentSizePreset() {
 }
 
 
-
-// ==========================================
-// CURRENT MODEL SCALE
-// ==========================================
 
 function getCurrentModelScale(
     food
@@ -1592,7 +1580,7 @@ function getCurrentModelScale(
 
 
 // ==========================================
-// LOAD MODEL
+// LOAD MODELS
 // ==========================================
 
 function loadModel(
@@ -1667,10 +1655,6 @@ function loadModel(
 }
 
 
-
-// ==========================================
-// LOAD MODELS
-// ==========================================
 
 async function loadModels() {
 
@@ -1896,7 +1880,7 @@ function getGroupedOrderItems() {
 
 
 // ==========================================
-// RENDER ORDER SUMMARY
+// ORDER SUMMARY
 // ==========================================
 
 function renderOrderSummary(
@@ -2031,20 +2015,6 @@ function updateOrderBadge() {
     orderBadgeText.textContent =
 
         `Your Order · ${count} ${count === 1 ? "item" : "items"}`;
-
-
-
-    reviewOrderBtn.disabled =
-
-        Boolean(
-            menuARState.placedObject
-        ) ||
-
-        menuARState.appState ===
-            "PLACING" ||
-
-        menuARState.appState ===
-            "MOVE_MODE";
 
 }
 
@@ -2692,6 +2662,11 @@ async function startARSession() {
 
 
 
+    navigateHomeAfterSessionEnd =
+        false;
+
+
+
     startARBtn.disabled =
         true;
 
@@ -2829,6 +2804,10 @@ async function startARSession() {
             false;
 
 
+        menuARState.selectedFood =
+            "burger";
+
+
         menuARState.selectedSize =
             "medium";
 
@@ -2869,6 +2848,19 @@ async function startARSession() {
 
 
 
+        cancelOrderBtn.hidden =
+            false;
+
+
+        cancelOrderBtn.disabled =
+            false;
+
+
+        cancelOrderBtn.textContent =
+            "Cancel Order";
+
+
+
         hideInteractionControls();
 
 
@@ -2882,15 +2874,6 @@ async function startARSession() {
 
 
         updateOrderBadge();
-
-
-
-        exitARBtn.disabled =
-            false;
-
-
-        exitARBtn.textContent =
-            "Exit Preview";
 
 
 
@@ -3034,23 +3017,7 @@ async function startARSession() {
 
 
 // ==========================================
-// END AR SESSION
-// ==========================================
-//
-// FIX:
-// The previous version relied only on session.end()
-// and the browser's "end" event.
-//
-// Some Android WebXR browsers may enter a shutdown
-// state where another click or delayed cleanup causes
-// an error.
-//
-// This version:
-// 1. Prevents duplicate exit requests.
-// 2. Disables the Exit button during shutdown.
-// 3. Waits for WebXR session.end().
-// 4. Uses the normal "end" event for cleanup.
-// 5. Has a safe fallback cleanup if end() rejects.
+// END XR SESSION
 // ==========================================
 
 async function endARSession() {
@@ -3060,9 +3027,26 @@ async function endARSession() {
         !xrSession
     ) {
 
-        showPreARInterface();
 
-        updateStartButton();
+        if (
+            navigateHomeAfterSessionEnd
+        ) {
+
+
+            window.location.href =
+                "index.html";
+
+
+        } else {
+
+
+            showPreARInterface();
+
+
+            updateStartButton();
+
+        }
+
 
         return;
 
@@ -3085,15 +3069,6 @@ async function endARSession() {
 
 
 
-    exitARBtn.disabled =
-        true;
-
-
-    exitARBtn.textContent =
-        "Exiting...";
-
-
-
     const sessionToEnd =
         xrSession;
 
@@ -3105,17 +3080,12 @@ async function endARSession() {
         await sessionToEnd.end();
 
 
-        // onARSessionEnded() will normally be
-        // triggered automatically by the XR
-        // session "end" event.
-
-
     } catch (error) {
 
 
         console.warn(
 
-            "XR session could not end normally. Running safe cleanup.",
+            "XR session could not end normally. Running cleanup.",
 
             error
 
@@ -3234,6 +3204,145 @@ function clearConfirmedItemsFromScene() {
 
     menuARState.confirmedItems =
         [];
+
+}
+
+
+
+// ==========================================
+// CANCEL ORDER
+// ==========================================
+//
+// Removes:
+// - current active preview
+// - every dish already added to order
+// - shadows
+// - anchors
+//
+// Then ends AR and returns to the
+// markerless Start screen.
+//
+// ==========================================
+
+async function cancelOrder() {
+
+
+    if (
+        menuARState.appState ===
+            "ORDER_CONFIRMED"
+    ) {
+
+        return;
+
+    }
+
+
+
+    if (
+        isEndingXRSession
+    ) {
+
+        return;
+
+    }
+
+
+
+    navigateHomeAfterSessionEnd =
+        false;
+
+
+
+    cancelOrderBtn.disabled =
+        true;
+
+
+    cancelOrderBtn.textContent =
+        "Cancelling...";
+
+
+
+    reticle.visible =
+        false;
+
+
+    latestHitTestResult =
+        null;
+
+
+
+    removeActivePreviewFromScene();
+
+
+    clearConfirmedItemsFromScene();
+
+
+
+    menuARState.orderPlaced =
+        false;
+
+
+    menuARState.surfaceFound =
+        false;
+
+
+
+    await endARSession();
+
+}
+
+
+
+// ==========================================
+// DONE
+// ==========================================
+//
+// Done only exists after Place Order.
+//
+// It closes the WebXR session and then
+// sends the customer back to index.html.
+//
+// ==========================================
+
+async function finishOrder() {
+
+
+    if (
+        menuARState.appState !==
+            "ORDER_CONFIRMED"
+    ) {
+
+        return;
+
+    }
+
+
+
+    if (
+        isEndingXRSession
+    ) {
+
+        return;
+
+    }
+
+
+
+    navigateHomeAfterSessionEnd =
+        true;
+
+
+
+    doneBtn.disabled =
+        true;
+
+
+    doneBtn.textContent =
+        "Done...";
+
+
+
+    await endARSession();
 
 }
 
@@ -3452,9 +3561,32 @@ function resetControls() {
 
 
 
+    cancelOrderBtn.hidden =
+        false;
+
+
+    cancelOrderBtn.disabled =
+        false;
+
+
+    cancelOrderBtn.textContent =
+        "Cancel Order";
+
+
+
+    doneBtn.disabled =
+        false;
+
+
+    doneBtn.textContent =
+        "Done";
+
+
+
     if (
         orderSummary
     ) {
+
 
         orderSummary.innerHTML =
             "";
@@ -3466,6 +3598,7 @@ function resetControls() {
     if (
         finalOrderSummary
     ) {
+
 
         finalOrderSummary.innerHTML =
             "";
@@ -3482,15 +3615,6 @@ function resetControls() {
         "active"
     );
 
-
-
-    exitARBtn.disabled =
-        false;
-
-
-    exitARBtn.textContent =
-        "Exit Preview";
-
 }
 
 
@@ -3502,7 +3626,6 @@ function resetControls() {
 function onARSessionEnded() {
 
 
-    // Prevent cleanup from executing twice.
     if (
         isCleaningUpXRSession
     ) {
@@ -3515,6 +3638,11 @@ function onARSessionEnded() {
 
     isCleaningUpXRSession =
         true;
+
+
+
+    const shouldNavigateHome =
+        navigateHomeAfterSessionEnd;
 
 
 
@@ -3540,7 +3668,7 @@ function onARSessionEnded() {
 
 
                 console.warn(
-                    "Hit-test source was already closed."
+                    "Hit-test source already closed."
                 );
 
             }
@@ -3567,7 +3695,7 @@ function onARSessionEnded() {
 
 
         // ==================================
-        // REMOVE RETICLE
+        // RETICLE
         // ==================================
 
         if (
@@ -3583,7 +3711,7 @@ function onARSessionEnded() {
 
 
         // ==================================
-        // REMOVE MODELS / ANCHORS
+        // REMOVE ALL AR FOOD
         // ==================================
 
         removeActivePreviewFromScene();
@@ -3594,7 +3722,7 @@ function onARSessionEnded() {
 
 
         // ==================================
-        // RESET APPLICATION STATE
+        // RESET STATE
         // ==================================
 
         menuARState.surfaceFound =
@@ -3638,12 +3766,6 @@ function onARSessionEnded() {
 
 
 
-        // ==================================
-        // IMPORTANT
-        // Clear the session only after
-        // scene/session cleanup is completed.
-        // ==================================
-
         xrSession =
             null;
 
@@ -3654,6 +3776,29 @@ function onARSessionEnded() {
         );
 
 
+
+        // ==================================
+        // DONE → HOME
+        // ==================================
+
+        if (
+            shouldNavigateHome
+        ) {
+
+
+            window.location.href =
+                "index.html";
+
+
+            return;
+
+        }
+
+
+
+        // ==================================
+        // CANCEL → START SCREEN
+        // ==================================
 
         resetControls();
 
@@ -3667,17 +3812,9 @@ function onARSessionEnded() {
 
 
 
-        // ==================================
-        // RESTORE START BUTTON
-        // ==================================
-
         updateStartButton();
 
 
-
-        // ==================================
-        // RETURN PAGE TO TOP
-        // ==================================
 
         try {
 
@@ -3720,12 +3857,9 @@ function onARSessionEnded() {
 
 
 
-        // Even if a cleanup step fails,
-        // make sure the user can see the
-        // normal Start AR screen again.
-
         xrSession =
             null;
+
 
 
         document.body.classList.remove(
@@ -3733,10 +3867,28 @@ function onARSessionEnded() {
         );
 
 
-        showPreARInterface();
+
+        if (
+            shouldNavigateHome
+        ) {
 
 
-        updateStartButton();
+            window.location.href =
+                "index.html";
+
+
+        } else {
+
+
+            resetControls();
+
+
+            showPreARInterface();
+
+
+            updateStartButton();
+
+        }
 
 
     } finally {
@@ -3750,12 +3902,8 @@ function onARSessionEnded() {
             false;
 
 
-        exitARBtn.disabled =
+        navigateHomeAfterSessionEnd =
             false;
-
-
-        exitARBtn.textContent =
-            "Exit Preview";
 
     }
 
@@ -3825,7 +3973,7 @@ function easeOutBack(
 
 
 // ==========================================
-// START PLACEMENT ANIMATION
+// PLACEMENT ANIMATION
 // ==========================================
 
 function startPlacementAnimation(
@@ -3929,10 +4077,6 @@ function startPlacementAnimation(
 }
 
 
-
-// ==========================================
-// UPDATE PLACEMENT ANIMATION
-// ==========================================
 
 function updatePlacementAnimation(
     timestamp
@@ -4292,10 +4436,6 @@ function placeSelectedFood() {
 
 
 
-    // ======================================
-    // OPTIONAL WEBXR ANCHOR
-    // ======================================
-
     createAnchorForHitResult(
 
         latestHitTestResult
@@ -4357,10 +4497,7 @@ function placeSelectedFood() {
 
                 } catch (error) {
 
-
-                    console.warn(
-                        "Unused anchor was already unavailable."
-                    );
+                    // Ignore.
 
                 }
 
@@ -4389,7 +4526,7 @@ function placeSelectedFood() {
 
 
 // ==========================================
-// CAN MANIPULATE
+// MANIPULATION
 // ==========================================
 
 function canManipulate() {
@@ -4408,10 +4545,6 @@ function canManipulate() {
 }
 
 
-
-// ==========================================
-// MOVE MODE
-// ==========================================
 
 function enterMoveMode() {
 
@@ -4478,10 +4611,6 @@ function enterMoveMode() {
 
 
 
-// ==========================================
-// MOVE STATUS
-// ==========================================
-
 function setMoveModeStatus() {
 
 
@@ -4511,10 +4640,6 @@ function setMoveModeStatus() {
 }
 
 
-
-// ==========================================
-// REPOSITION FOOD
-// ==========================================
 
 function repositionPlacedFood() {
 
@@ -4640,10 +4765,7 @@ function repositionPlacedFood() {
 
                 } catch (error) {
 
-
-                    console.warn(
-                        "Unused movement anchor was already unavailable."
-                    );
+                    // Ignore.
 
                 }
 
@@ -4713,7 +4835,7 @@ function repositionPlacedFood() {
 
 
 // ==========================================
-// REMOVE ACTIVE DISH
+// REMOVE CURRENT DISH
 // ==========================================
 
 function removeFood() {
@@ -4772,7 +4894,7 @@ function removeFood() {
 
         setStatus(
 
-            `${removedFood} removed. Place another dish or review your current order.`
+            `${removedFood} removed. Choose another dish to continue your order.`
 
         );
 
@@ -4793,7 +4915,7 @@ function removeFood() {
 
 
 // ==========================================
-// ADD CURRENT DISH TO ORDER
+// ADD CURRENT ITEM TO ORDER
 // ==========================================
 
 function addCurrentItemToOrder() {
@@ -4865,7 +4987,7 @@ function addCurrentItemToOrder() {
 
 
 // ==========================================
-// SHOW ORDER REVIEW
+// AUTOMATIC ORDER REVIEW
 // ==========================================
 
 function showOrderReview(
@@ -4914,6 +5036,10 @@ function showOrderReview(
 
 
     orderReviewPanel.hidden =
+        false;
+
+
+    cancelOrderBtn.hidden =
         false;
 
 
@@ -4988,6 +5114,10 @@ function addAnotherDish() {
         true;
 
 
+    cancelOrderBtn.hidden =
+        false;
+
+
 
     hideInteractionControls();
 
@@ -5016,37 +5146,7 @@ function addAnotherDish() {
 
 
 // ==========================================
-// REVIEW EXISTING ORDER
-// ==========================================
-
-function reviewCurrentOrder() {
-
-
-    if (
-
-        menuARState.confirmedItems.length ===
-            0 ||
-
-        menuARState.placedObject
-
-    ) {
-
-        return;
-
-    }
-
-
-
-    showOrderReview(
-        "Here is your current order."
-    );
-
-}
-
-
-
-// ==========================================
-// FINAL ORDER MODEL PULSE
+// FINAL ORDER ANIMATION
 // ==========================================
 
 function startOrderPulseAnimation() {
@@ -5088,10 +5188,6 @@ function startOrderPulseAnimation() {
 }
 
 
-
-// ==========================================
-// UPDATE FINAL MODEL PULSES
-// ==========================================
 
 function updateOrderPulseAnimation(
     timestamp
@@ -5335,6 +5431,14 @@ function placeOrder() {
 
 
 
+    // Cancel is removed after confirmation.
+    // Only Done remains.
+
+    cancelOrderBtn.hidden =
+        true;
+
+
+
     renderOrderSummary(
         finalOrderSummary
     );
@@ -5548,7 +5652,7 @@ function render(
 
 
     // ======================================
-    // SPATIAL TRACKING / HIT TESTING
+    // WEBXR SPATIAL TRACKING / HIT TESTING
     // ======================================
 
     const shouldRunHitTest =
@@ -5916,7 +6020,7 @@ moveBtn.addEventListener(
 
 
 // ==========================================
-// REMOVE
+// REMOVE CURRENT DISH
 // ==========================================
 
 removeBtn.addEventListener(
@@ -5944,7 +6048,7 @@ addToOrderBtn.addEventListener(
 
 
 // ==========================================
-// ADD ANOTHER
+// ADD ANOTHER DISH
 // ==========================================
 
 addAnotherBtn.addEventListener(
@@ -5952,20 +6056,6 @@ addAnotherBtn.addEventListener(
     "click",
 
     addAnotherDish
-
-);
-
-
-
-// ==========================================
-// REVIEW ORDER
-// ==========================================
-
-reviewOrderBtn.addEventListener(
-
-    "click",
-
-    reviewCurrentOrder
 
 );
 
@@ -5986,6 +6076,50 @@ placeOrderBtn.addEventListener(
 
 
 // ==========================================
+// CANCEL ORDER
+// ==========================================
+
+cancelOrderBtn.addEventListener(
+
+    "click",
+
+    async () => {
+
+
+        markUITouch();
+
+
+        await cancelOrder();
+
+    }
+
+);
+
+
+
+// ==========================================
+// DONE
+// ==========================================
+
+doneBtn.addEventListener(
+
+    "click",
+
+    async () => {
+
+
+        markUITouch();
+
+
+        await finishOrder();
+
+    }
+
+);
+
+
+
+// ==========================================
 // START
 // ==========================================
 
@@ -6000,25 +6134,6 @@ startARBtn.addEventListener(
 
 
         await startARSession();
-
-    }
-
-);
-
-
-
-// ==========================================
-// EXIT
-// ==========================================
-
-exitARBtn.addEventListener(
-
-    "click",
-
-    async () => {
-
-
-        await endARSession();
 
     }
 
