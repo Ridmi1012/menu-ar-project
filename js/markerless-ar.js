@@ -37,6 +37,9 @@ const xrSupportMessage =
 const arControls =
     document.getElementById("arControls");
 
+const dishSelectionArea =
+    document.getElementById("dishSelectionArea");
+
 const interactionControls =
     document.getElementById("interactionControls");
 
@@ -61,20 +64,40 @@ const moveBtn =
 const removeBtn =
     document.getElementById("removeBtn");
 
-const confirmBtn =
-    document.getElementById("confirmBtn");
+const addToOrderBtn =
+    document.getElementById("addToOrderBtn");
+
+const orderBadge =
+    document.getElementById("orderBadge");
+
+const orderBadgeText =
+    document.getElementById("orderBadgeText");
+
+const reviewOrderBtn =
+    document.getElementById("reviewOrderBtn");
+
+const orderReviewPanel =
+    document.getElementById("orderReviewPanel");
+
+const orderSummary =
+    document.getElementById("orderSummary");
+
+const addAnotherBtn =
+    document.getElementById("addAnotherBtn");
+
+const placeOrderBtn =
+    document.getElementById("placeOrderBtn");
+
+const orderCompletePanel =
+    document.getElementById("orderCompletePanel");
+
+const finalOrderSummary =
+    document.getElementById("finalOrderSummary");
 
 
 
 // ==========================================
-// SIZE PRESETS
-// ==========================================
-//
-// These are visual preview categories.
-//
-// Do not describe them as exact restaurant
-// dimensions unless the restaurant provides
-// actual serving measurements.
+// SIZE OPTIONS
 // ==========================================
 
 const SIZE_PRESETS = {
@@ -118,6 +141,21 @@ const SIZE_PRESETS = {
 // ==========================================
 // APPLICATION STATE
 // ==========================================
+//
+// MULTI-STEP STATE MANAGEMENT:
+//
+// INITIALIZING
+// READY_TO_SCAN
+// SCANNING
+// SURFACE_FOUND
+// PLACING
+// PLACED
+// MOVE_MODE
+// ORDER_REVIEW
+// ORDER_CONFIRMED
+// UNSUPPORTED
+//
+// ==========================================
 
 const menuARState = {
 
@@ -132,6 +170,18 @@ const menuARState = {
 
     placedObject:
         null,
+
+    activeShadow:
+        null,
+
+    confirmedItems:
+        [],
+
+    orderPlaced:
+        false,
+
+    nextItemId:
+        1,
 
     surfaceFound:
         false,
@@ -151,14 +201,6 @@ const menuARState = {
 
 // ==========================================
 // MODEL CONFIGURATION
-// ==========================================
-//
-// Increased from the previous calibration.
-//
-// Medium is now the default.
-//
-// Small and Large are calculated using
-// SIZE_PRESETS.
 // ==========================================
 
 const MODEL_CONFIG = {
@@ -209,7 +251,7 @@ const MODEL_CONFIG = {
 
 
 // ==========================================
-// INTERACTION CONFIGURATION
+// INTERACTION SETTINGS
 // ==========================================
 
 const ROTATION_STEP =
@@ -237,9 +279,6 @@ let moveModeStartedAt =
 // ==========================================
 // PLACEMENT ANIMATION
 // ==========================================
-//
-// More noticeable than the previous version.
-// ==========================================
 
 const PLACEMENT_DURATION =
     560;
@@ -258,17 +297,30 @@ let placementAnimation =
     null;
 
 
-let confirmationAnimation =
+
+// ==========================================
+// ORDER CONFIRMATION ANIMATION
+// ==========================================
+
+let orderPulseAnimation =
     null;
 
 
 
 // ==========================================
-// SHADOW SETTINGS
+// SHADOW
 // ==========================================
 
 const SHADOW_OPACITY =
     0.44;
+
+
+let shadowTexture =
+    null;
+
+
+let shadowGeometry =
+    null;
 
 
 
@@ -285,8 +337,6 @@ let renderer;
 let reticle;
 
 let controller;
-
-let shadowReceiver;
 
 
 let xrSession =
@@ -307,7 +357,7 @@ let referenceSpace =
 
 
 // ==========================================
-// AUDIO
+// WEB AUDIO
 // ==========================================
 
 let audioContext =
@@ -332,14 +382,7 @@ const modelTemplates = {
 
 
 // ==========================================
-// CREATE SOFT SHADOW TEXTURE
-// ==========================================
-//
-// A radial-gradient texture gives a much
-// clearer contact shadow than the previous
-// real-time ShadowMaterial approach.
-//
-// No image file is required.
+// SOFT SHADOW TEXTURE
 // ==========================================
 
 function createSoftShadowTexture() {
@@ -509,10 +552,6 @@ function initThreeJS() {
 
 
 
-    // ======================================
-    // PBR DISPLAY QUALITY
-    // ======================================
-
     renderer.outputColorSpace =
         THREE.SRGBColorSpace;
 
@@ -590,10 +629,15 @@ function initThreeJS() {
 
 
     // ======================================
-    // SOFT CONTACT SHADOW
+    // SHADOW ASSETS
     // ======================================
 
-    const shadowGeometry =
+    shadowTexture =
+        createSoftShadowTexture();
+
+
+
+    shadowGeometry =
         new THREE.PlaneGeometry(
 
             1,
@@ -606,55 +650,6 @@ function initThreeJS() {
 
     shadowGeometry.rotateX(
         -Math.PI / 2
-    );
-
-
-
-    const shadowMaterial =
-        new THREE.MeshBasicMaterial({
-
-            map:
-                createSoftShadowTexture(),
-
-            transparent:
-                true,
-
-            opacity:
-                SHADOW_OPACITY,
-
-            depthWrite:
-                false,
-
-            side:
-                THREE.DoubleSide
-
-        });
-
-
-
-    shadowReceiver =
-        new THREE.Mesh(
-
-            shadowGeometry,
-
-            shadowMaterial
-
-        );
-
-
-
-    shadowReceiver.visible =
-        false;
-
-
-
-    shadowReceiver.renderOrder =
-        1;
-
-
-
-    scene.add(
-        shadowReceiver
     );
 
 
@@ -755,7 +750,217 @@ function initThreeJS() {
 
 
 // ==========================================
-// AUDIO
+// CREATE A SHADOW FOR ONE DISH
+// ==========================================
+
+function createShadowMesh(
+
+    food,
+
+    sizeKey
+
+) {
+
+
+    const material =
+        new THREE.MeshBasicMaterial({
+
+            map:
+                shadowTexture,
+
+            transparent:
+                true,
+
+            opacity:
+                SHADOW_OPACITY,
+
+            depthWrite:
+                false,
+
+            side:
+                THREE.DoubleSide
+
+        });
+
+
+
+    const shadow =
+        new THREE.Mesh(
+
+            shadowGeometry,
+
+            material
+
+        );
+
+
+
+    shadow.renderOrder =
+        1;
+
+
+
+    updateShadowAppearance(
+
+        shadow,
+
+        food,
+
+        sizeKey
+
+    );
+
+
+
+    return shadow;
+
+}
+
+
+
+// ==========================================
+// UPDATE ONE SHADOW
+// ==========================================
+
+function updateShadowAppearance(
+
+    shadow,
+
+    food,
+
+    sizeKey
+
+) {
+
+
+    if (
+        !shadow
+    ) {
+
+        return;
+
+    }
+
+
+
+    const config =
+        MODEL_CONFIG[food];
+
+
+
+    const size =
+        SIZE_PRESETS[sizeKey];
+
+
+
+    shadow.scale.set(
+
+        config.shadowWidth *
+        size.factor,
+
+        config.shadowDepth *
+        size.factor,
+
+        1
+
+    );
+
+
+
+    shadow.material.opacity =
+        SHADOW_OPACITY;
+
+}
+
+
+
+// ==========================================
+// POSITION SHADOW AT RETICLE
+// ==========================================
+
+function positionShadowFromReticle(
+    shadow
+) {
+
+
+    if (
+        !shadow
+    ) {
+
+        return;
+
+    }
+
+
+
+    const position =
+        new THREE.Vector3();
+
+
+
+    const quaternion =
+        new THREE.Quaternion();
+
+
+
+    const ignoredScale =
+        new THREE.Vector3();
+
+
+
+    reticle.matrix.decompose(
+
+        position,
+
+        quaternion,
+
+        ignoredScale
+
+    );
+
+
+
+    shadow.position.copy(
+        position
+    );
+
+
+
+    shadow.quaternion.copy(
+        quaternion
+    );
+
+
+
+    const surfaceNormal =
+        new THREE.Vector3(
+            0,
+            1,
+            0
+        );
+
+
+
+    surfaceNormal.applyQuaternion(
+        quaternion
+    );
+
+
+
+    shadow.position.addScaledVector(
+
+        surfaceNormal,
+
+        0.003
+
+    );
+
+}
+
+
+
+// ==========================================
+// AUDIO INITIALIZATION
 // ==========================================
 
 function ensureAudioContext() {
@@ -810,7 +1015,7 @@ function ensureAudioContext() {
 
 
 // ==========================================
-// SYNTHESIZED TONE
+// GENERATED TONE
 // ==========================================
 
 function playTone(
@@ -986,10 +1191,33 @@ function playPlacementSound() {
 
 
 // ==========================================
-// CONFIRMATION SOUND
+// ADD-TO-ORDER SOUND
 // ==========================================
 
-function playConfirmationSound() {
+function playAddedSound() {
+
+
+    playTone(
+
+        430,
+
+        520,
+
+        0.11,
+
+        0.025
+
+    );
+
+}
+
+
+
+// ==========================================
+// FINAL ORDER SOUND
+// ==========================================
+
+function playOrderConfirmationSound() {
 
 
     playTone(
@@ -998,9 +1226,11 @@ function playConfirmationSound() {
 
         523,
 
-        0.12,
+        0.13,
 
-        0.035
+        0.035,
+
+        0
 
     );
 
@@ -1011,11 +1241,26 @@ function playConfirmationSound() {
 
         659,
 
-        0.17,
+        0.15,
 
         0.038,
 
-        0.09
+        0.10
+
+    );
+
+
+    playTone(
+
+        784,
+
+        784,
+
+        0.22,
+
+        0.040,
+
+        0.21
 
     );
 
@@ -1118,6 +1363,7 @@ function getCurrentModelScale(food) {
         MODEL_CONFIG[food];
 
 
+
     const size =
         getCurrentSizePreset();
 
@@ -1155,15 +1401,10 @@ function loadModel(food) {
 
 
 
-            const config =
-                MODEL_CONFIG[food];
-
-
-
             loader.load(
 
 
-                config.src,
+                MODEL_CONFIG[food].src,
 
 
                 (gltf) => {
@@ -1192,8 +1433,11 @@ function loadModel(food) {
 
 
                     console.error(
+
                         `Failed to load ${food}:`,
+
                         error
+
                     );
 
 
@@ -1255,7 +1499,9 @@ async function loadModels() {
 
 
         showSupportMessage(
+
             "The food previews could not be loaded. Refresh the page and try again."
+
         );
 
 
@@ -1272,7 +1518,7 @@ async function loadModels() {
 
 
 // ==========================================
-// FOOD BUTTON STATE
+// FOOD BUTTONS
 // ==========================================
 
 function updateFoodButtons(food) {
@@ -1312,7 +1558,7 @@ function updateFoodButtons(food) {
 
 
 // ==========================================
-// SIZE BUTTON STATE
+// SIZE BUTTONS
 // ==========================================
 
 function updateSizeButtons() {
@@ -1375,65 +1621,194 @@ function updateSizeButtons() {
 
 
 // ==========================================
-// UPDATE SHADOW SIZE
+// ORDER GROUPING
 // ==========================================
 
-function updateShadowAppearance() {
+function getGroupedOrderItems() {
 
 
-    if (
-        !shadowReceiver
-    ) {
-
-        return;
-
-    }
+    const grouped =
+        new Map();
 
 
 
-    const config =
-        MODEL_CONFIG[
-            menuARState.selectedFood
-        ];
+    menuARState.confirmedItems.forEach(
+
+        (item) => {
+
+
+            const key =
+                `${item.sizeKey}-${item.food}`;
 
 
 
-    const size =
-        getCurrentSizePreset();
+            if (
+                !grouped.has(key)
+            ) {
+
+
+                grouped.set(
+
+                    key,
+
+                    {
+
+                        food:
+                            item.food,
+
+                        sizeKey:
+                            item.sizeKey,
+
+                        count:
+                            0
+
+                    }
+
+                );
+
+            }
 
 
 
-    shadowReceiver.scale.set(
+            grouped.get(key).count +=
+                1;
 
-        config.shadowWidth *
-        size.factor,
-
-        config.shadowDepth *
-        size.factor,
-
-        1
+        }
 
     );
 
 
 
-    shadowReceiver.material.opacity =
-        SHADOW_OPACITY;
+    return Array.from(
+        grouped.values()
+    );
 
 }
 
 
 
 // ==========================================
-// POSITION SHADOW AT HIT TEST
+// RENDER ORDER SUMMARY
 // ==========================================
 
-function positionShadowFromReticle() {
+function renderOrderSummary(
+    container
+) {
+
+
+    container.innerHTML =
+        "";
+
+
+
+    const groups =
+        getGroupedOrderItems();
+
+
+
+    groups.forEach(
+
+        (group) => {
+
+
+            const row =
+                document.createElement(
+                    "div"
+                );
+
+
+
+            row.className =
+                "order-summary-row";
+
+
+
+            const name =
+                document.createElement(
+                    "span"
+                );
+
+
+
+            name.className =
+                "order-summary-name";
+
+
+
+            name.textContent =
+
+                `${SIZE_PRESETS[group.sizeKey].label} ${getFoodName(group.food)}`;
+
+
+
+            const count =
+                document.createElement(
+                    "span"
+                );
+
+
+
+            count.className =
+                "order-summary-count";
+
+
+
+            count.textContent =
+                `${group.count} ×`;
+
+
+
+            row.appendChild(
+                name
+            );
+
+
+            row.appendChild(
+                count
+            );
+
+
+
+            container.appendChild(
+                row
+            );
+
+        }
+
+    );
+
+}
+
+
+
+// ==========================================
+// ORDER BADGE
+// ==========================================
+
+function updateOrderBadge() {
+
+
+    const count =
+        menuARState.confirmedItems.length;
+
 
 
     if (
-        !shadowReceiver
+
+        count === 0 ||
+
+        menuARState.appState ===
+            "ORDER_REVIEW" ||
+
+        menuARState.appState ===
+            "ORDER_CONFIRMED"
+
     ) {
+
+
+        orderBadge.hidden =
+            true;
+
 
         return;
 
@@ -1441,76 +1816,28 @@ function positionShadowFromReticle() {
 
 
 
-    const position =
-        new THREE.Vector3();
+    orderBadge.hidden =
+        false;
 
 
 
-    const quaternion =
-        new THREE.Quaternion();
+    orderBadgeText.textContent =
+
+        `Your Order · ${count} ${count === 1 ? "item" : "items"}`;
 
 
 
-    const ignoredScale =
-        new THREE.Vector3();
+    reviewOrderBtn.disabled =
 
+        Boolean(
+            menuARState.placedObject
+        ) ||
 
+        menuARState.appState ===
+            "PLACING" ||
 
-    reticle.matrix.decompose(
-
-        position,
-
-        quaternion,
-
-        ignoredScale
-
-    );
-
-
-
-    shadowReceiver.position.copy(
-        position
-    );
-
-
-
-    shadowReceiver.quaternion.copy(
-        quaternion
-    );
-
-
-
-    const surfaceNormal =
-        new THREE.Vector3(
-            0,
-            1,
-            0
-        );
-
-
-
-    surfaceNormal.applyQuaternion(
-        quaternion
-    );
-
-
-
-    shadowReceiver.position.addScaledVector(
-
-        surfaceNormal,
-
-        0.003
-
-    );
-
-
-
-    updateShadowAppearance();
-
-
-
-    shadowReceiver.visible =
-        true;
+        menuARState.appState ===
+            "MOVE_MODE";
 
 }
 
@@ -1520,7 +1847,9 @@ function positionShadowFromReticle() {
 // SELECT SIZE
 // ==========================================
 
-function selectPreviewSize(sizeKey) {
+function selectPreviewSize(
+    sizeKey
+) {
 
 
     if (
@@ -1547,31 +1876,31 @@ function selectPreviewSize(sizeKey) {
 
 
 
-    const scale =
+    menuARState.placedObject.scale.setScalar(
+
         getCurrentModelScale(
             menuARState.selectedFood
-        );
+        )
 
-
-
-    menuARState.placedObject.scale.setScalar(
-        scale
     );
 
 
 
-    updateShadowAppearance();
+    updateShadowAppearance(
 
+        menuARState.activeShadow,
 
+        menuARState.selectedFood,
 
-    const sizeName =
-        getCurrentSizePreset().label;
+        menuARState.selectedSize
+
+    );
 
 
 
     setStatus(
 
-        `${getFoodName(menuARState.selectedFood)} size changed to ${sizeName}.`
+        `${getCurrentSizePreset().label} ${getFoodName(menuARState.selectedFood)} selected.`
 
     );
 
@@ -1580,7 +1909,7 @@ function selectPreviewSize(sizeKey) {
 
 
 // ==========================================
-// SELECT / CHANGE FOOD
+// SELECT FOOD
 // ==========================================
 
 function selectFood(food) {
@@ -1589,7 +1918,10 @@ function selectFood(food) {
     if (
 
         menuARState.appState ===
-            "CONFIRMED" ||
+            "ORDER_REVIEW" ||
+
+        menuARState.appState ===
+            "ORDER_CONFIRMED" ||
 
         menuARState.appState ===
             "PLACING"
@@ -1637,7 +1969,9 @@ function selectFood(food) {
 
 
             setStatus(
-                `${foodName} is already on your table.`
+
+                `${foodName} is already selected.`
+
             );
 
 
@@ -1676,7 +2010,7 @@ function selectFood(food) {
 
             setStatus(
 
-                `Great — tap the white circle to place your ${foodName}.`
+                `Perfect — tap the white circle to place your ${foodName}.`
 
             );
 
@@ -1686,7 +2020,7 @@ function selectFood(food) {
 
             setStatus(
 
-                `${foodName} selected. Move your device slowly over the table.`
+                `${foodName} selected. Find a spot on the table.`
 
             );
 
@@ -1699,7 +2033,7 @@ function selectFood(food) {
 
 
 // ==========================================
-// REPLACE PLACED FOOD
+// REPLACE ACTIVE FOOD
 // ==========================================
 
 function replacePlacedFood(
@@ -1813,7 +2147,15 @@ function replacePlacedFood(
 
 
 
-    updateShadowAppearance();
+    updateShadowAppearance(
+
+        menuARState.activeShadow,
+
+        newFood,
+
+        menuARState.selectedSize
+
+    );
 
 
 
@@ -1822,16 +2164,34 @@ function replacePlacedFood(
 
 
 
-    menuARState.appState =
-        "PLACED";
+    if (
+        menuARState.appState ===
+            "MOVE_MODE"
+    ) {
+
+
+        setStatus(
+
+            `Changed to ${getFoodName(newFood)} — ${sizeName} size kept. Choose a new spot.`
+
+        );
+
+
+    } else {
+
+
+        menuARState.appState =
+            "PLACED";
 
 
 
-    setStatus(
+        setStatus(
 
-        `Changed to ${getFoodName(newFood)} — ${sizeName} size kept.`
+            `Changed to ${getFoodName(newFood)} — ${sizeName} size kept.`
 
-    );
+        );
+
+    }
 
 }
 
@@ -1859,7 +2219,9 @@ async function checkXRSupport() {
 
 
         showSupportMessage(
+
             "Table preview is not supported on this device or browser."
+
         );
 
 
@@ -1910,7 +2272,9 @@ async function checkXRSupport() {
 
 
             showSupportMessage(
+
                 "Table preview is not supported on this device or browser."
+
             );
 
         }
@@ -1940,7 +2304,9 @@ async function checkXRSupport() {
 
 
         showSupportMessage(
+
             "Unable to check table-preview support on this device."
+
         );
 
 
@@ -2018,7 +2384,7 @@ function updateStartButton() {
 
 
 // ==========================================
-// SHOW AR INTERFACE
+// AR INTERFACE
 // ==========================================
 
 function showARInterface() {
@@ -2052,7 +2418,7 @@ function showARInterface() {
 
 
 // ==========================================
-// SHOW PRE-AR
+// PRE-AR INTERFACE
 // ==========================================
 
 function showPreARInterface() {
@@ -2065,18 +2431,12 @@ function showPreARInterface() {
     xrIntro.hidden =
         false;
 
-
-
-    arControls.classList.remove(
-        "xr-panel-enter"
-    );
-
 }
 
 
 
 // ==========================================
-// START AR
+// START XR SESSION
 // ==========================================
 
 async function startARSession() {
@@ -2106,10 +2466,6 @@ async function startARSession() {
 
     startARBtn.textContent =
         "Starting...";
-
-
-
-    hideSupportMessage();
 
 
 
@@ -2220,16 +2576,24 @@ async function startARSession() {
             false;
 
 
-        menuARState.currentRotation =
-            0;
-
-
         menuARState.selectedSize =
             "medium";
 
 
+        menuARState.currentRotation =
+            0;
 
-        updateSizeButtons();
+
+        menuARState.confirmedItems =
+            [];
+
+
+        menuARState.orderPlaced =
+            false;
+
+
+        menuARState.nextItemId =
+            1;
 
 
 
@@ -2243,6 +2607,19 @@ async function startARSession() {
 
 
 
+        dishSelectionArea.hidden =
+            false;
+
+
+        orderReviewPanel.hidden =
+            true;
+
+
+        orderCompletePanel.hidden =
+            true;
+
+
+
         hideInteractionControls();
 
 
@@ -2252,10 +2629,16 @@ async function startARSession() {
         );
 
 
+        updateSizeButtons();
+
+
+        updateOrderBadge();
+
+
 
         setStatus(
 
-            `Move your device slowly over the table to find a clear spot for your ${getFoodName(menuARState.selectedFood)}.`
+            `Choose a dish and move your device slowly over the table.`
 
         );
 
@@ -2286,7 +2669,9 @@ async function startARSession() {
 
 
             showSupportMessage(
+
                 "Camera permission was not granted. Allow access and try again."
+
             );
 
 
@@ -2320,7 +2705,9 @@ async function startARSession() {
 
 
             showSupportMessage(
+
                 "This device does not support the table-preview features required by MenuAR."
+
             );
 
 
@@ -2339,7 +2726,9 @@ async function startARSession() {
 
 
         showSupportMessage(
+
             "The table preview could not start. Check permissions and try again."
+
         );
 
 
@@ -2377,17 +2766,13 @@ async function endARSession() {
 
 
 // ==========================================
-// REMOVE PLACED OBJECT
+// REMOVE ACTIVE PREVIEW
 // ==========================================
 
-function removePlacedObjectFromScene() {
+function removeActivePreviewFromScene() {
 
 
     placementAnimation =
-        null;
-
-
-    confirmationAnimation =
         null;
 
 
@@ -2402,7 +2787,6 @@ function removePlacedObjectFromScene() {
         );
 
 
-
         menuARState.placedObject =
             null;
 
@@ -2411,12 +2795,17 @@ function removePlacedObjectFromScene() {
 
 
     if (
-        shadowReceiver
+        menuARState.activeShadow
     ) {
 
 
-        shadowReceiver.visible =
-            false;
+        scene.remove(
+            menuARState.activeShadow
+        );
+
+
+        menuARState.activeShadow =
+            null;
 
     }
 
@@ -2425,7 +2814,56 @@ function removePlacedObjectFromScene() {
 
 
 // ==========================================
-// CONTROL VISIBILITY
+// CLEAR CONFIRMED ITEMS
+// ==========================================
+
+function clearConfirmedItemsFromScene() {
+
+
+    menuARState.confirmedItems.forEach(
+
+        (item) => {
+
+
+            if (
+                item.object
+            ) {
+
+
+                scene.remove(
+                    item.object
+                );
+
+            }
+
+
+
+            if (
+                item.shadow
+            ) {
+
+
+                scene.remove(
+                    item.shadow
+                );
+
+            }
+
+        }
+
+    );
+
+
+
+    menuARState.confirmedItems =
+        [];
+
+}
+
+
+
+// ==========================================
+// INTERACTION CONTROLS
 // ==========================================
 
 function showInteractionControls() {
@@ -2485,7 +2923,16 @@ function enableManipulationControls() {
         false;
 
 
-    confirmBtn.disabled =
+    addToOrderBtn.disabled =
+        false;
+
+
+
+    burgerBtn.disabled =
+        false;
+
+
+    pizzaBtn.disabled =
         false;
 
 
@@ -2497,11 +2944,6 @@ function enableManipulationControls() {
     moveBtn.classList.remove(
         "active"
     );
-
-
-
-    confirmBtn.textContent =
-        "Confirm Preview";
 
 }
 
@@ -2542,7 +2984,7 @@ function disableManipulationControls() {
         true;
 
 
-    confirmBtn.disabled =
+    addToOrderBtn.disabled =
         true;
 
 }
@@ -2580,13 +3022,13 @@ function setMoveModeControls() {
         true;
 
 
-    confirmBtn.disabled =
+    addToOrderBtn.disabled =
         true;
+
 
 
     moveBtn.disabled =
         true;
-
 
 
     moveBtn.textContent =
@@ -2602,7 +3044,7 @@ function setMoveModeControls() {
 
 
 // ==========================================
-// RESET CONTROLS
+// RESET UI
 // ==========================================
 
 function resetControls() {
@@ -2629,8 +3071,24 @@ function resetControls() {
     disableManipulationControls();
 
 
-
     hideInteractionControls();
+
+
+
+    dishSelectionArea.hidden =
+        false;
+
+
+    orderReviewPanel.hidden =
+        true;
+
+
+    orderCompletePanel.hidden =
+        true;
+
+
+    orderBadge.hidden =
+        true;
 
 
 
@@ -2640,21 +3098,6 @@ function resetControls() {
 
     moveBtn.classList.remove(
         "active"
-    );
-
-
-
-    confirmBtn.textContent =
-        "Confirm Preview";
-
-
-    confirmBtn.classList.remove(
-        "confirmed-feedback"
-    );
-
-
-    statusMessage.classList.remove(
-        "confirmed-feedback"
     );
 
 }
@@ -2695,12 +3138,17 @@ function onARSessionEnded() {
         null;
 
 
+
     reticle.visible =
         false;
 
 
 
-    removePlacedObjectFromScene();
+    removeActivePreviewFromScene();
+
+
+
+    clearConfirmedItemsFromScene();
 
 
 
@@ -2708,12 +3156,29 @@ function onARSessionEnded() {
         false;
 
 
+    menuARState.selectedSize =
+        "medium";
+
+
     menuARState.currentRotation =
         0;
 
 
+    menuARState.orderPlaced =
+        false;
+
+
+    menuARState.nextItemId =
+        1;
+
+
     menuARState.appState =
         "READY_TO_SCAN";
+
+
+
+    orderPulseAnimation =
+        null;
 
 
 
@@ -2847,8 +3312,15 @@ function startPlacementAnimation(
 
 
 
-    shadowReceiver.material.opacity =
-        0;
+    if (
+        menuARState.activeShadow
+    ) {
+
+
+        menuARState.activeShadow.material.opacity =
+            0;
+
+    }
 
 
 
@@ -2897,7 +3369,9 @@ function startPlacementAnimation(
 // UPDATE PLACEMENT ANIMATION
 // ==========================================
 
-function updatePlacementAnimation(timestamp) {
+function updatePlacementAnimation(
+    timestamp
+) {
 
 
     if (
@@ -2961,7 +3435,7 @@ function updatePlacementAnimation(timestamp) {
 
 
 
-    const currentY =
+    placementAnimation.model.position.y =
 
         THREE.MathUtils.lerp(
 
@@ -2975,7 +3449,7 @@ function updatePlacementAnimation(timestamp) {
 
 
 
-    const currentScale =
+    placementAnimation.model.scale.setScalar(
 
         THREE.MathUtils.lerp(
 
@@ -2985,26 +3459,24 @@ function updatePlacementAnimation(timestamp) {
 
             scaleEase
 
-        );
+        )
 
-
-
-    placementAnimation.model.position.y =
-        currentY;
-
-
-
-    placementAnimation.model.scale.setScalar(
-        currentScale
     );
 
 
 
-    shadowReceiver.material.opacity =
+    if (
+        menuARState.activeShadow
+    ) {
 
-        SHADOW_OPACITY *
 
-        positionEase;
+        menuARState.activeShadow.material.opacity =
+
+            SHADOW_OPACITY *
+
+            positionEase;
+
+    }
 
 
 
@@ -3027,11 +3499,6 @@ function updatePlacementAnimation(timestamp) {
         placementAnimation.model.scale.setScalar(
             placementAnimation.finalScale
         );
-
-
-
-        shadowReceiver.material.opacity =
-            SHADOW_OPACITY;
 
 
 
@@ -3065,10 +3532,13 @@ function updatePlacementAnimation(timestamp) {
         updateSizeButtons();
 
 
+        updateOrderBadge();
+
+
 
         setStatus(
 
-            `${getFoodName(completedFood)} is on your table — choose Small, Medium or Large.`
+            `Your ${getCurrentSizePreset().label} ${getFoodName(completedFood)} is ready. Adjust it, then add it to your order.`
 
         );
 
@@ -3205,6 +3675,42 @@ function placeSelectedFood() {
         placedModel;
 
 
+
+    // Create a unique shadow for this dish.
+
+    const shadow =
+        createShadowMesh(
+
+            food,
+
+            menuARState.selectedSize
+
+        );
+
+
+
+    positionShadowFromReticle(
+        shadow
+    );
+
+
+
+    shadow.material.opacity =
+        0;
+
+
+
+    scene.add(
+        shadow
+    );
+
+
+
+    menuARState.activeShadow =
+        shadow;
+
+
+
     menuARState.currentRotation =
         0;
 
@@ -3214,21 +3720,13 @@ function placeSelectedFood() {
 
 
 
-    positionShadowFromReticle();
-
-
-
-    shadowReceiver.material.opacity =
-        0;
-
-
-
     reticle.visible =
         false;
 
 
 
     hideInteractionControls();
+
 
 
     disableManipulationControls();
@@ -3252,7 +3750,7 @@ function placeSelectedFood() {
 
 
 // ==========================================
-// ROTATION
+// ROTATE
 // ==========================================
 
 function rotateLeft() {
@@ -3374,6 +3872,18 @@ function enterMoveMode() {
 
 
 
+    if (
+        menuARState.activeShadow
+    ) {
+
+
+        menuARState.activeShadow.visible =
+            false;
+
+    }
+
+
+
     moveModeStartedAt =
         performance.now();
 
@@ -3402,7 +3912,7 @@ function enterMoveMode() {
 
 
 // ==========================================
-// MOVE MODE STATUS
+// MOVE STATUS
 // ==========================================
 
 function setMoveModeStatus() {
@@ -3414,7 +3924,9 @@ function setMoveModeStatus() {
 
 
         setStatus(
+
             "New spot found — tap the white circle to move your dish."
+
         );
 
 
@@ -3422,7 +3934,9 @@ function setMoveModeStatus() {
 
 
         setStatus(
+
             "Move your device slowly to find a new spot."
+
         );
 
     }
@@ -3455,8 +3969,6 @@ function repositionPlacedFood() {
 
 
 
-    // Save rotation + scale.
-
     const savedQuaternion =
 
         menuARState.placedObject
@@ -3477,8 +3989,6 @@ function repositionPlacedFood() {
         menuARState.currentRotation;
 
 
-
-    // New position.
 
     const newPosition =
         new THREE.Vector3();
@@ -3509,15 +4019,11 @@ function repositionPlacedFood() {
 
 
 
-    // Restore rotation.
-
     menuARState.placedObject.quaternion.copy(
         savedQuaternion
     );
 
 
-
-    // Restore selected size.
 
     menuARState.placedObject.scale.copy(
         savedScale
@@ -3530,11 +4036,33 @@ function repositionPlacedFood() {
 
 
 
-    positionShadowFromReticle();
+    if (
+        menuARState.activeShadow
+    ) {
+
+
+        positionShadowFromReticle(
+            menuARState.activeShadow
+        );
 
 
 
-    updateShadowAppearance();
+        updateShadowAppearance(
+
+            menuARState.activeShadow,
+
+            menuARState.selectedFood,
+
+            menuARState.selectedSize
+
+        );
+
+
+
+        menuARState.activeShadow.visible =
+            true;
+
+    }
 
 
 
@@ -3566,19 +4094,14 @@ function repositionPlacedFood() {
 
 
 // ==========================================
-// REMOVE FOOD
+// REMOVE ACTIVE DISH
 // ==========================================
 
 function removeFood() {
 
 
     if (
-
-        !menuARState.placedObject ||
-
-        menuARState.appState ===
-            "CONFIRMED"
-
+        !menuARState.placedObject
     ) {
 
         return;
@@ -3594,7 +4117,7 @@ function removeFood() {
 
 
 
-    removePlacedObjectFromScene();
+    removeActivePreviewFromScene();
 
 
 
@@ -3622,154 +4145,31 @@ function removeFood() {
 
 
 
-    setStatus(
-
-        `${removedFood} removed. Move your device to choose another spot.`
-
-    );
-
-}
-
-
-
-// ==========================================
-// CONFIRM MODEL ANIMATION
-// ==========================================
-
-function startConfirmationAnimation() {
-
-
-    if (
-        !menuARState.placedObject
-    ) {
-
-        return;
-
-    }
-
-
-
-    confirmationAnimation = {
-
-        model:
-            menuARState.placedObject,
-
-        originalScale:
-            menuARState.placedObject
-                .scale
-                .clone(),
-
-        startTime:
-            null,
-
-        duration:
-            520
-
-    };
-
-}
-
-
-
-// ==========================================
-// UPDATE CONFIRM ANIMATION
-// ==========================================
-
-function updateConfirmationAnimation(timestamp) {
-
-
-    if (
-        !confirmationAnimation
-    ) {
-
-        return;
-
-    }
+    updateOrderBadge();
 
 
 
     if (
-        confirmationAnimation.startTime ===
-        null
+        menuARState.confirmedItems.length >
+        0
     ) {
 
 
-        confirmationAnimation.startTime =
-            timestamp;
+        setStatus(
 
-    }
-
-
-
-    const elapsed =
-
-        timestamp -
-
-        confirmationAnimation.startTime;
-
-
-
-    const progress =
-
-        THREE.MathUtils.clamp(
-
-            elapsed /
-
-            confirmationAnimation.duration,
-
-            0,
-
-            1
+            `${removedFood} removed. Place another dish or review your current order.`
 
         );
 
 
-
-    const pulse =
-
-        1 +
-
-        (
-            0.06 *
-
-            Math.sin(
-                Math.PI *
-                progress
-            )
-        );
+    } else {
 
 
+        setStatus(
 
-    confirmationAnimation.model.scale.copy(
-
-        confirmationAnimation.originalScale
-
-    );
-
-
-
-    confirmationAnimation.model.scale.multiplyScalar(
-        pulse
-    );
-
-
-
-    if (
-        progress >=
-        1
-    ) {
-
-
-        confirmationAnimation.model.scale.copy(
-
-            confirmationAnimation.originalScale
+            `${removedFood} removed. Choose another spot when you're ready.`
 
         );
-
-
-
-        confirmationAnimation =
-            null;
 
     }
 
@@ -3778,45 +4178,10 @@ function updateConfirmationAnimation(timestamp) {
 
 
 // ==========================================
-// CONFIRM UI FEEDBACK
+// ADD CURRENT DISH TO ORDER
 // ==========================================
 
-function triggerConfirmationUIAnimation() {
-
-
-    confirmBtn.classList.remove(
-        "confirmed-feedback"
-    );
-
-
-    statusMessage.classList.remove(
-        "confirmed-feedback"
-    );
-
-
-
-    void confirmBtn.offsetWidth;
-
-
-
-    confirmBtn.classList.add(
-        "confirmed-feedback"
-    );
-
-
-    statusMessage.classList.add(
-        "confirmed-feedback"
-    );
-
-}
-
-
-
-// ==========================================
-// CONFIRM PREVIEW
-// ==========================================
-
-function confirmPreview() {
+function addCurrentItemToOrder() {
 
 
     if (
@@ -3829,8 +4194,90 @@ function confirmPreview() {
 
 
 
+    const item = {
+
+        id:
+            menuARState.nextItemId++,
+
+        food:
+            menuARState.selectedFood,
+
+        sizeKey:
+            menuARState.selectedSize,
+
+        object:
+            menuARState.placedObject,
+
+        shadow:
+            menuARState.activeShadow
+
+    };
+
+
+
+    item.object.userData.orderLocked =
+        true;
+
+
+
+    menuARState.confirmedItems.push(
+        item
+    );
+
+
+
+    // The dish remains in the Three.js scene,
+    // but it is no longer the active dish.
+
+    menuARState.placedObject =
+        null;
+
+
+    menuARState.activeShadow =
+        null;
+
+
+    menuARState.currentRotation =
+        0;
+
+
+
+    playAddedSound();
+
+
+
+    showOrderReview(
+
+        `${SIZE_PRESETS[item.sizeKey].label} ${getFoodName(item.food)} added to your order.`
+
+    );
+
+}
+
+
+
+// ==========================================
+// SHOW ORDER REVIEW
+// ==========================================
+
+function showOrderReview(
+    message = "Review your order."
+) {
+
+
+    if (
+        menuARState.confirmedItems.length ===
+        0
+    ) {
+
+        return;
+
+    }
+
+
+
     menuARState.appState =
-        "CONFIRMED";
+        "ORDER_REVIEW";
 
 
     menuARState.surfaceFound =
@@ -3842,53 +4289,492 @@ function confirmPreview() {
 
 
 
-    burgerBtn.disabled =
+    dishSelectionArea.hidden =
         true;
+
+
+    hideInteractionControls();
+
+
+
+    orderBadge.hidden =
+        true;
+
+
+    orderCompletePanel.hidden =
+        true;
+
+
+    orderReviewPanel.hidden =
+        false;
+
+
+
+    renderOrderSummary(
+        orderSummary
+    );
+
+
+
+    setStatus(
+        message
+    );
+
+}
+
+
+
+// ==========================================
+// ADD ANOTHER DISH
+// ==========================================
+
+function addAnotherDish() {
+
+
+    if (
+        menuARState.confirmedItems.length ===
+        0
+    ) {
+
+        return;
+
+    }
+
+
+
+    menuARState.appState =
+        "SCANNING";
+
+
+    menuARState.surfaceFound =
+        false;
+
+
+    menuARState.selectedSize =
+        "medium";
+
+
+    menuARState.currentRotation =
+        0;
+
+
+    reticle.visible =
+        false;
+
+
+
+    burgerBtn.disabled =
+        false;
 
 
     pizzaBtn.disabled =
+        false;
+
+
+
+    dishSelectionArea.hidden =
+        false;
+
+
+    orderReviewPanel.hidden =
+        true;
+
+
+    orderCompletePanel.hidden =
         true;
 
 
 
-    disableManipulationControls();
+    hideInteractionControls();
 
 
 
-    confirmBtn.textContent =
-        "✓ Preview Confirmed";
+    updateSizeButtons();
 
 
-
-    const foodName =
-        getFoodName(
-            menuARState.selectedFood
-        );
+    updateFoodButtons(
+        menuARState.selectedFood
+    );
 
 
-
-    const sizeName =
-        getCurrentSizePreset().label;
+    updateOrderBadge();
 
 
 
     setStatus(
 
-        `Looks good! Your ${sizeName} ${foodName} preview is confirmed.`
+        "Choose your next dish, then find another spot on the table."
+
+    );
+
+}
+
+
+
+// ==========================================
+// REVIEW EXISTING ORDER
+// ==========================================
+
+function reviewCurrentOrder() {
+
+
+    if (
+
+        menuARState.confirmedItems.length ===
+            0 ||
+
+        menuARState.placedObject
+
+    ) {
+
+        return;
+
+    }
+
+
+
+    showOrderReview(
+        "Here is your current order."
+    );
+
+}
+
+
+
+// ==========================================
+// FINAL ORDER MODEL PULSE
+// ==========================================
+
+function startOrderPulseAnimation() {
+
+
+    if (
+        menuARState.confirmedItems.length ===
+        0
+    ) {
+
+        return;
+
+    }
+
+
+
+    orderPulseAnimation = {
+
+        startTime:
+            null,
+
+        durationPerItem:
+            420,
+
+        stagger:
+            130,
+
+        baseScales:
+
+            menuARState.confirmedItems.map(
+
+                (item) =>
+                    item.object.scale.clone()
+
+            )
+
+    };
+
+}
+
+
+
+// ==========================================
+// UPDATE FINAL MODEL PULSES
+// ==========================================
+
+function updateOrderPulseAnimation(
+    timestamp
+) {
+
+
+    if (
+        !orderPulseAnimation
+    ) {
+
+        return;
+
+    }
+
+
+
+    if (
+        orderPulseAnimation.startTime ===
+        null
+    ) {
+
+
+        orderPulseAnimation.startTime =
+            timestamp;
+
+    }
+
+
+
+    const elapsed =
+
+        timestamp -
+
+        orderPulseAnimation.startTime;
+
+
+
+    const itemCount =
+        menuARState.confirmedItems.length;
+
+
+
+    menuARState.confirmedItems.forEach(
+
+        (
+            item,
+            index
+        ) => {
+
+
+            const localElapsed =
+
+                elapsed -
+
+                (
+                    index *
+                    orderPulseAnimation.stagger
+                );
+
+
+
+            const baseScale =
+
+                orderPulseAnimation
+                    .baseScales[index];
+
+
+
+            if (
+                localElapsed <
+                0
+            ) {
+
+
+                item.object.scale.copy(
+                    baseScale
+                );
+
+
+                return;
+
+            }
+
+
+
+            const progress =
+
+                THREE.MathUtils.clamp(
+
+                    localElapsed /
+
+                    orderPulseAnimation.durationPerItem,
+
+                    0,
+
+                    1
+
+                );
+
+
+
+            const pulse =
+
+                1 +
+
+                (
+                    0.065 *
+
+                    Math.sin(
+                        Math.PI *
+                        progress
+                    )
+                );
+
+
+
+            item.object.scale.copy(
+                baseScale
+            );
+
+
+
+            item.object.scale.multiplyScalar(
+                pulse
+            );
+
+        }
 
     );
 
 
 
-    startConfirmationAnimation();
+    const totalDuration =
+
+        orderPulseAnimation.durationPerItem +
+
+        (
+            Math.max(
+                itemCount - 1,
+                0
+            ) *
+
+            orderPulseAnimation.stagger
+        );
 
 
 
-    triggerConfirmationUIAnimation();
+    if (
+        elapsed >=
+        totalDuration
+    ) {
+
+
+        menuARState.confirmedItems.forEach(
+
+            (
+                item,
+                index
+            ) => {
+
+
+                item.object.scale.copy(
+
+                    orderPulseAnimation
+                        .baseScales[index]
+
+                );
+
+            }
+
+        );
 
 
 
-    playConfirmationSound();
+        orderPulseAnimation =
+            null;
+
+    }
+
+}
+
+
+
+// ==========================================
+// PLACE ORDER
+// ==========================================
+//
+// Prototype confirmation only.
+// No server/payment/order backend is called.
+// ==========================================
+
+function placeOrder() {
+
+
+    if (
+
+        menuARState.confirmedItems.length ===
+            0 ||
+
+        menuARState.placedObject
+
+    ) {
+
+        return;
+
+    }
+
+
+
+    menuARState.appState =
+        "ORDER_CONFIRMED";
+
+
+    menuARState.orderPlaced =
+        true;
+
+
+    menuARState.surfaceFound =
+        false;
+
+
+    reticle.visible =
+        false;
+
+
+
+    dishSelectionArea.hidden =
+        true;
+
+
+    hideInteractionControls();
+
+
+
+    orderBadge.hidden =
+        true;
+
+
+    orderReviewPanel.hidden =
+        true;
+
+
+    orderCompletePanel.hidden =
+        false;
+
+
+
+    renderOrderSummary(
+        finalOrderSummary
+    );
+
+
+
+    orderCompletePanel.classList.remove(
+        "order-complete-pop"
+    );
+
+
+
+    void orderCompletePanel.offsetWidth;
+
+
+
+    orderCompletePanel.classList.add(
+        "order-complete-pop"
+    );
+
+
+
+    const itemCount =
+        menuARState.confirmedItems.length;
+
+
+
+    setStatus(
+
+        `Order confirmed — ${itemCount} ${itemCount === 1 ? "dish" : "dishes"} selected.`
+
+    );
+
+
+
+    startOrderPulseAnimation();
+
+
+
+    playOrderConfirmationSound();
 
 }
 
@@ -3974,7 +4860,7 @@ function onXRSelect() {
 
 
 // ==========================================
-// HIT TEST / RENDER LOOP
+// RENDER / HIT TEST
 // ==========================================
 
 function render(
@@ -3991,7 +4877,8 @@ function render(
     );
 
 
-    updateConfirmationAnimation(
+
+    updateOrderPulseAnimation(
         timestamp
     );
 
@@ -4032,7 +4919,8 @@ function render(
 
 
         if (
-            hitTestResults.length > 0
+            hitTestResults.length >
+            0
         ) {
 
 
@@ -4086,7 +4974,7 @@ function render(
 
                     setStatus(
 
-                        `Great — tap the white circle to place your ${getFoodName(menuARState.selectedFood)}.`
+                        `Perfect — tap the white circle to place your ${getFoodName(menuARState.selectedFood)}.`
 
                     );
 
@@ -4138,7 +5026,7 @@ function render(
 
                 setStatus(
 
-                    `Move your device slowly over the table to find a clear spot for your ${getFoodName(menuARState.selectedFood)}.`
+                    `Move your device slowly over the table to find a spot for your ${getFoodName(menuARState.selectedFood)}.`
 
                 );
 
@@ -4230,7 +5118,6 @@ arControls.addEventListener(
         event.preventDefault();
 
 
-
         markUITouch();
 
     }
@@ -4240,7 +5127,7 @@ arControls.addEventListener(
 
 
 // ==========================================
-// FOOD EVENTS
+// FOOD BUTTONS
 // ==========================================
 
 burgerBtn.addEventListener(
@@ -4278,7 +5165,7 @@ pizzaBtn.addEventListener(
 
 
 // ==========================================
-// SIZE EVENTS
+// SIZE BUTTONS
 // ==========================================
 
 sizeSmallBtn.addEventListener(
@@ -4333,7 +5220,7 @@ sizeLargeBtn.addEventListener(
 
 
 // ==========================================
-// ROTATION EVENTS
+// ROTATION
 // ==========================================
 
 rotateLeftBtn.addEventListener(
@@ -4385,14 +5272,56 @@ removeBtn.addEventListener(
 
 
 // ==========================================
-// CONFIRM
+// ADD TO ORDER
 // ==========================================
 
-confirmBtn.addEventListener(
+addToOrderBtn.addEventListener(
 
     "click",
 
-    confirmPreview
+    addCurrentItemToOrder
+
+);
+
+
+
+// ==========================================
+// ADD ANOTHER
+// ==========================================
+
+addAnotherBtn.addEventListener(
+
+    "click",
+
+    addAnotherDish
+
+);
+
+
+
+// ==========================================
+// REVIEW ORDER
+// ==========================================
+
+reviewOrderBtn.addEventListener(
+
+    "click",
+
+    reviewCurrentOrder
+
+);
+
+
+
+// ==========================================
+// PLACE ORDER
+// ==========================================
+
+placeOrderBtn.addEventListener(
+
+    "click",
+
+    placeOrder
 
 );
 
@@ -4410,7 +5339,6 @@ startARBtn.addEventListener(
 
 
         ensureAudioContext();
-
 
 
         await startARSession();
@@ -4489,7 +5417,7 @@ window.addEventListener(
 
 
 // ==========================================
-// INITIALIZATION
+// INITIALIZE
 // ==========================================
 
 async function initializeApplication() {

@@ -13,10 +13,9 @@
     <title>MenuAR | View Food on Table</title>
 
 
-    <!-- Main Styles -->
     <link
         rel="stylesheet"
-        href="css/style.css?v=7"
+        href="css/style.css?v=8"
     >
 
 
@@ -31,10 +30,6 @@
     </script>
 
 
-    <!-- =====================================
-         MARKERLESS AR PAGE POLISH
-         ===================================== -->
-
     <style>
 
         /* ==================================
@@ -45,14 +40,11 @@
 
             max-width: 320px;
 
-            margin:
-                16px auto 0;
+            margin: 16px auto 0;
 
-            padding:
-                10px 12px;
+            padding: 10px 12px;
 
-            border-radius:
-                10px;
+            border-radius: 10px;
 
             background:
                 rgba(
@@ -62,93 +54,142 @@
                     0.10
                 );
 
-            color:
-                #ffffff;
+            color: #ffffff;
 
-            font-size:
-                12px;
+            font-size: 12px;
 
-            line-height:
-                1.45;
+            line-height: 1.45;
 
         }
 
 
         /* ==================================
-           SIZE SECTION
+           ORDER BADGE
+           ================================== */
+
+        .order-badge {
+
+            display: flex;
+
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 10px;
+
+            margin-bottom: 10px;
+
+            padding: 9px 11px;
+
+            border:
+                1px solid
+                #f0d2bb;
+
+            border-radius: 11px;
+
+            background:
+                #fff8f1;
+
+        }
+
+
+        .order-badge[hidden] {
+
+            display: none !important;
+
+        }
+
+
+        .order-badge-text {
+
+            color: #9b4b17;
+
+            font-size: 11px;
+            font-weight: 700;
+
+        }
+
+
+        .review-order-button {
+
+            min-height: 32px;
+
+            padding: 5px 11px;
+
+            border:
+                1px solid
+                #e85d04;
+
+            border-radius: 9px;
+
+            background: #ffffff;
+
+            color: #d95400;
+
+            font-size: 10px;
+            font-weight: 700;
+
+            cursor: pointer;
+
+        }
+
+
+        /* ==================================
+           SIZE SELECTOR
            ================================== */
 
         .size-section {
 
-            margin-top:
-                9px;
+            margin-top: 9px;
 
         }
 
 
         .size-title {
 
-            margin-bottom:
-                7px;
+            margin-bottom: 7px;
 
-            color:
-                #666666;
+            color: #666666;
 
-            font-size:
-                11px;
+            font-size: 11px;
+            font-weight: 700;
 
-            font-weight:
-                700;
-
-            text-align:
-                center;
+            text-align: center;
 
         }
 
 
         .size-selector {
 
-            display:
-                grid;
+            display: grid;
 
             grid-template-columns:
                 repeat(3, 1fr);
 
-            gap:
-                7px;
+            gap: 7px;
 
         }
 
 
         .size-option {
 
-            min-height:
-                38px;
+            min-height: 38px;
 
-            padding:
-                7px 5px;
+            padding: 7px 5px;
 
             border:
                 1px solid
                 #dddddd;
 
-            border-radius:
-                10px;
+            border-radius: 10px;
 
-            background:
-                #ffffff;
+            background: #ffffff;
 
-            color:
-                #555555;
+            color: #555555;
 
-            font-size:
-                11px;
+            font-size: 11px;
+            font-weight: 700;
 
-            font-weight:
-                700;
-
-            cursor:
-                pointer;
+            cursor: pointer;
 
             transition:
                 transform 160ms ease,
@@ -181,19 +222,320 @@
         }
 
 
-        .size-option:disabled {
+        /* ==================================
+           ADD TO ORDER
+           ================================== */
 
-            opacity:
-                0.4;
+        .add-order-button {
 
-            cursor:
-                not-allowed;
+            width: 100%;
+
+            min-height: 44px;
+
+            margin-top: 10px;
+
+            border: none;
+
+            border-radius: 11px;
+
+            background:
+                #e85d04;
+
+            color:
+                #ffffff;
+
+            font-size: 13px;
+            font-weight: 700;
+
+            cursor: pointer;
 
         }
 
 
         /* ==================================
-           AR PANEL ENTRANCE
+           ORDER REVIEW PANEL
+           ================================== */
+
+        .order-review-panel {
+
+            padding: 4px 0 2px;
+
+        }
+
+
+        .order-review-panel[hidden] {
+
+            display: none !important;
+
+        }
+
+
+        .order-review-panel h3 {
+
+            margin-bottom: 5px;
+
+            color: #29231f;
+
+            font-size: 17px;
+
+            text-align: center;
+
+        }
+
+
+        .order-review-note {
+
+            margin-bottom: 10px;
+
+            color: #77706a;
+
+            font-size: 11px;
+
+            line-height: 1.45;
+
+            text-align: center;
+
+        }
+
+
+        /* ==================================
+           ORDER SUMMARY
+           ================================== */
+
+        .order-summary {
+
+            display: flex;
+            flex-direction: column;
+
+            gap: 7px;
+
+            margin-bottom: 11px;
+
+        }
+
+
+        .order-summary-row {
+
+            display: flex;
+
+            justify-content: space-between;
+            align-items: center;
+
+            gap: 10px;
+
+            padding: 9px 10px;
+
+            border:
+                1px solid
+                #eee3da;
+
+            border-radius: 10px;
+
+            background:
+                #fffaf5;
+
+        }
+
+
+        .order-summary-name {
+
+            color: #413832;
+
+            font-size: 11px;
+            font-weight: 700;
+
+        }
+
+
+        .order-summary-count {
+
+            color: #d95400;
+
+            font-size: 11px;
+            font-weight: 800;
+
+        }
+
+
+        /* ==================================
+           ORDER ACTION BUTTONS
+           ================================== */
+
+        .order-actions {
+
+            display: grid;
+
+            grid-template-columns:
+                1fr 1fr;
+
+            gap: 8px;
+
+        }
+
+
+        .add-another-button,
+        .place-order-button {
+
+            min-height: 43px;
+
+            padding: 8px;
+
+            border-radius: 11px;
+
+            font-size: 11px;
+            font-weight: 700;
+
+            cursor: pointer;
+
+        }
+
+
+        .add-another-button {
+
+            border:
+                1px solid
+                #e0c6b2;
+
+            background: #ffffff;
+
+            color: #8d542d;
+
+        }
+
+
+        .place-order-button {
+
+            border: none;
+
+            background:
+                #e85d04;
+
+            color: #ffffff;
+
+        }
+
+
+        /* ==================================
+           FINAL ORDER PANEL
+           ================================== */
+
+        .order-complete-panel {
+
+            padding: 5px 0;
+
+            text-align: center;
+
+        }
+
+
+        .order-complete-panel[hidden] {
+
+            display: none !important;
+
+        }
+
+
+        .order-checkmark {
+
+            width: 54px;
+            height: 54px;
+
+            display: flex;
+
+            justify-content: center;
+            align-items: center;
+
+            margin:
+                0 auto
+                10px;
+
+            border-radius: 50%;
+
+            background:
+                #eaf7ed;
+
+            color:
+                #238247;
+
+            font-size: 27px;
+            font-weight: 800;
+
+        }
+
+
+        .order-complete-panel h3 {
+
+            margin-bottom: 5px;
+
+            color: #29231f;
+
+            font-size: 18px;
+
+        }
+
+
+        .order-complete-panel > p {
+
+            margin-bottom: 12px;
+
+            color: #77706a;
+
+            font-size: 11px;
+
+            line-height: 1.45;
+
+        }
+
+
+        .order-complete-pop {
+
+            animation:
+                orderCompletePop
+                520ms
+                ease-out
+                both;
+
+        }
+
+
+        @keyframes orderCompletePop {
+
+            0% {
+
+                opacity: 0;
+
+                transform:
+                    translateY(10px)
+                    scale(0.96);
+
+            }
+
+
+            70% {
+
+                opacity: 1;
+
+                transform:
+                    translateY(0)
+                    scale(1.02);
+
+            }
+
+
+            100% {
+
+                opacity: 1;
+
+                transform:
+                    scale(1);
+
+            }
+
+        }
+
+
+        /* ==================================
+           PANEL ENTRANCE
            ================================== */
 
         .ar-controls.xr-panel-enter {
@@ -211,8 +553,7 @@
 
             from {
 
-                opacity:
-                    0;
+                opacity: 0;
 
                 transform:
                     translateY(18px);
@@ -222,8 +563,7 @@
 
             to {
 
-                opacity:
-                    1;
+                opacity: 1;
 
                 transform:
                     translateY(0);
@@ -234,118 +574,31 @@
 
 
         /* ==================================
-           CONFIRM FEEDBACK
+           XR COMPACT MODE
            ================================== */
-
-        .confirm-button.confirmed-feedback {
-
-            animation:
-                confirmPulse
-                560ms
-                ease-out;
-
-        }
-
-
-        .status-message.confirmed-feedback {
-
-            animation:
-                statusPulse
-                650ms
-                ease-out;
-
-        }
-
-
-        @keyframes confirmPulse {
-
-            0% {
-
-                transform:
-                    scale(1);
-
-            }
-
-
-            40% {
-
-                transform:
-                    scale(1.05);
-
-            }
-
-
-            100% {
-
-                transform:
-                    scale(1);
-
-            }
-
-        }
-
-
-        @keyframes statusPulse {
-
-            0% {
-
-                transform:
-                    scale(1);
-
-            }
-
-
-            40% {
-
-                transform:
-                    scale(1.025);
-
-            }
-
-
-            100% {
-
-                transform:
-                    scale(1);
-
-            }
-
-        }
-
-
-        /* ==================================
-           XR COMPACT SIZE BUTTONS
-           ================================== */
-
-        body:xr-overlay .size-section,
-        body.xr-session-active .size-section {
-
-            margin-top:
-                7px;
-
-        }
-
-
-        body:xr-overlay .size-title,
-        body.xr-session-active .size-title {
-
-            margin-bottom:
-                5px;
-
-            font-size:
-                10px;
-
-        }
-
 
         body:xr-overlay .size-option,
         body.xr-session-active .size-option {
 
-            min-height:
-                34px;
+            min-height: 34px;
 
-            font-size:
-                10px;
+            font-size: 10px;
+
+        }
+
+
+        body:xr-overlay .order-summary-row,
+        body.xr-session-active .order-summary-row {
+
+            padding: 7px 9px;
+
+        }
+
+
+        body:xr-overlay .order-summary,
+        body.xr-session-active .order-summary {
+
+            gap: 5px;
 
         }
 
@@ -358,21 +611,16 @@
         (prefers-reduced-motion: reduce) {
 
             .ar-controls.xr-panel-enter,
+            .order-complete-pop {
 
-            .confirm-button.confirmed-feedback,
-
-            .status-message.confirmed-feedback {
-
-                animation:
-                    none;
+                animation: none;
 
             }
 
 
             .size-option {
 
-                transition:
-                    none;
+                transition: none;
 
             }
 
@@ -387,7 +635,7 @@
 
 
     <!-- =====================================
-         NORMAL PAGE HEADER
+         HEADER
          ===================================== -->
 
     <header class="ar-header">
@@ -409,7 +657,7 @@
             </h1>
 
             <p>
-                See how your dish looks before you order
+                Build your order before you decide
             </p>
 
         </div>
@@ -418,10 +666,6 @@
     </header>
 
 
-
-    <!-- =====================================
-         MAIN AREA
-         ===================================== -->
 
     <main class="markerless-layout">
 
@@ -448,7 +692,7 @@
 
 
                 <h2>
-                    Find Your Table
+                    See It on Your Table
                 </h2>
 
 
@@ -484,7 +728,7 @@
 
 
         <!-- =================================
-             AR CONTROL PANEL
+             XR CONTROL PANEL
              ================================= -->
 
         <section
@@ -494,7 +738,7 @@
         >
 
 
-            <!-- Friendly status -->
+            <!-- Friendly feedback -->
 
             <p
                 class="status-message"
@@ -506,32 +750,30 @@
 
 
             <!-- =================================
-                 FOOD SELECTION
+                 CURRENT ORDER BADGE
                  ================================= -->
 
-            <p class="control-label">
-                Choose Your Dish
-            </p>
+            <div
+                class="order-badge"
+                id="orderBadge"
+                hidden
+            >
 
 
-            <div class="food-selector">
+                <span
+                    class="order-badge-text"
+                    id="orderBadgeText"
+                >
+                    Your Order · 1 item
+                </span>
 
 
                 <button
                     type="button"
-                    class="food-button active"
-                    id="burgerBtn"
+                    class="review-order-button"
+                    id="reviewOrderBtn"
                 >
-                    🍔 Burger
-                </button>
-
-
-                <button
-                    type="button"
-                    class="food-button"
-                    id="pizzaBtn"
-                >
-                    🍕 Pizza
+                    Review Order
                 </button>
 
 
@@ -540,7 +782,47 @@
 
 
             <!-- =================================
-                 MANIPULATION CONTROLS
+                 DISH SELECTION
+                 ================================= -->
+
+            <div id="dishSelectionArea">
+
+
+                <p class="control-label">
+                    Choose Your Dish
+                </p>
+
+
+                <div class="food-selector">
+
+
+                    <button
+                        type="button"
+                        class="food-button active"
+                        id="burgerBtn"
+                    >
+                        🍔 Burger
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="food-button"
+                        id="pizzaBtn"
+                    >
+                        🍕 Pizza
+                    </button>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- =================================
+                 ACTIVE DISH CONTROLS
                  ================================= -->
 
             <div
@@ -549,15 +831,13 @@
             >
 
 
-                <!-- =================================
-                     SIZE CHOICES
-                     ================================= -->
+                <!-- Size -->
 
                 <div class="size-section">
 
 
                     <p class="size-title">
-                        Preview Size
+                        Choose a Size
                     </p>
 
 
@@ -601,9 +881,7 @@
 
 
 
-                <!-- =================================
-                     ROTATION
-                     ================================= -->
+                <!-- Turn -->
 
                 <div
                     class="control-row"
@@ -635,9 +913,7 @@
 
 
 
-                <!-- =================================
-                     MOVE
-                     ================================= -->
+                <!-- Move -->
 
                 <button
                     type="button"
@@ -650,9 +926,7 @@
 
 
 
-                <!-- =================================
-                     REMOVE
-                     ================================= -->
+                <!-- Remove -->
 
                 <button
                     type="button"
@@ -665,18 +939,112 @@
 
 
 
-                <!-- =================================
-                     CONFIRM
-                     ================================= -->
+                <!-- Add -->
 
                 <button
                     type="button"
-                    class="confirm-button"
-                    id="confirmBtn"
+                    class="add-order-button"
+                    id="addToOrderBtn"
                     disabled
                 >
-                    Confirm Preview
+                    Add to Order
                 </button>
+
+
+            </div>
+
+
+
+            <!-- =================================
+                 ORDER REVIEW
+                 ================================= -->
+
+            <div
+                class="order-review-panel"
+                id="orderReviewPanel"
+                hidden
+            >
+
+
+                <h3>
+                    Your Order
+                </h3>
+
+
+                <p class="order-review-note">
+                    Your selected dishes will stay
+                    on the table while you build your order.
+                </p>
+
+
+                <div
+                    class="order-summary"
+                    id="orderSummary"
+                >
+                </div>
+
+
+                <div class="order-actions">
+
+
+                    <button
+                        type="button"
+                        class="add-another-button"
+                        id="addAnotherBtn"
+                    >
+                        + Add Another Dish
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="place-order-button"
+                        id="placeOrderBtn"
+                    >
+                        Place Order
+                    </button>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- =================================
+                 ORDER COMPLETE
+                 ================================= -->
+
+            <div
+                class="order-complete-panel"
+                id="orderCompletePanel"
+                hidden
+                aria-live="polite"
+            >
+
+
+                <div class="order-checkmark">
+                    ✓
+                </div>
+
+
+                <h3>
+                    Order Confirmed
+                </h3>
+
+
+                <p>
+                    Your selected dishes are shown
+                    on the table.
+                </p>
+
+
+                <div
+                    class="order-summary"
+                    id="finalOrderSummary"
+                >
+                </div>
 
 
             </div>
@@ -704,7 +1072,7 @@
 
     <script
         type="module"
-        src="js/markerless-ar.js?v=10"
+        src="js/markerless-ar.js?v=11"
     >
     </script>
 
