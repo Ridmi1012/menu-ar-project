@@ -43,12 +43,6 @@ const dishSelectionArea =
 const interactionControls =
     document.getElementById("interactionControls");
 
-const rotateLeftBtn =
-    document.getElementById("rotateLeftBtn");
-
-const rotateRightBtn =
-    document.getElementById("rotateRightBtn");
-
 const sizeSmallBtn =
     document.getElementById("sizeSmallBtn");
 
@@ -190,10 +184,7 @@ const menuARState = {
         false,
 
     xrSupported:
-        false,
-
-    currentRotation:
-        0
+        false
 
 };
 
@@ -253,10 +244,6 @@ const MODEL_CONFIG = {
 // ==========================================
 // INTERACTION SETTINGS
 // ==========================================
-
-const ROTATION_STEP =
-    THREE.MathUtils.degToRad(15);
-
 
 const UI_SELECT_GUARD_MS =
     650;
@@ -352,6 +339,15 @@ let viewerSpace =
 
 
 let referenceSpace =
+    null;
+
+
+// The most recent XRHitTestResult produced by the
+// render loop. Used at the moment of placement (or
+// re-placement) to create an anchor for that exact
+// real-world point.
+
+let latestHitTestResult =
     null;
 
 
@@ -954,6 +950,271 @@ function positionShadowFromReticle(
         0.003
 
     );
+
+}
+
+
+
+// ==========================================
+// ANCHOR-BASED DRIFT CORRECTION
+// ==========================================
+//
+// On surfaces with little visual texture (plain
+// wood, glass, a plain tablecloth) the device's
+// visual-inertial tracking has fewer features to
+// lock onto. If it re-estimates its position, any
+// object placed using only a single hit-test pose
+// stays fixed relative to the *old* estimate, so
+// the whole scene appears to shift together while
+// the distances between objects stay correct —
+// exactly the symptom described.
+//
+// WebXR anchors fix this: instead of remembering a
+// plain position, each dish asks the tracking
+// system to keep pinning a specific real-world
+// point. Every frame we re-read that anchor's pose
+// and move the dish (and its shadow) to match, so
+// each item is corrected independently and stays
+// where it was actually placed.
+// ==========================================
+
+async function createAnchorForHitResult(hitResult) {
+
+
+    if (
+
+        !hitResult ||
+
+        typeof hitResult.createAnchor !== "function"
+
+    ) {
+
+        return null;
+
+    }
+
+
+
+    try {
+
+
+        return await hitResult.createAnchor();
+
+
+    } catch (error) {
+
+
+        console.warn(
+
+            "Anchor creation failed, falling back to static placement:",
+
+            error
+
+        );
+
+
+
+        return null;
+
+    }
+
+}
+
+
+
+function deleteAnchorFromObject(object) {
+
+
+    if (
+
+        object &&
+
+        object.userData &&
+
+        object.userData.anchor
+
+    ) {
+
+
+        try {
+
+
+            object.userData.anchor.delete();
+
+
+        } catch (error) {
+
+            // Anchor may already be invalid — safe to ignore.
+
+        }
+
+
+
+        object.userData.anchor =
+            null;
+
+    }
+
+}
+
+
+
+function applyAnchorTracking(
+
+    object,
+
+    shadow,
+
+    frame,
+
+    space
+
+) {
+
+
+    if (
+
+        !object ||
+
+        !object.userData.anchor ||
+
+        !frame ||
+
+        !space
+
+    ) {
+
+        return;
+
+    }
+
+
+
+    const anchorPose =
+
+        frame.getPose(
+
+            object.userData.anchor.anchorSpace,
+
+            space
+
+        );
+
+
+
+    if (
+        !anchorPose
+    ) {
+
+        return;
+
+    }
+
+
+
+    const matrix =
+
+        new THREE.Matrix4().fromArray(
+
+            anchorPose.transform.matrix
+
+        );
+
+
+
+    const position =
+        new THREE.Vector3();
+
+
+
+    const quaternion =
+        new THREE.Quaternion();
+
+
+
+    const ignoredScale =
+        new THREE.Vector3();
+
+
+
+    matrix.decompose(
+
+        position,
+
+        quaternion,
+
+        ignoredScale
+
+    );
+
+
+
+    const up =
+
+        new THREE.Vector3(
+            0,
+            1,
+            0
+        ).applyQuaternion(
+            quaternion
+        );
+
+
+
+    const offsetY =
+
+        object.userData.surfaceOffset ||
+
+        0;
+
+
+
+    object.position.copy(
+        position
+    );
+
+
+
+    object.position.addScaledVector(
+
+        up,
+
+        offsetY
+
+    );
+
+
+
+    object.quaternion.copy(
+        quaternion
+    );
+
+
+
+    if (
+        shadow
+    ) {
+
+
+        shadow.position.copy(
+            position
+        );
+
+
+        shadow.quaternion.copy(
+            quaternion
+        );
+
+
+        shadow.position.addScaledVector(
+
+            up,
+
+            0.003
+
+        );
+
+    }
 
 }
 
@@ -2136,6 +2397,31 @@ function replacePlacedFood(
 
 
 
+    newModel.userData.surfaceOffset =
+        newConfig.surfaceOffset;
+
+
+
+    // Same physical spot as before, so the existing
+    // anchor (if any) is still valid — carry it over
+    // instead of losing tracking on a food swap.
+
+    if (
+        oldModel.userData.anchor
+    ) {
+
+
+        newModel.userData.anchor =
+            oldModel.userData.anchor;
+
+
+        oldModel.userData.anchor =
+            null;
+
+    }
+
+
+
     scene.add(
         newModel
     );
@@ -2492,7 +2778,9 @@ async function startARSession() {
 
                         "dom-overlay",
 
-                        "local-floor"
+                        "local-floor",
+
+                        "anchors"
 
                     ],
 
@@ -2578,10 +2866,6 @@ async function startARSession() {
 
         menuARState.selectedSize =
             "medium";
-
-
-        menuARState.currentRotation =
-            0;
 
 
         menuARState.confirmedItems =
@@ -2782,6 +3066,12 @@ function removeActivePreviewFromScene() {
     ) {
 
 
+        deleteAnchorFromObject(
+            menuARState.placedObject
+        );
+
+
+
         scene.remove(
             menuARState.placedObject
         );
@@ -2828,6 +3118,12 @@ function clearConfirmedItemsFromScene() {
             if (
                 item.object
             ) {
+
+
+                deleteAnchorFromObject(
+                    item.object
+                );
+
 
 
                 scene.remove(
@@ -2895,14 +3191,6 @@ function hideInteractionControls() {
 function enableManipulationControls() {
 
 
-    rotateLeftBtn.disabled =
-        false;
-
-
-    rotateRightBtn.disabled =
-        false;
-
-
     sizeSmallBtn.disabled =
         false;
 
@@ -2956,14 +3244,6 @@ function enableManipulationControls() {
 function disableManipulationControls() {
 
 
-    rotateLeftBtn.disabled =
-        true;
-
-
-    rotateRightBtn.disabled =
-        true;
-
-
     sizeSmallBtn.disabled =
         true;
 
@@ -2996,14 +3276,6 @@ function disableManipulationControls() {
 // ==========================================
 
 function setMoveModeControls() {
-
-
-    rotateLeftBtn.disabled =
-        true;
-
-
-    rotateRightBtn.disabled =
-        true;
 
 
     sizeSmallBtn.disabled =
@@ -3138,6 +3410,10 @@ function onARSessionEnded() {
         null;
 
 
+    latestHitTestResult =
+        null;
+
+
 
     reticle.visible =
         false;
@@ -3158,10 +3434,6 @@ function onARSessionEnded() {
 
     menuARState.selectedSize =
         "medium";
-
-
-    menuARState.currentRotation =
-        0;
 
 
     menuARState.orderPlaced =
@@ -3665,6 +3937,11 @@ function placeSelectedFood() {
 
 
 
+    placedModel.userData.surfaceOffset =
+        config.surfaceOffset;
+
+
+
     scene.add(
         placedModel
     );
@@ -3711,10 +3988,6 @@ function placeSelectedFood() {
 
 
 
-    menuARState.currentRotation =
-        0;
-
-
     menuARState.surfaceFound =
         false;
 
@@ -3733,6 +4006,83 @@ function placeSelectedFood() {
 
 
 
+    // Pin this dish to the exact real-world point it
+    // was placed at, so tracking re-calibration on a
+    // low-texture table corrects it individually
+    // instead of the whole scene drifting together.
+
+    createAnchorForHitResult(
+
+        latestHitTestResult
+
+    ).then(
+
+        (anchor) => {
+
+
+            if (
+                !anchor
+            ) {
+
+                return;
+
+            }
+
+
+
+            const stillActive =
+
+                menuARState.placedObject ===
+                placedModel;
+
+
+
+            const stillInOrder =
+
+                menuARState.confirmedItems.some(
+
+                    (item) =>
+                        item.object === placedModel
+
+                );
+
+
+
+            if (
+
+                stillActive ||
+
+                stillInOrder
+
+            ) {
+
+
+                placedModel.userData.anchor =
+                    anchor;
+
+
+            } else {
+
+
+                // The dish was removed before the
+                // anchor finished resolving.
+
+                try {
+
+
+                    anchor.delete();
+
+
+                } catch (error) {}
+
+            }
+
+        }
+
+    );
+
+
+
     startPlacementAnimation(
 
         placedModel,
@@ -3742,78 +4092,6 @@ function placeSelectedFood() {
         finalScale,
 
         finalY
-
-    );
-
-}
-
-
-
-// ==========================================
-// ROTATE
-// ==========================================
-
-function rotateLeft() {
-
-
-    if (
-        !canManipulate()
-    ) {
-
-        return;
-
-    }
-
-
-
-    menuARState.placedObject.rotateY(
-        ROTATION_STEP
-    );
-
-
-
-    menuARState.currentRotation +=
-        ROTATION_STEP;
-
-
-
-    setStatus(
-
-        `${getFoodName(menuARState.selectedFood)} turned left.`
-
-    );
-
-}
-
-
-
-function rotateRight() {
-
-
-    if (
-        !canManipulate()
-    ) {
-
-        return;
-
-    }
-
-
-
-    menuARState.placedObject.rotateY(
-        -ROTATION_STEP
-    );
-
-
-
-    menuARState.currentRotation -=
-        ROTATION_STEP;
-
-
-
-    setStatus(
-
-        `${getFoodName(menuARState.selectedFood)} turned right.`
 
     );
 
@@ -3969,9 +4247,14 @@ function repositionPlacedFood() {
 
 
 
+    const objectBeingMoved =
+        menuARState.placedObject;
+
+
+
     const savedQuaternion =
 
-        menuARState.placedObject
+        objectBeingMoved
             .quaternion
             .clone();
 
@@ -3979,14 +4262,9 @@ function repositionPlacedFood() {
 
     const savedScale =
 
-        menuARState.placedObject
+        objectBeingMoved
             .scale
             .clone();
-
-
-
-    const savedRotation =
-        menuARState.currentRotation;
 
 
 
@@ -4008,31 +4286,80 @@ function repositionPlacedFood() {
 
 
 
-    menuARState.placedObject.position.copy(
+    objectBeingMoved.position.copy(
         newPosition
     );
 
 
 
-    menuARState.placedObject.position.y +=
+    objectBeingMoved.position.y +=
         config.surfaceOffset;
 
 
 
-    menuARState.placedObject.quaternion.copy(
+    objectBeingMoved.quaternion.copy(
         savedQuaternion
     );
 
 
 
-    menuARState.placedObject.scale.copy(
+    objectBeingMoved.scale.copy(
         savedScale
     );
 
 
 
-    menuARState.currentRotation =
-        savedRotation;
+    // The dish now sits on a new real-world spot, so
+    // the old anchor no longer applies — drop it and
+    // pin a fresh one at the new location.
+
+    deleteAnchorFromObject(
+        objectBeingMoved
+    );
+
+
+
+    createAnchorForHitResult(
+
+        latestHitTestResult
+
+    ).then(
+
+        (anchor) => {
+
+
+            if (
+
+                anchor &&
+
+                menuARState.placedObject ===
+                    objectBeingMoved
+
+            ) {
+
+
+                objectBeingMoved.userData.anchor =
+                    anchor;
+
+
+            } else if (
+                anchor
+            ) {
+
+
+                try {
+
+
+                    anchor.delete();
+
+
+                } catch (error) {}
+
+            }
+
+        }
+
+    );
 
 
 
@@ -4119,10 +4446,6 @@ function removeFood() {
 
     removeActivePreviewFromScene();
 
-
-
-    menuARState.currentRotation =
-        0;
 
 
     menuARState.surfaceFound =
@@ -4227,7 +4550,8 @@ function addCurrentItemToOrder() {
 
 
     // The dish remains in the Three.js scene,
-    // but it is no longer the active dish.
+    // still tracked by its anchor, but it is no
+    // longer the active dish.
 
     menuARState.placedObject =
         null;
@@ -4235,10 +4559,6 @@ function addCurrentItemToOrder() {
 
     menuARState.activeShadow =
         null;
-
-
-    menuARState.currentRotation =
-        0;
 
 
 
@@ -4352,10 +4672,6 @@ function addAnotherDish() {
 
     menuARState.selectedSize =
         "medium";
-
-
-    menuARState.currentRotation =
-        0;
 
 
     reticle.visible =
@@ -4884,6 +5200,72 @@ function render(
 
 
 
+    // Re-pin every anchored dish to its tracked
+    // real-world point every frame. This is what
+    // keeps items steady (individually corrected)
+    // instead of the whole order drifting together
+    // when the surface is hard to track.
+
+    if (
+
+        frame &&
+
+        referenceSpace
+
+    ) {
+
+
+        if (
+
+            menuARState.placedObject &&
+
+            menuARState.appState ===
+                "PLACED"
+
+        ) {
+
+
+            applyAnchorTracking(
+
+                menuARState.placedObject,
+
+                menuARState.activeShadow,
+
+                frame,
+
+                referenceSpace
+
+            );
+
+        }
+
+
+
+        menuARState.confirmedItems.forEach(
+
+            (item) => {
+
+
+                applyAnchorTracking(
+
+                    item.object,
+
+                    item.shadow,
+
+                    frame,
+
+                    referenceSpace
+
+                );
+
+            }
+
+        );
+
+    }
+
+
+
     const shouldRunHitTest =
 
         menuARState.appState ===
@@ -4926,6 +5308,11 @@ function render(
 
             const hit =
                 hitTestResults[0];
+
+
+
+            latestHitTestResult =
+                hit;
 
 
 
@@ -4998,6 +5385,11 @@ function render(
         } else {
 
 
+            latestHitTestResult =
+                null;
+
+
+
             reticle.visible =
                 false;
 
@@ -5033,6 +5425,12 @@ function render(
             }
 
         }
+
+    } else {
+
+
+        latestHitTestResult =
+            null;
 
     }
 
@@ -5214,30 +5612,6 @@ sizeLargeBtn.addEventListener(
         );
 
     }
-
-);
-
-
-
-// ==========================================
-// ROTATION
-// ==========================================
-
-rotateLeftBtn.addEventListener(
-
-    "click",
-
-    rotateLeft
-
-);
-
-
-
-rotateRightBtn.addEventListener(
-
-    "click",
-
-    rotateRight
 
 );
 
