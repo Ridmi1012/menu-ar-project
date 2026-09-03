@@ -54,6 +54,11 @@ const markerARState = {
 // ==========================================
 // MODEL CONFIGURATION
 // ==========================================
+//
+// Updated after mobile testing.
+// These are intentionally larger than
+// the previous Marker AR values.
+// ==========================================
 
 const MARKER_MODEL_CONFIG = {
 
@@ -64,10 +69,10 @@ const MARKER_MODEL_CONFIG = {
             "#burgerModel",
 
         scale:
-            1.8,
+            2.2,
 
         positionY:
-            0.18,
+            0.22,
 
         rotation:
             "0 0 0"
@@ -81,10 +86,10 @@ const MARKER_MODEL_CONFIG = {
             "#pizzaModel",
 
         scale:
-            1.2,
+            1.5,
 
         positionY:
-            0.06,
+            0.08,
 
         rotation:
             "0 0 0"
@@ -100,20 +105,13 @@ const MARKER_MODEL_CONFIG = {
 // ANIMATION CONFIGURATION
 // ==========================================
 
-// Starting size compared with final size.
-
 const REVEAL_START_SCALE_FACTOR =
     0.72;
 
 
-// Small vertical drop creates a
-// "dish being placed down" effect.
-
 const REVEAL_HEIGHT =
     0.07;
 
-
-// Animation duration in milliseconds.
 
 const REVEAL_DURATION =
     360;
@@ -171,7 +169,7 @@ function clearRevealAnimation() {
 
 
 // ==========================================
-// RESET MODEL TO FINAL TRANSFORM
+// RESET MODEL TRANSFORM
 // ==========================================
 
 function resetModelTransform() {
@@ -189,26 +187,35 @@ function resetModelTransform() {
 
 
     markerFoodModel.setAttribute(
+
         "scale",
+
         createScaleString(
             config.scale
         )
+
     );
 
 
 
     markerFoodModel.setAttribute(
+
         "position",
+
         createPositionString(
             config.positionY
         )
+
     );
 
 
 
     markerFoodModel.setAttribute(
+
         "rotation",
+
         config.rotation
+
     );
 
 }
@@ -216,19 +223,7 @@ function resetModelTransform() {
 
 
 // ==========================================
-// FOOD REVEAL ANIMATION
-// ==========================================
-//
-// Effect:
-//
-// slightly smaller
-//        +
-// slightly higher
-//
-//        ↓
-//
-// settles into its final location.
-//
+// FOOD REVEAL
 // ==========================================
 
 function playFoodRevealAnimation() {
@@ -271,10 +266,6 @@ function playFoodRevealAnimation() {
 
 
 
-    // --------------------------------------
-    // Start values
-    // --------------------------------------
-
     markerFoodModel.setAttribute(
 
         "scale",
@@ -298,14 +289,6 @@ function playFoodRevealAnimation() {
     );
 
 
-
-    // --------------------------------------
-    // Wait one frame before adding
-    // animation attributes.
-    //
-    // This lets A-Frame register the
-    // starting transform first.
-    // --------------------------------------
 
     requestAnimationFrame(
 
@@ -352,7 +335,7 @@ function playFoodRevealAnimation() {
 
 
 // ==========================================
-// UPDATE FOOD BUTTONS
+// BUTTON STATE
 // ==========================================
 
 function updateFoodButtons(food) {
@@ -392,7 +375,7 @@ function updateFoodButtons(food) {
 
 
 // ==========================================
-// APPLY FOOD MODEL
+// APPLY MODEL
 // ==========================================
 
 function applyMarkerFoodModel(food) {
@@ -413,8 +396,6 @@ function applyMarkerFoodModel(food) {
     clearRevealAnimation();
 
 
-
-    // Set final transform first.
 
     markerFoodModel.setAttribute(
 
@@ -450,8 +431,6 @@ function applyMarkerFoodModel(food) {
 
 
 
-    // Change model.
-
     markerFoodModel.setAttribute(
 
         "gltf-model",
@@ -476,10 +455,6 @@ function selectMarkerFood(food) {
         food
     ) {
 
-
-        // If user taps the currently selected
-        // dish while the marker is visible,
-        // replay the reveal animation.
 
         if (
             markerARState.markerVisible &&
@@ -528,7 +503,7 @@ function selectMarkerFood(food) {
 
 
 // ==========================================
-// BURGER BUTTON
+// BUTTON EVENTS
 // ==========================================
 
 markerBurgerBtn.addEventListener(
@@ -548,10 +523,6 @@ markerBurgerBtn.addEventListener(
 );
 
 
-
-// ==========================================
-// PIZZA BUTTON
-// ==========================================
 
 markerPizzaBtn.addEventListener(
 
@@ -573,13 +544,6 @@ markerPizzaBtn.addEventListener(
 
 // ==========================================
 // MODEL LOADED
-// ==========================================
-//
-// This event also fires when Burger/Pizza
-// is switched.
-//
-// We wait until the GLB is ready before
-// running the reveal animation.
 // ==========================================
 
 markerFoodModel.addEventListener(
@@ -619,7 +583,7 @@ markerFoodModel.addEventListener(
 
 
 // ==========================================
-// MODEL LOADING ERROR
+// MODEL ERROR
 // ==========================================
 
 markerFoodModel.addEventListener(
@@ -706,9 +670,6 @@ hiroMarker.addEventListener(
         clearRevealAnimation();
 
 
-
-        // Return to final transform so the
-        // next detection starts cleanly.
 
         resetModelTransform();
 

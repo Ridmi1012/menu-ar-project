@@ -100,6 +100,11 @@ const menuARState = {
 // ==========================================
 // MODEL CONFIGURATION
 // ==========================================
+//
+// Increased after real mobile testing.
+// These are starting real-world calibration
+// values for the new realistic models.
+// ==========================================
 
 const MODEL_CONFIG = {
 
@@ -110,10 +115,10 @@ const MODEL_CONFIG = {
             "assets/models/burger.glb",
 
         baseScale:
-            0.22,
+            0.60,
 
         surfaceOffset:
-            0.015
+            0.018
 
     },
 
@@ -124,10 +129,10 @@ const MODEL_CONFIG = {
             "assets/models/pizza.glb",
 
         baseScale:
-            0.24,
+            0.53,
 
         surfaceOffset:
-            0.012
+            0.014
 
     }
 
@@ -156,19 +161,48 @@ const MAX_SCALE_FACTOR =
     2.0;
 
 
-// Prevent HTML control taps from also
-// being interpreted as XR placement taps.
-
 const UI_SELECT_GUARD_MS =
     650;
 
 
-// Prevent the Move button tap itself
-// from immediately repositioning the model.
-
 const MOVE_ACTIVATION_DELAY_MS =
     700;
 
+
+
+// ==========================================
+// PLACEMENT ANIMATION
+// ==========================================
+
+const PLACEMENT_ANIMATION_DURATION =
+    420;
+
+
+const PLACEMENT_START_SCALE_FACTOR =
+    0.78;
+
+
+const PLACEMENT_LIFT =
+    0.055;
+
+
+const SHADOW_FINAL_OPACITY =
+    0.26;
+
+
+
+let placementAnimation =
+    null;
+
+
+let confirmationAnimation =
+    null;
+
+
+
+// ==========================================
+// UI GUARD STATE
+// ==========================================
 
 let ignoreXRSelectUntil =
     0;
@@ -180,7 +214,7 @@ let moveModeStartedAt =
 
 
 // ==========================================
-// THREE.JS / WEBXR VARIABLES
+// THREE / WEBXR
 // ==========================================
 
 let scene;
@@ -192,6 +226,10 @@ let renderer;
 let reticle;
 
 let controller;
+
+let directionalLight;
+
+let shadowReceiver;
 
 
 let xrSession =
@@ -207,6 +245,15 @@ let viewerSpace =
 
 
 let referenceSpace =
+    null;
+
+
+
+// ==========================================
+// WEB AUDIO
+// ==========================================
+
+let audioContext =
     null;
 
 
@@ -297,6 +344,19 @@ function initThreeJS() {
 
 
 
+    // ======================================
+    // SHADOW SUPPORT
+    // ======================================
+
+    renderer.shadowMap.enabled =
+        true;
+
+
+    renderer.shadowMap.type =
+        THREE.PCFSoftShadowMap;
+
+
+
     renderer.domElement.classList.add(
         "xr-canvas"
     );
@@ -320,7 +380,7 @@ function initThreeJS() {
 
             0x666666,
 
-            2.5
+            2.2
 
         );
 
@@ -331,14 +391,20 @@ function initThreeJS() {
 
 
 
-    const directionalLight =
+    directionalLight =
         new THREE.DirectionalLight(
 
             0xffffff,
 
-            1.5
+            1.7
 
         );
+
+
+
+    directionalLight.castShadow =
+        true;
+
 
 
     directionalLight.position.set(
@@ -352,14 +418,133 @@ function initThreeJS() {
     );
 
 
+
+    directionalLight.shadow.mapSize.width =
+        1024;
+
+
+    directionalLight.shadow.mapSize.height =
+        1024;
+
+
+
+    directionalLight.shadow.camera.near =
+        0.1;
+
+
+    directionalLight.shadow.camera.far =
+        6;
+
+
+
+    directionalLight.shadow.camera.left =
+        -1.2;
+
+
+    directionalLight.shadow.camera.right =
+        1.2;
+
+
+    directionalLight.shadow.camera.top =
+        1.2;
+
+
+    directionalLight.shadow.camera.bottom =
+        -1.2;
+
+
+
+    directionalLight.shadow.bias =
+        -0.0004;
+
+
+    directionalLight.shadow.normalBias =
+        0.015;
+
+
+
     scene.add(
         directionalLight
     );
 
 
 
+    scene.add(
+        directionalLight.target
+    );
+
+
+
     // ======================================
-    // HIT-TEST RETICLE
+    // CONTACT SHADOW RECEIVER
+    // ======================================
+    //
+    // This is a transparent virtual plane.
+    // Only the model's soft shadow is visible
+    // over the real camera image.
+    // ======================================
+
+    const shadowGeometry =
+        new THREE.PlaneGeometry(
+
+            0.75,
+
+            0.75
+
+        );
+
+
+
+    shadowGeometry.rotateX(
+        -Math.PI / 2
+    );
+
+
+
+    const shadowMaterial =
+        new THREE.ShadowMaterial({
+
+            color:
+                0x000000,
+
+            opacity:
+                SHADOW_FINAL_OPACITY,
+
+            transparent:
+                true
+
+        });
+
+
+
+    shadowReceiver =
+        new THREE.Mesh(
+
+            shadowGeometry,
+
+            shadowMaterial
+
+        );
+
+
+
+    shadowReceiver.receiveShadow =
+        true;
+
+
+    shadowReceiver.visible =
+        false;
+
+
+
+    scene.add(
+        shadowReceiver
+    );
+
+
+
+    // ======================================
+    // RETICLE
     // ======================================
 
     const reticleGeometry =
@@ -372,6 +557,7 @@ function initThreeJS() {
             32
 
         );
+
 
 
     reticleGeometry.rotateX(
@@ -453,6 +639,262 @@ function initThreeJS() {
 
 
 // ==========================================
+// AUDIO INITIALIZATION
+// ==========================================
+
+function ensureAudioContext() {
+
+
+    const AudioContextClass =
+
+        window.AudioContext ||
+
+        window.webkitAudioContext;
+
+
+
+    if (
+        !AudioContextClass
+    ) {
+
+        return false;
+
+    }
+
+
+
+    if (
+        !audioContext
+    ) {
+
+
+        audioContext =
+            new AudioContextClass();
+
+    }
+
+
+
+    if (
+        audioContext.state ===
+        "suspended"
+    ) {
+
+
+        audioContext.resume();
+
+    }
+
+
+
+    return true;
+
+}
+
+
+
+// ==========================================
+// SYNTHESIZED TONE
+// ==========================================
+
+function playTone(
+
+    startFrequency,
+
+    endFrequency,
+
+    duration,
+
+    volume,
+
+    delay = 0
+
+) {
+
+
+    if (
+        !ensureAudioContext()
+    ) {
+
+        return;
+
+    }
+
+
+
+    const now =
+
+        audioContext.currentTime +
+
+        delay;
+
+
+
+    const oscillator =
+        audioContext.createOscillator();
+
+
+
+    const gain =
+        audioContext.createGain();
+
+
+
+    oscillator.type =
+        "sine";
+
+
+
+    oscillator.frequency.setValueAtTime(
+
+        startFrequency,
+
+        now
+
+    );
+
+
+
+    oscillator.frequency.exponentialRampToValueAtTime(
+
+        Math.max(
+            endFrequency,
+            1
+        ),
+
+        now +
+        duration
+
+    );
+
+
+
+    gain.gain.setValueAtTime(
+
+        0.0001,
+
+        now
+
+    );
+
+
+
+    gain.gain.exponentialRampToValueAtTime(
+
+        volume,
+
+        now +
+        0.015
+
+    );
+
+
+
+    gain.gain.exponentialRampToValueAtTime(
+
+        0.0001,
+
+        now +
+        duration
+
+    );
+
+
+
+    oscillator.connect(
+        gain
+    );
+
+
+
+    gain.connect(
+        audioContext.destination
+    );
+
+
+
+    oscillator.start(
+        now
+    );
+
+
+
+    oscillator.stop(
+
+        now +
+        duration +
+        0.03
+
+    );
+
+}
+
+
+
+// ==========================================
+// PLACEMENT SOUND
+// ==========================================
+
+function playPlacementSound() {
+
+
+    playTone(
+
+        190,
+
+        115,
+
+        0.14,
+
+        0.028
+
+    );
+
+}
+
+
+
+// ==========================================
+// CONFIRMATION SOUND
+// ==========================================
+
+function playConfirmationSound() {
+
+
+    playTone(
+
+        523,
+
+        523,
+
+        0.11,
+
+        0.022,
+
+        0
+
+    );
+
+
+    playTone(
+
+        659,
+
+        659,
+
+        0.16,
+
+        0.024,
+
+        0.09
+
+    );
+
+}
+
+
+
+// ==========================================
 // STATUS
 // ==========================================
 
@@ -464,6 +906,7 @@ function setStatus(message) {
         message
     ) {
 
+
         statusMessage.textContent =
             message;
 
@@ -474,7 +917,7 @@ function setStatus(message) {
 
 
 // ==========================================
-// PRE-AR SUPPORT MESSAGE
+// SUPPORT MESSAGE
 // ==========================================
 
 function showSupportMessage(message) {
@@ -521,6 +964,40 @@ function getFoodName(food) {
 
 
 // ==========================================
+// MODEL SHADOW PREPARATION
+// ==========================================
+
+function prepareModelForAR(model) {
+
+
+    model.traverse(
+
+        (child) => {
+
+
+            if (
+                child.isMesh
+            ) {
+
+
+                child.castShadow =
+                    true;
+
+
+                child.receiveShadow =
+                    false;
+
+            }
+
+        }
+
+    );
+
+}
+
+
+
+// ==========================================
 // LOAD MODEL
 // ==========================================
 
@@ -558,9 +1035,17 @@ function loadModel(food) {
                         gltf.scene;
 
 
+
+                    prepareModelForAR(
+                        modelTemplates[food]
+                    );
+
+
+
                     console.log(
                         `${food} model loaded.`
                     );
+
 
 
                     resolve();
@@ -578,6 +1063,7 @@ function loadModel(food) {
                         `Failed to load ${food}:`,
                         error
                     );
+
 
 
                     reject(
@@ -598,7 +1084,7 @@ function loadModel(food) {
 
 
 // ==========================================
-// LOAD BOTH MODELS
+// LOAD MODELS
 // ==========================================
 
 async function loadModels() {
@@ -694,15 +1180,20 @@ function updateFoodButtons(food) {
 
 
 // ==========================================
-// SELECT / CHANGE FOOD
+// SELECT FOOD
 // ==========================================
 
 function selectFood(food) {
 
 
     if (
+
         menuARState.appState ===
-        "CONFIRMED"
+            "CONFIRMED" ||
+
+        menuARState.appState ===
+            "PLACING"
+
     ) {
 
         return;
@@ -733,10 +1224,6 @@ function selectFood(food) {
         );
 
 
-
-    // ======================================
-    // REPLACE ALREADY PLACED MODEL
-    // ======================================
 
     if (
         menuARState.placedObject
@@ -783,15 +1270,12 @@ function selectFood(food) {
         );
 
 
+
         return;
 
     }
 
 
-
-    // ======================================
-    // INSIDE AR BUT NOT PLACED YET
-    // ======================================
 
     if (
         xrSession
@@ -819,6 +1303,148 @@ function selectFood(food) {
         }
 
     }
+
+}
+
+
+
+// ==========================================
+// UPDATE SHADOW LIGHT
+// ==========================================
+
+function updateLightForObject(object) {
+
+
+    if (
+
+        !object ||
+
+        !directionalLight
+
+    ) {
+
+        return;
+
+    }
+
+
+
+    directionalLight.target.position.copy(
+        object.position
+    );
+
+
+
+    directionalLight.position.copy(
+        object.position
+    );
+
+
+
+    directionalLight.position.add(
+
+        new THREE.Vector3(
+            0.9,
+            1.8,
+            0.8
+        )
+
+    );
+
+
+
+    directionalLight.target.updateMatrixWorld();
+
+}
+
+
+
+// ==========================================
+// POSITION SHADOW FROM RETICLE
+// ==========================================
+
+function positionShadowFromReticle() {
+
+
+    if (
+        !shadowReceiver
+    ) {
+
+        return;
+
+    }
+
+
+
+    const position =
+        new THREE.Vector3();
+
+
+
+    const quaternion =
+        new THREE.Quaternion();
+
+
+
+    const ignoredScale =
+        new THREE.Vector3();
+
+
+
+    reticle.matrix.decompose(
+
+        position,
+
+        quaternion,
+
+        ignoredScale
+
+    );
+
+
+
+    shadowReceiver.position.copy(
+        position
+    );
+
+
+
+    shadowReceiver.quaternion.copy(
+        quaternion
+    );
+
+
+
+    // Slight offset above surface
+    // helps avoid visual z-fighting.
+
+    const surfaceNormal =
+        new THREE.Vector3(
+            0,
+            1,
+            0
+        );
+
+
+
+    surfaceNormal.applyQuaternion(
+        quaternion
+    );
+
+
+
+    shadowReceiver.position.addScaledVector(
+
+        surfaceNormal,
+
+        0.002
+
+    );
+
+
+
+    shadowReceiver.visible =
+        true;
 
 }
 
@@ -877,10 +1503,6 @@ function replacePlacedFood(
 
 
 
-    // --------------------------------------
-    // Preserve exact transform
-    // --------------------------------------
-
     const savedPosition =
         oldModel.position.clone();
 
@@ -907,7 +1529,11 @@ function replacePlacedFood(
 
 
 
-    // Position
+    prepareModelForAR(
+        newModel
+    );
+
+
 
     newModel.position.copy(
         savedPosition
@@ -923,15 +1549,11 @@ function replacePlacedFood(
 
 
 
-    // Rotation
-
     newModel.quaternion.copy(
         savedQuaternion
     );
 
 
-
-    // Scale
 
     newModel.scale.setScalar(
 
@@ -956,6 +1578,12 @@ function replacePlacedFood(
 
     menuARState.scaleFactor =
         savedScaleFactor;
+
+
+
+    updateLightForObject(
+        newModel
+    );
 
 
 
@@ -999,10 +1627,6 @@ function replacePlacedFood(
 
 async function checkXRSupport() {
 
-
-    // --------------------------------------
-    // Browser does not expose WebXR
-    // --------------------------------------
 
     if (
         !navigator.xr
@@ -1170,15 +1794,8 @@ function updateStartButton() {
 
 
 
-    if (
-        !menuARState.modelsReady
-    ) {
-
-
-        startARBtn.textContent =
-            "Loading...";
-
-    }
+    startARBtn.textContent =
+        "Loading...";
 
 }
 
@@ -1198,12 +1815,28 @@ function showARInterface() {
     arControls.hidden =
         false;
 
+
+
+    arControls.classList.remove(
+        "xr-panel-enter"
+    );
+
+
+
+    void arControls.offsetWidth;
+
+
+
+    arControls.classList.add(
+        "xr-panel-enter"
+    );
+
 }
 
 
 
 // ==========================================
-// SHOW NORMAL INTERFACE
+// PRE-AR INTERFACE
 // ==========================================
 
 function showPreARInterface() {
@@ -1215,6 +1848,12 @@ function showPreARInterface() {
 
     xrIntro.hidden =
         false;
+
+
+
+    arControls.classList.remove(
+        "xr-panel-enter"
+    );
 
 }
 
@@ -1238,6 +1877,10 @@ async function startARSession() {
         return;
 
     }
+
+
+
+    ensureAudioContext();
 
 
 
@@ -1363,10 +2006,8 @@ async function startARSession() {
             false;
 
 
-
         menuARState.scaleFactor =
             1;
-
 
 
         menuARState.currentRotation =
@@ -1418,10 +2059,6 @@ async function startARSession() {
 
 
 
-        // ----------------------------------
-        // Permission denied
-        // ----------------------------------
-
         if (
             error.name ===
             "NotAllowedError"
@@ -1447,10 +2084,6 @@ async function startARSession() {
 
 
 
-        // ----------------------------------
-        // Required WebXR feature unavailable
-        // ----------------------------------
-
         if (
             error.name ===
             "NotSupportedError"
@@ -1465,9 +2098,11 @@ async function startARSession() {
                 "UNSUPPORTED";
 
 
+
             showSupportMessage(
                 "This device or browser does not support the markerless AR features required by MenuAR."
             );
+
 
 
             startARBtn.disabled =
@@ -1484,13 +2119,10 @@ async function startARSession() {
 
 
 
-        // ----------------------------------
-        // Other failure
-        // ----------------------------------
-
         showSupportMessage(
             "Markerless AR could not start. Check browser permissions and try again."
         );
+
 
 
         startARBtn.disabled =
@@ -1527,30 +2159,48 @@ async function endARSession() {
 
 
 // ==========================================
-// REMOVE FROM SCENE
+// REMOVE PLACED OBJECT
 // ==========================================
 
 function removePlacedObjectFromScene() {
 
 
+    placementAnimation =
+        null;
+
+
+    confirmationAnimation =
+        null;
+
+
+
     if (
-        !menuARState.placedObject
+        menuARState.placedObject
     ) {
 
-        return;
+
+        scene.remove(
+            menuARState.placedObject
+        );
+
+
+
+        menuARState.placedObject =
+            null;
 
     }
 
 
 
-    scene.remove(
-        menuARState.placedObject
-    );
+    if (
+        shadowReceiver
+    ) {
 
 
+        shadowReceiver.visible =
+            false;
 
-    menuARState.placedObject =
-        null;
+    }
 
 }
 
@@ -1583,7 +2233,7 @@ function hideInteractionControls() {
 
 
 // ==========================================
-// ENABLE MANIPULATION CONTROLS
+// ENABLE CONTROLS
 // ==========================================
 
 function enableManipulationControls() {
@@ -1636,7 +2286,7 @@ function enableManipulationControls() {
 
 
 // ==========================================
-// DISABLE MANIPULATION CONTROLS
+// DISABLE CONTROLS
 // ==========================================
 
 function disableManipulationControls() {
@@ -1758,6 +2408,18 @@ function resetControls() {
     confirmBtn.textContent =
         "Confirm Preview";
 
+
+
+    confirmBtn.classList.remove(
+        "confirmed-feedback"
+    );
+
+
+
+    statusMessage.classList.remove(
+        "confirmed-feedback"
+    );
+
 }
 
 
@@ -1810,15 +2472,12 @@ function onARSessionEnded() {
         false;
 
 
-
     menuARState.scaleFactor =
         1;
 
 
-
     menuARState.currentRotation =
         0;
-
 
 
     menuARState.appState =
@@ -1841,6 +2500,340 @@ function onARSessionEnded() {
 
 
     updateStartButton();
+
+}
+
+
+
+// ==========================================
+// START PLACEMENT ANIMATION
+// ==========================================
+
+function startPlacementAnimation(
+
+    model,
+
+    food,
+
+    finalScale,
+
+    finalY
+
+) {
+
+
+    const startScale =
+
+        finalScale *
+
+        PLACEMENT_START_SCALE_FACTOR;
+
+
+
+    model.scale.setScalar(
+        startScale
+    );
+
+
+
+    model.position.y =
+
+        finalY +
+
+        PLACEMENT_LIFT;
+
+
+
+    burgerBtn.disabled =
+        true;
+
+
+    pizzaBtn.disabled =
+        true;
+
+
+
+    menuARState.appState =
+        "PLACING";
+
+
+
+    shadowReceiver.material.opacity =
+        0;
+
+
+
+    placementAnimation = {
+
+        model:
+            model,
+
+        food:
+            food,
+
+        startTime:
+            null,
+
+        duration:
+            PLACEMENT_ANIMATION_DURATION,
+
+        startScale:
+            startScale,
+
+        finalScale:
+            finalScale,
+
+        startY:
+            finalY +
+            PLACEMENT_LIFT,
+
+        finalY:
+            finalY
+
+    };
+
+
+
+    setStatus(
+        `Placing ${getFoodName(food)}...`
+    );
+
+}
+
+
+
+// ==========================================
+// EASING
+// ==========================================
+
+function easeOutCubic(t) {
+
+
+    return (
+        1 -
+        Math.pow(
+            1 - t,
+            3
+        )
+    );
+
+}
+
+
+
+function easeOutBack(t) {
+
+
+    const c1 =
+        1.70158;
+
+
+    const c3 =
+        c1 +
+        1;
+
+
+
+    return (
+
+        1 +
+
+        c3 *
+        Math.pow(
+            t - 1,
+            3
+        ) +
+
+        c1 *
+        Math.pow(
+            t - 1,
+            2
+        )
+
+    );
+
+}
+
+
+
+// ==========================================
+// UPDATE PLACEMENT ANIMATION
+// ==========================================
+
+function updatePlacementAnimation(timestamp) {
+
+
+    if (
+        !placementAnimation
+    ) {
+
+        return;
+
+    }
+
+
+
+    if (
+        placementAnimation.startTime ===
+        null
+    ) {
+
+
+        placementAnimation.startTime =
+            timestamp;
+
+    }
+
+
+
+    const elapsed =
+
+        timestamp -
+
+        placementAnimation.startTime;
+
+
+
+    const progress =
+
+        THREE.MathUtils.clamp(
+
+            elapsed /
+
+            placementAnimation.duration,
+
+            0,
+
+            1
+
+        );
+
+
+
+    const positionEase =
+        easeOutCubic(
+            progress
+        );
+
+
+
+    const scaleEase =
+        easeOutBack(
+            progress
+        );
+
+
+
+    const currentY =
+
+        THREE.MathUtils.lerp(
+
+            placementAnimation.startY,
+
+            placementAnimation.finalY,
+
+            positionEase
+
+        );
+
+
+
+    const currentScale =
+
+        THREE.MathUtils.lerp(
+
+            placementAnimation.startScale,
+
+            placementAnimation.finalScale,
+
+            scaleEase
+
+        );
+
+
+
+    placementAnimation.model.position.y =
+        currentY;
+
+
+
+    placementAnimation.model.scale.setScalar(
+        currentScale
+    );
+
+
+
+    shadowReceiver.material.opacity =
+
+        SHADOW_FINAL_OPACITY *
+
+        positionEase;
+
+
+
+    if (
+        progress >=
+        1
+    ) {
+
+
+        const completedFood =
+            placementAnimation.food;
+
+
+
+        placementAnimation.model.position.y =
+            placementAnimation.finalY;
+
+
+
+        placementAnimation.model.scale.setScalar(
+            placementAnimation.finalScale
+        );
+
+
+
+        shadowReceiver.material.opacity =
+            SHADOW_FINAL_OPACITY;
+
+
+
+        placementAnimation =
+            null;
+
+
+
+        menuARState.appState =
+            "PLACED";
+
+
+
+        burgerBtn.disabled =
+            false;
+
+
+        pizzaBtn.disabled =
+            false;
+
+
+
+        showInteractionControls();
+
+
+
+        enableManipulationControls();
+
+
+
+        setStatus(
+            `${getFoodName(completedFood)} placed. Rotate, resize, move, change dish, remove or confirm.`
+        );
+
+
+
+        playPlacementSound();
+
+    }
 
 }
 
@@ -1897,6 +2890,12 @@ function placeSelectedFood() {
 
 
 
+    prepareModelForAR(
+        placedModel
+    );
+
+
+
     const placementPosition =
         new THREE.Vector3();
 
@@ -1916,6 +2915,11 @@ function placeSelectedFood() {
 
     placedModel.position.y +=
         config.surfaceOffset;
+
+
+
+    const finalY =
+        placedModel.position.y;
 
 
 
@@ -1952,12 +2956,6 @@ function placeSelectedFood() {
 
 
 
-    placedModel.scale.setScalar(
-        config.baseScale
-    );
-
-
-
     scene.add(
         placedModel
     );
@@ -1969,18 +2967,22 @@ function placeSelectedFood() {
 
 
 
-    menuARState.appState =
-        "PLACED";
-
-
-
     menuARState.currentRotation =
         0;
 
 
-
     menuARState.surfaceFound =
         false;
+
+
+
+    positionShadowFromReticle();
+
+
+
+    updateLightForObject(
+        placedModel
+    );
 
 
 
@@ -1989,16 +2991,24 @@ function placeSelectedFood() {
 
 
 
-    showInteractionControls();
+    hideInteractionControls();
 
 
 
-    enableManipulationControls();
+    disableManipulationControls();
 
 
 
-    setStatus(
-        `${getFoodName(food)} placed. Rotate, resize, move, change dish, remove or confirm.`
+    startPlacementAnimation(
+
+        placedModel,
+
+        food,
+
+        config.baseScale,
+
+        finalY
+
     );
 
 }
@@ -2074,7 +3084,7 @@ function rotateRight() {
 
 
 // ==========================================
-// CAN MANIPULATE?
+// CAN MANIPULATE
 // ==========================================
 
 function canManipulate() {
@@ -2220,7 +3230,7 @@ function enterMoveMode() {
 
 
 // ==========================================
-// MOVE MODE STATUS
+// MOVE STATUS
 // ==========================================
 
 function setMoveModeStatus() {
@@ -2259,10 +3269,6 @@ function setMoveModeStatus() {
 // ==========================================
 // REPOSITION MODEL
 // ==========================================
-//
-// ONLY THE POSITION IS ALLOWED TO CHANGE.
-// SCALE AND ROTATION ARE EXPLICITLY RESTORED.
-// ==========================================
 
 function repositionPlacedFood() {
 
@@ -2283,10 +3289,6 @@ function repositionPlacedFood() {
     }
 
 
-
-    // --------------------------------------
-    // Save exact transform
-    // --------------------------------------
 
     const savedQuaternion =
 
@@ -2314,10 +3316,6 @@ function repositionPlacedFood() {
 
 
 
-    // --------------------------------------
-    // Calculate new position
-    // --------------------------------------
-
     const newPosition =
         new THREE.Vector3();
 
@@ -2336,10 +3334,6 @@ function repositionPlacedFood() {
 
 
 
-    // --------------------------------------
-    // Change position
-    // --------------------------------------
-
     menuARState.placedObject.position.copy(
         newPosition
     );
@@ -2351,19 +3345,11 @@ function repositionPlacedFood() {
 
 
 
-    // --------------------------------------
-    // Restore rotation
-    // --------------------------------------
-
     menuARState.placedObject.quaternion.copy(
         savedQuaternion
     );
 
 
-
-    // --------------------------------------
-    // Restore size
-    // --------------------------------------
 
     menuARState.placedObject.scale.copy(
         savedScale
@@ -2381,18 +3367,27 @@ function repositionPlacedFood() {
 
 
 
-    // --------------------------------------
-    // Leave Move Mode
-    // --------------------------------------
+    positionShadowFromReticle();
+
+
+
+    shadowReceiver.material.opacity =
+        SHADOW_FINAL_OPACITY;
+
+
+
+    updateLightForObject(
+        menuARState.placedObject
+    );
+
+
 
     menuARState.appState =
         "PLACED";
 
 
-
     menuARState.surfaceFound =
         false;
-
 
 
     reticle.visible =
@@ -2442,20 +3437,16 @@ function removeFood() {
         1;
 
 
-
     menuARState.currentRotation =
         0;
-
 
 
     menuARState.surfaceFound =
         false;
 
 
-
     menuARState.appState =
         "SCANNING";
-
 
 
     reticle.visible =
@@ -2473,6 +3464,186 @@ function removeFood() {
 
     setStatus(
         `${getFoodName(menuARState.selectedFood)} removed. Scan to place again.`
+    );
+
+}
+
+
+
+// ==========================================
+// CONFIRM MODEL ANIMATION
+// ==========================================
+
+function startConfirmationAnimation() {
+
+
+    if (
+        !menuARState.placedObject
+    ) {
+
+        return;
+
+    }
+
+
+
+    confirmationAnimation = {
+
+        model:
+            menuARState.placedObject,
+
+        originalScale:
+            menuARState.placedObject
+                .scale
+                .clone(),
+
+        startTime:
+            null,
+
+        duration:
+            520
+
+    };
+
+}
+
+
+
+// ==========================================
+// UPDATE CONFIRMATION ANIMATION
+// ==========================================
+
+function updateConfirmationAnimation(timestamp) {
+
+
+    if (
+        !confirmationAnimation
+    ) {
+
+        return;
+
+    }
+
+
+
+    if (
+        confirmationAnimation.startTime ===
+        null
+    ) {
+
+
+        confirmationAnimation.startTime =
+            timestamp;
+
+    }
+
+
+
+    const elapsed =
+
+        timestamp -
+
+        confirmationAnimation.startTime;
+
+
+
+    const progress =
+
+        THREE.MathUtils.clamp(
+
+            elapsed /
+
+            confirmationAnimation.duration,
+
+            0,
+
+            1
+
+        );
+
+
+
+    const pulse =
+
+        1 +
+
+        (
+            0.055 *
+
+            Math.sin(
+                Math.PI *
+                progress
+            )
+        );
+
+
+
+    confirmationAnimation.model.scale.copy(
+
+        confirmationAnimation.originalScale
+
+    );
+
+
+
+    confirmationAnimation.model.scale.multiplyScalar(
+        pulse
+    );
+
+
+
+    if (
+        progress >=
+        1
+    ) {
+
+
+        confirmationAnimation.model.scale.copy(
+
+            confirmationAnimation.originalScale
+
+        );
+
+
+
+        confirmationAnimation =
+            null;
+
+    }
+
+}
+
+
+
+// ==========================================
+// CONFIRM UI ANIMATION
+// ==========================================
+
+function triggerConfirmationUIAnimation() {
+
+
+    confirmBtn.classList.remove(
+        "confirmed-feedback"
+    );
+
+
+    statusMessage.classList.remove(
+        "confirmed-feedback"
+    );
+
+
+
+    void confirmBtn.offsetWidth;
+
+
+
+    confirmBtn.classList.add(
+        "confirmed-feedback"
+    );
+
+
+    statusMessage.classList.add(
+        "confirmed-feedback"
     );
 
 }
@@ -2500,10 +3671,8 @@ function confirmPreview() {
         "CONFIRMED";
 
 
-
     menuARState.surfaceFound =
         false;
-
 
 
     reticle.visible =
@@ -2513,7 +3682,6 @@ function confirmPreview() {
 
     burgerBtn.disabled =
         true;
-
 
 
     pizzaBtn.disabled =
@@ -2534,6 +3702,18 @@ function confirmPreview() {
         `Preview confirmed — ${getFoodName(menuARState.selectedFood)} is locked in place.`
     );
 
+
+
+    startConfirmationAnimation();
+
+
+
+    triggerConfirmationUIAnimation();
+
+
+
+    playConfirmationSound();
+
 }
 
 
@@ -2550,10 +3730,6 @@ function onXRSelect() {
 
 
 
-    // --------------------------------------
-    // Ignore XR select caused by HTML UI tap
-    // --------------------------------------
-
     if (
         now <
         ignoreXRSelectUntil
@@ -2564,10 +3740,6 @@ function onXRSelect() {
     }
 
 
-
-    // --------------------------------------
-    // Initial placement
-    // --------------------------------------
 
     if (
 
@@ -2589,10 +3761,6 @@ function onXRSelect() {
     }
 
 
-
-    // --------------------------------------
-    // Move Mode
-    // --------------------------------------
 
     if (
 
@@ -2630,7 +3798,7 @@ function onXRSelect() {
 
 
 // ==========================================
-// HIT TEST / RENDER LOOP
+// HIT TEST / RENDER
 // ==========================================
 
 function render(
@@ -2640,6 +3808,22 @@ function render(
     frame
 
 ) {
+
+
+    // --------------------------------------
+    // 3D Animations
+    // --------------------------------------
+
+    updatePlacementAnimation(
+        timestamp
+    );
+
+
+
+    updateConfirmationAnimation(
+        timestamp
+    );
+
 
 
     const shouldRunHitTest =
@@ -2757,7 +3941,6 @@ function render(
                 false;
 
 
-
             menuARState.surfaceFound =
                 false;
 
@@ -2830,9 +4013,6 @@ function markUITouch() {
 
 
 
-// Prevent HTML controls from accidentally
-// moving or placing the 3D model.
-
 arControls.addEventListener(
 
     "pointerdown",
@@ -2873,6 +4053,7 @@ arControls.addEventListener(
 
 
         event.preventDefault();
+
 
 
         markUITouch();
@@ -2922,7 +4103,7 @@ pizzaBtn.addEventListener(
 
 
 // ==========================================
-// ROTATION EVENTS
+// ROTATION
 // ==========================================
 
 rotateLeftBtn.addEventListener(
@@ -2946,7 +4127,7 @@ rotateRightBtn.addEventListener(
 
 
 // ==========================================
-// SIZE EVENTS
+// SIZE
 // ==========================================
 
 sizeDownBtn.addEventListener(
@@ -3036,6 +4217,10 @@ startARBtn.addEventListener(
     async () => {
 
 
+        ensureAudioContext();
+
+
+
         await startARSession();
 
     }
@@ -3045,7 +4230,7 @@ startARBtn.addEventListener(
 
 
 // ==========================================
-// EXIT AR
+// EXIT
 // ==========================================
 
 exitARBtn.addEventListener(
@@ -3117,9 +4302,6 @@ window.addEventListener(
 
 async function initializeApplication() {
 
-
-    // Initial page:
-    // no Burger/Pizza controls yet.
 
     showPreARInterface();
 

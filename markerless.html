@@ -13,7 +13,6 @@
     <title>MenuAR | View Food on Table</title>
 
 
-    <!-- Main Styles -->
     <link
         rel="stylesheet"
         href="css/style.css?v=6"
@@ -21,6 +20,7 @@
 
 
     <!-- Three.js Import Map -->
+
     <script type="importmap">
 
         {
@@ -31,6 +31,193 @@
         }
 
     </script>
+
+
+    <!-- =====================================
+         MARKERLESS POLISH
+         ===================================== -->
+
+    <style>
+
+        /* ==================================
+           SUPPORT MESSAGE
+           ================================== */
+
+        .xr-support-message {
+
+            max-width:
+                320px;
+
+            margin:
+                16px auto 0;
+
+            padding:
+                10px 12px;
+
+            border-radius:
+                10px;
+
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.10
+                );
+
+            color:
+                #ffffff;
+
+            font-size:
+                12px;
+
+            line-height:
+                1.45;
+
+        }
+
+
+        /* ==================================
+           AR CONTROL PANEL ENTRANCE
+           ================================== */
+
+        .ar-controls.xr-panel-enter {
+
+            animation:
+                xrPanelEnter
+                320ms
+                ease-out
+                both;
+
+        }
+
+
+        @keyframes xrPanelEnter {
+
+            from {
+
+                opacity:
+                    0;
+
+                transform:
+                    translateY(18px);
+
+            }
+
+            to {
+
+                opacity:
+                    1;
+
+                transform:
+                    translateY(0);
+
+            }
+
+        }
+
+
+        /* ==================================
+           CONFIRM BUTTON FEEDBACK
+           ================================== */
+
+        .confirm-button.confirmed-feedback {
+
+            animation:
+                confirmPulse
+                560ms
+                ease-out;
+
+        }
+
+
+        @keyframes confirmPulse {
+
+            0% {
+
+                transform:
+                    scale(1);
+
+            }
+
+            35% {
+
+                transform:
+                    scale(1.045);
+
+            }
+
+            100% {
+
+                transform:
+                    scale(1);
+
+            }
+
+        }
+
+
+        /* ==================================
+           CONFIRMED STATUS FEEDBACK
+           ================================== */
+
+        .status-message.confirmed-feedback {
+
+            animation:
+                confirmedStatus
+                650ms
+                ease-out;
+
+        }
+
+
+        @keyframes confirmedStatus {
+
+            0% {
+
+                transform:
+                    scale(1);
+
+            }
+
+            35% {
+
+                transform:
+                    scale(1.025);
+
+            }
+
+            100% {
+
+                transform:
+                    scale(1);
+
+            }
+
+        }
+
+
+        /* ==================================
+           ACCESSIBILITY
+           ================================== */
+
+        @media
+        (prefers-reduced-motion: reduce) {
+
+            .ar-controls.xr-panel-enter,
+
+            .confirm-button.confirmed-feedback,
+
+            .status-message.confirmed-feedback {
+
+                animation:
+                    none;
+
+            }
+
+        }
+
+    </style>
 
 </head>
 
@@ -44,10 +231,15 @@
 
     <header class="ar-header">
 
+
         <a
+
             href="index.html"
+
             class="back-button"
+
             aria-label="Back to home"
+
         >
             ←
         </a>
@@ -55,40 +247,46 @@
 
         <div>
 
+
             <h1>
                 View Food on Table
             </h1>
+
 
             <p>
                 Place food on a real surface
             </p>
 
+
         </div>
+
 
     </header>
 
 
 
-    <!-- =====================================
-         MAIN AREA
-         ===================================== -->
-
     <main class="markerless-layout">
 
 
         <!-- =================================
-             PRE-AR / START AREA
+             PRE-AR
              ================================= -->
 
         <section
+
             class="xr-viewport"
+
             id="xrViewport"
+
         >
 
 
             <div
+
                 class="camera-message"
+
                 id="xrIntro"
+
             >
 
 
@@ -103,28 +301,35 @@
 
 
                 <p>
+
                     Move your device slowly across
-                    a well-lit table.
+                    a well-lit, textured table.
+
                 </p>
 
 
-                <!-- Compatibility feedback -->
-
                 <p
+
                     id="xrSupportMessage"
+
                     class="xr-support-message"
+
                     hidden
+
                 >
                 </p>
 
 
-                <!-- Start -->
-
                 <button
+
                     type="button"
+
                     id="startARBtn"
+
                     class="start-ar-button"
+
                     disabled
+
                 >
                     Loading...
                 </button>
@@ -138,32 +343,33 @@
 
 
         <!-- =================================
-             AR CONTROL PANEL
-
-             Completely hidden before AR starts.
+             AR CONTROLS
              ================================= -->
 
         <section
+
             class="ar-controls"
+
             id="arControls"
+
             hidden
+
         >
 
 
-            <!-- Status -->
-
             <p
+
                 class="status-message"
+
                 id="statusMessage"
+
             >
                 Ready
             </p>
 
 
 
-            <!-- =================================
-                 FOOD SELECTION
-                 ================================= -->
+            <!-- Food Selection -->
 
             <p class="control-label">
                 Select Food
@@ -174,18 +380,26 @@
 
 
                 <button
+
                     type="button"
+
                     class="food-button active"
+
                     id="burgerBtn"
+
                 >
                     🍔 Burger
                 </button>
 
 
                 <button
+
                     type="button"
+
                     class="food-button"
+
                     id="pizzaBtn"
+
                 >
                     🍕 Pizza
                 </button>
@@ -196,14 +410,15 @@
 
 
             <!-- =================================
-                 MANIPULATION CONTROLS
-
-                 These appear after placement.
+                 MANIPULATION
                  ================================= -->
 
             <div
+
                 class="interaction-controls"
+
                 id="interactionControls"
+
             >
 
 
@@ -213,20 +428,30 @@
 
 
                     <button
+
                         type="button"
+
                         class="control-button"
+
                         id="rotateLeftBtn"
+
                         disabled
+
                     >
                         ↶ Rotate Left
                     </button>
 
 
                     <button
+
                         type="button"
+
                         class="control-button"
+
                         id="rotateRightBtn"
+
                         disabled
+
                     >
                         Rotate Right ↷
                     </button>
@@ -242,20 +467,30 @@
 
 
                     <button
+
                         type="button"
+
                         class="control-button"
+
                         id="sizeDownBtn"
+
                         disabled
+
                     >
                         − Size
                     </button>
 
 
                     <button
+
                         type="button"
+
                         class="control-button"
+
                         id="sizeUpBtn"
+
                         disabled
+
                     >
                         + Size
                     </button>
@@ -268,10 +503,15 @@
                 <!-- Move -->
 
                 <button
+
                     type="button"
+
                     class="move-button"
+
                     id="moveBtn"
+
                     disabled
+
                 >
                     ↔ Move
                 </button>
@@ -281,10 +521,15 @@
                 <!-- Remove -->
 
                 <button
+
                     type="button"
+
                     class="remove-button"
+
                     id="removeBtn"
+
                     disabled
+
                 >
                     Remove Food
                 </button>
@@ -294,10 +539,15 @@
                 <!-- Confirm -->
 
                 <button
+
                     type="button"
+
                     class="confirm-button"
+
                     id="confirmBtn"
+
                     disabled
+
                 >
                     Confirm Preview
                 </button>
@@ -307,14 +557,16 @@
 
 
 
-            <!-- =================================
-                 EXIT
-                 ================================= -->
+            <!-- Exit -->
 
             <button
+
                 type="button"
+
                 class="exit-ar-button"
+
                 id="exitARBtn"
+
             >
                 Exit AR
             </button>
@@ -326,12 +578,12 @@
     </main>
 
 
-
-    <!-- Markerless AR Logic -->
-
     <script
+
         type="module"
-        src="js/markerless-ar.js?v=8"
+
+        src="js/markerless-ar.js?v=9"
+
     >
     </script>
 

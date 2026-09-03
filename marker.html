@@ -32,51 +32,46 @@
     </script>
 
 
-    <!--
-        Marker-page-only visual polish.
-        Kept here so the existing shared
-        stylesheet does not need to change.
-    -->
     <style>
 
-        /* -----------------------------------
-           Hide default VR button
-           ----------------------------------- */
+        /* ==================================
+           HIDE DEFAULT VR BUTTON
+           ================================== */
 
         .a-enter-vr-button {
             display: none !important;
         }
 
 
-        /* -----------------------------------
-           Header entrance
-           ----------------------------------- */
+        /* ==================================
+           PAGE ENTRANCE ANIMATIONS
+           ================================== */
 
         .marker-ar-page .marker-top-bar {
+
             animation:
                 markerHeaderReveal
                 420ms
                 ease-out
                 both;
+
         }
 
 
-        /* -----------------------------------
-           Bottom controls entrance
-           ----------------------------------- */
-
         .marker-ar-page .marker-control-panel {
+
             animation:
                 markerPanelReveal
                 480ms
                 ease-out
                 both;
+
         }
 
 
-        /* -----------------------------------
-           Food buttons
-           ----------------------------------- */
+        /* ==================================
+           FOOD BUTTON POLISH
+           ================================== */
 
         .marker-ar-page .food-button {
 
@@ -106,47 +101,59 @@
         }
 
 
-        /* -----------------------------------
-           Header animation
-           ----------------------------------- */
+        /* ==================================
+           KEYFRAMES
+           ================================== */
 
         @keyframes markerHeaderReveal {
 
             from {
+
                 opacity: 0;
-                transform: translateY(-14px);
+
+                transform:
+                    translateY(-14px);
+
             }
 
             to {
+
                 opacity: 1;
-                transform: translateY(0);
+
+                transform:
+                    translateY(0);
+
             }
 
         }
 
-
-        /* -----------------------------------
-           Control panel animation
-           ----------------------------------- */
 
         @keyframes markerPanelReveal {
 
             from {
+
                 opacity: 0;
-                transform: translateY(22px);
+
+                transform:
+                    translateY(22px);
+
             }
 
             to {
+
                 opacity: 1;
-                transform: translateY(0);
+
+                transform:
+                    translateY(0);
+
             }
 
         }
 
 
-        /* -----------------------------------
-           Phone portrait adjustments
-           ----------------------------------- */
+        /* ==================================
+           PHONE PORTRAIT
+           ================================== */
 
         @media
         (orientation: portrait)
@@ -226,9 +233,9 @@
         }
 
 
-        /* -----------------------------------
-           Short portrait screens
-           ----------------------------------- */
+        /* ==================================
+           SHORT SCREENS
+           ================================== */
 
         @media
         (orientation: portrait)
@@ -246,9 +253,9 @@
         }
 
 
-        /* -----------------------------------
-           Accessibility
-           ----------------------------------- */
+        /* ==================================
+           REDUCED MOTION
+           ================================== */
 
         @media
         (prefers-reduced-motion: reduce) {
@@ -325,33 +332,24 @@
 
 
         <!-- =================================
-             FOOD ASSETS
+             MODELS
              ================================= -->
 
         <a-assets timeout="20000">
 
 
             <a-asset-item
-
                 id="burgerModel"
-
-                src="assets/models/burger.glb?v=final-marker-1"
-
+                src="assets/models/burger.glb?v=final-marker-2"
                 response-type="arraybuffer"
-
             >
             </a-asset-item>
 
 
-
             <a-asset-item
-
                 id="pizzaModel"
-
-                src="assets/models/pizza.glb?v=final-marker-1"
-
+                src="assets/models/pizza.glb?v=final-marker-2"
                 response-type="arraybuffer"
-
             >
             </a-asset-item>
 
@@ -376,7 +374,6 @@
         </a-entity>
 
 
-
         <a-entity
 
             light="
@@ -389,7 +386,6 @@
 
         >
         </a-entity>
-
 
 
         <a-entity
@@ -408,13 +404,7 @@
 
 
         <!-- =================================
-             MARKER
-
-             For this test we KEEP Hiro.
-
-             Once animations are validated on
-             phone + tablet, this will become
-             our custom MenuAR tray marker.
+             HIRO MARKER
              ================================= -->
 
         <a-marker
@@ -436,13 +426,10 @@
         >
 
 
-            <!-- =================================
-                 SELECTED FOOD
-
-                 Because this entity is inside
-                 <a-marker>, the food is tied
-                 directly to marker tracking.
-                 ================================= -->
+            <!--
+                Slightly larger starting Burger
+                for the real mobile camera test.
+            -->
 
             <a-entity
 
@@ -450,11 +437,11 @@
 
                 gltf-model="#burgerModel"
 
-                position="0 0.18 0"
+                position="0 0.22 0"
 
                 rotation="0 0 0"
 
-                scale="1.8 1.8 1.8"
+                scale="2.2 2.2 2.2"
 
             >
             </a-entity>
@@ -465,7 +452,7 @@
 
 
         <!-- =================================
-             AR CAMERA
+             CAMERA
              ================================= -->
 
         <a-entity
@@ -490,10 +477,6 @@
     <div class="marker-ui">
 
 
-        <!-- =================================
-             HEADER
-             ================================= -->
-
         <header class="marker-top-bar">
 
 
@@ -508,7 +491,6 @@
             >
                 ←
             </a>
-
 
 
             <div>
@@ -531,17 +513,12 @@
 
 
 
-        <!-- =================================
-             FOOD SELECTION
-             ================================= -->
-
         <section class="marker-control-panel">
 
 
             <p class="control-label">
                 Choose Your Dish
             </p>
-
 
 
             <div class="food-selector">
@@ -560,7 +537,6 @@
                 </button>
 
 
-
                 <button
 
                     type="button"
@@ -577,7 +553,6 @@
             </div>
 
 
-
             <p class="instruction">
 
                 Keep the full marker visible
@@ -592,11 +567,8 @@
     </div>
 
 
-
-    <!-- Marker AR Interaction -->
-
     <script
-        src="js/marker-ar.js?v=11">
+        src="js/marker-ar.js?v=12">
     </script>
 
 
