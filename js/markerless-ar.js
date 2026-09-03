@@ -43,6 +43,12 @@ const dishSelectionArea =
 const interactionControls =
     document.getElementById("interactionControls");
 
+const rotateLeftBtn =
+    document.getElementById("rotateLeftBtn");
+
+const rotateRightBtn =
+    document.getElementById("rotateRightBtn");
+
 const sizeSmallBtn =
     document.getElementById("sizeSmallBtn");
 
@@ -186,8 +192,8 @@ const menuARState = {
     xrSupported:
         false,
 
-    placementBlocked:
-        false
+    currentRotation:
+        0
 
 };
 
@@ -215,10 +221,7 @@ const MODEL_CONFIG = {
             0.28,
 
         shadowDepth:
-            0.23,
-
-        collisionPadding:
-            0.07
+            0.23
 
     },
 
@@ -238,10 +241,7 @@ const MODEL_CONFIG = {
             0.38,
 
         shadowDepth:
-            0.35,
-
-        collisionPadding:
-            0.07
+            0.35
 
     }
 
@@ -253,6 +253,10 @@ const MODEL_CONFIG = {
 // ==========================================
 // INTERACTION SETTINGS
 // ==========================================
+
+const ROTATION_STEP =
+    THREE.MathUtils.degToRad(15);
+
 
 const UI_SELECT_GUARD_MS =
     650;
@@ -317,19 +321,6 @@ let shadowTexture =
 
 let shadowGeometry =
     null;
-
-
-
-// ==========================================
-// RETICLE COLORS
-// ==========================================
-
-const RETICLE_AVAILABLE_COLOR =
-    0xffffff;
-
-
-const RETICLE_BLOCKED_COLOR =
-    0xff4d4d;
 
 
 
@@ -618,6 +609,7 @@ function initThreeJS() {
         );
 
 
+
     directionalLight.position.set(
 
         1,
@@ -655,6 +647,7 @@ function initThreeJS() {
         );
 
 
+
     shadowGeometry.rotateX(
         -Math.PI / 2
     );
@@ -677,6 +670,7 @@ function initThreeJS() {
         );
 
 
+
     reticleGeometry.rotateX(
         -Math.PI / 2
     );
@@ -687,7 +681,7 @@ function initThreeJS() {
         new THREE.MeshBasicMaterial({
 
             color:
-                RETICLE_AVAILABLE_COLOR,
+                0xffffff,
 
             side:
                 THREE.DoubleSide
@@ -800,6 +794,7 @@ function createShadowMesh(
         );
 
 
+
     shadow.renderOrder =
         1;
 
@@ -852,6 +847,7 @@ function updateShadowAppearance(
         MODEL_CONFIG[food];
 
 
+
     const size =
         SIZE_PRESETS[sizeKey];
 
@@ -868,6 +864,7 @@ function updateShadowAppearance(
         1
 
     );
+
 
 
     shadow.material.opacity =
@@ -900,8 +897,10 @@ function positionShadowFromReticle(
         new THREE.Vector3();
 
 
+
     const quaternion =
         new THREE.Quaternion();
+
 
 
     const ignoredScale =
@@ -926,6 +925,7 @@ function positionShadowFromReticle(
     );
 
 
+
     shadow.quaternion.copy(
         quaternion
     );
@@ -940,6 +940,7 @@ function positionShadowFromReticle(
         );
 
 
+
     surfaceNormal.applyQuaternion(
         quaternion
     );
@@ -951,292 +952,6 @@ function positionShadowFromReticle(
         surfaceNormal,
 
         0.003
-
-    );
-
-}
-
-
-
-// ==========================================
-// COLLISION / SPACING
-// ==========================================
-//
-// Each dish is treated as occupying a small
-// circular footprint on the table.
-//
-// This prevents:
-//
-// - Burger on burger
-// - Pizza on pizza
-// - Burger overlapping pizza
-// - Moving a dish into another dish
-//
-// Rotation is intentionally NOT used.
-// ==========================================
-
-function getDishCollisionRadius(
-
-    food,
-
-    sizeKey
-
-) {
-
-
-    const config =
-        MODEL_CONFIG[food];
-
-
-    const size =
-        SIZE_PRESETS[sizeKey];
-
-
-
-    const halfWidth =
-        (
-            config.shadowWidth *
-            size.factor
-        ) / 2;
-
-
-    const halfDepth =
-        (
-            config.shadowDepth *
-            size.factor
-        ) / 2;
-
-
-
-    const footprintRadius =
-        Math.max(
-            halfWidth,
-            halfDepth
-        );
-
-
-
-    return (
-
-        footprintRadius +
-
-        config.collisionPadding
-
-    );
-
-}
-
-
-
-// ==========================================
-// GET HORIZONTAL POSITION
-// ==========================================
-
-function getHorizontalPosition(
-    object
-) {
-
-
-    return new THREE.Vector2(
-
-        object.position.x,
-
-        object.position.z
-
-    );
-
-}
-
-
-
-// ==========================================
-// CHECK COLLISION
-// ==========================================
-
-function isPositionBlocked(
-
-    position,
-
-    food,
-
-    sizeKey,
-
-    ignoredItem = null
-
-) {
-
-
-    const newRadius =
-        getDishCollisionRadius(
-
-            food,
-
-            sizeKey
-
-        );
-
-
-
-    const newPosition =
-        new THREE.Vector2(
-
-            position.x,
-
-            position.z
-
-        );
-
-
-
-    for (
-        const item of
-        menuARState.confirmedItems
-    ) {
-
-
-        if (
-            item ===
-            ignoredItem
-        ) {
-
-            continue;
-
-        }
-
-
-
-        if (
-            !item.object
-        ) {
-
-            continue;
-
-        }
-
-
-
-        const existingPosition =
-            getHorizontalPosition(
-                item.object
-            );
-
-
-
-        const existingRadius =
-            getDishCollisionRadius(
-
-                item.food,
-
-                item.sizeKey
-
-            );
-
-
-
-        const distance =
-            newPosition.distanceTo(
-                existingPosition
-            );
-
-
-
-        const minimumDistance =
-
-            newRadius +
-
-            existingRadius;
-
-
-
-        if (
-            distance <
-            minimumDistance
-        ) {
-
-
-            return true;
-
-        }
-
-    }
-
-
-
-    return false;
-
-}
-
-
-
-// ==========================================
-// RETICLE COLLISION STATE
-// ==========================================
-
-function updateReticlePlacementState() {
-
-
-    if (
-        !reticle.visible
-    ) {
-
-        return;
-
-    }
-
-
-
-    if (
-
-        menuARState.appState !==
-            "SURFACE_FOUND" &&
-
-        menuARState.appState !==
-            "MOVE_MODE"
-
-    ) {
-
-        return;
-
-    }
-
-
-
-    const position =
-        new THREE.Vector3();
-
-
-
-    position.setFromMatrixPosition(
-        reticle.matrix
-    );
-
-
-
-    const blocked =
-        isPositionBlocked(
-
-            position,
-
-            menuARState.selectedFood,
-
-            menuARState.selectedSize
-
-        );
-
-
-
-    menuARState.placementBlocked =
-        blocked;
-
-
-
-    reticle.material.color.set(
-
-        blocked
-
-            ? RETICLE_BLOCKED_COLOR
-
-            : RETICLE_AVAILABLE_COLOR
 
     );
 
@@ -1412,6 +1127,7 @@ function playTone(
     );
 
 
+
     gain.connect(
         audioContext.destination
     );
@@ -1421,6 +1137,7 @@ function playTone(
     oscillator.start(
         now
     );
+
 
 
     oscillator.stop(
@@ -1646,6 +1363,7 @@ function getCurrentModelScale(food) {
         MODEL_CONFIG[food];
 
 
+
     const size =
         getCurrentSizePreset();
 
@@ -1723,6 +1441,7 @@ function loadModel(food) {
                     );
 
 
+
                     reject(
                         error
                     );
@@ -1784,6 +1503,7 @@ async function loadModels() {
             "The food previews could not be loaded. Refresh the page and try again."
 
         );
+
 
 
         console.error(
@@ -1997,6 +1717,7 @@ function renderOrderSummary(
                 );
 
 
+
             row.className =
                 "order-summary-row";
 
@@ -2008,8 +1729,10 @@ function renderOrderSummary(
                 );
 
 
+
             name.className =
                 "order-summary-name";
+
 
 
             name.textContent =
@@ -2024,8 +1747,10 @@ function renderOrderSummary(
                 );
 
 
+
             count.className =
                 "order-summary-count";
+
 
 
             count.textContent =
@@ -2285,7 +2010,7 @@ function selectFood(food) {
 
             setStatus(
 
-                `Perfect — tap the ${menuARState.placementBlocked ? "available spot" : "white circle"} to place your ${foodName}.`
+                `Perfect — tap the white circle to place your ${foodName}.`
 
             );
 
@@ -2354,6 +2079,7 @@ function replacePlacedFood(
         MODEL_CONFIG[newFood];
 
 
+
     const previousConfig =
         MODEL_CONFIG[previousFood];
 
@@ -2364,43 +2090,8 @@ function replacePlacedFood(
 
 
 
-    const savedScale =
-        oldModel.scale.clone();
-
-
-
-    // ======================================
-    // CHECK NEW MODEL FOOTPRINT
-    // ======================================
-
-    const blocked =
-        isPositionBlocked(
-
-            savedPosition,
-
-            newFood,
-
-            menuARState.selectedSize
-
-        );
-
-
-
-    if (
-        blocked
-    ) {
-
-
-        setStatus(
-
-            `The ${getFoodName(newFood)} is too large for this spot. Use Move Dish to choose another spot.`
-
-        );
-
-
-        return;
-
-    }
+    const savedQuaternion =
+        oldModel.quaternion.clone();
 
 
 
@@ -2420,11 +2111,18 @@ function replacePlacedFood(
     );
 
 
+
     newModel.position.y +=
 
         newConfig.surfaceOffset -
 
         previousConfig.surfaceOffset;
+
+
+
+    newModel.quaternion.copy(
+        savedQuaternion
+    );
 
 
 
@@ -2782,6 +2480,7 @@ async function startARSession() {
 
                 {
 
+
                     requiredFeatures: [
 
                         "hit-test"
@@ -2881,6 +2580,10 @@ async function startARSession() {
             "medium";
 
 
+        menuARState.currentRotation =
+            0;
+
+
         menuARState.confirmedItems =
             [];
 
@@ -2891,10 +2594,6 @@ async function startARSession() {
 
         menuARState.nextItemId =
             1;
-
-
-        menuARState.placementBlocked =
-            false;
 
 
 
@@ -3196,6 +2895,14 @@ function hideInteractionControls() {
 function enableManipulationControls() {
 
 
+    rotateLeftBtn.disabled =
+        false;
+
+
+    rotateRightBtn.disabled =
+        false;
+
+
     sizeSmallBtn.disabled =
         false;
 
@@ -3249,6 +2956,14 @@ function enableManipulationControls() {
 function disableManipulationControls() {
 
 
+    rotateLeftBtn.disabled =
+        true;
+
+
+    rotateRightBtn.disabled =
+        true;
+
+
     sizeSmallBtn.disabled =
         true;
 
@@ -3281,6 +2996,14 @@ function disableManipulationControls() {
 // ==========================================
 
 function setMoveModeControls() {
+
+
+    rotateLeftBtn.disabled =
+        true;
+
+
+    rotateRightBtn.disabled =
+        true;
 
 
     sizeSmallBtn.disabled =
@@ -3437,16 +3160,16 @@ function onARSessionEnded() {
         "medium";
 
 
+    menuARState.currentRotation =
+        0;
+
+
     menuARState.orderPlaced =
         false;
 
 
     menuARState.nextItemId =
         1;
-
-
-    menuARState.placementBlocked =
-        false;
 
 
     menuARState.appState =
@@ -3564,6 +3287,7 @@ function startPlacementAnimation(
     model.scale.setScalar(
         startScale
     );
+
 
 
     model.position.y =
@@ -3701,6 +3425,7 @@ function updatePlacementAnimation(
         easeOutCubic(
             progress
         );
+
 
 
     const scaleEase =
@@ -3873,6 +3598,11 @@ function placeSelectedFood() {
 
 
 
+    const placedModel =
+        template.clone(true);
+
+
+
     const placementPosition =
         new THREE.Vector3();
 
@@ -3881,56 +3611,6 @@ function placeSelectedFood() {
     placementPosition.setFromMatrixPosition(
         reticle.matrix
     );
-
-
-
-    // ======================================
-    // COLLISION CHECK
-    // ======================================
-
-    const blocked =
-        isPositionBlocked(
-
-            placementPosition,
-
-            food,
-
-            menuARState.selectedSize
-
-        );
-
-
-
-    if (
-        blocked
-    ) {
-
-
-        menuARState.placementBlocked =
-            true;
-
-
-
-        setStatus(
-
-            "That spot is too close to another dish. Choose another spot."
-
-        );
-
-
-        return;
-
-    }
-
-
-
-    menuARState.placementBlocked =
-        false;
-
-
-
-    const placedModel =
-        template.clone(true);
 
 
 
@@ -3950,10 +3630,31 @@ function placeSelectedFood() {
 
 
 
-    /*
-       No manual rotation is applied.
-       The dish keeps its natural orientation.
-    */
+    const placementRotation =
+        new THREE.Quaternion();
+
+
+
+    const ignoredScale =
+        new THREE.Vector3();
+
+
+
+    reticle.matrix.decompose(
+
+        new THREE.Vector3(),
+
+        placementRotation,
+
+        ignoredScale
+
+    );
+
+
+
+    placedModel.quaternion.copy(
+        placementRotation
+    );
 
 
 
@@ -4010,6 +3711,10 @@ function placeSelectedFood() {
 
 
 
+    menuARState.currentRotation =
+        0;
+
+
     menuARState.surfaceFound =
         false;
 
@@ -4037,6 +3742,78 @@ function placeSelectedFood() {
         finalScale,
 
         finalY
+
+    );
+
+}
+
+
+
+// ==========================================
+// ROTATE
+// ==========================================
+
+function rotateLeft() {
+
+
+    if (
+        !canManipulate()
+    ) {
+
+        return;
+
+    }
+
+
+
+    menuARState.placedObject.rotateY(
+        ROTATION_STEP
+    );
+
+
+
+    menuARState.currentRotation +=
+        ROTATION_STEP;
+
+
+
+    setStatus(
+
+        `${getFoodName(menuARState.selectedFood)} turned left.`
+
+    );
+
+}
+
+
+
+function rotateRight() {
+
+
+    if (
+        !canManipulate()
+    ) {
+
+        return;
+
+    }
+
+
+
+    menuARState.placedObject.rotateY(
+        -ROTATION_STEP
+    );
+
+
+
+    menuARState.currentRotation -=
+        ROTATION_STEP;
+
+
+
+    setStatus(
+
+        `${getFoodName(menuARState.selectedFood)} turned right.`
 
     );
 
@@ -4090,11 +3867,6 @@ function enterMoveMode() {
         false;
 
 
-    menuARState.placementBlocked =
-        false;
-
-
-
     reticle.visible =
         false;
 
@@ -4131,7 +3903,7 @@ function enterMoveMode() {
 
     setStatus(
 
-        "Choose a new spot on the table, then tap the available circle."
+        "Choose a new spot on the table, then tap the white circle."
 
     );
 
@@ -4147,31 +3919,13 @@ function setMoveModeStatus() {
 
 
     if (
-        menuARState.placementBlocked
-    ) {
-
-
-        setStatus(
-
-            "That spot is too close to another dish. Find a different spot."
-
-        );
-
-
-        return;
-
-    }
-
-
-
-    if (
         menuARState.surfaceFound
     ) {
 
 
         setStatus(
 
-            "New spot available — tap the circle to move your dish."
+            "New spot found — tap the white circle to move your dish."
 
         );
 
@@ -4215,6 +3969,27 @@ function repositionPlacedFood() {
 
 
 
+    const savedQuaternion =
+
+        menuARState.placedObject
+            .quaternion
+            .clone();
+
+
+
+    const savedScale =
+
+        menuARState.placedObject
+            .scale
+            .clone();
+
+
+
+    const savedRotation =
+        menuARState.currentRotation;
+
+
+
     const newPosition =
         new THREE.Vector3();
 
@@ -4223,47 +3998,6 @@ function repositionPlacedFood() {
     newPosition.setFromMatrixPosition(
         reticle.matrix
     );
-
-
-
-    const blocked =
-        isPositionBlocked(
-
-            newPosition,
-
-            menuARState.selectedFood,
-
-            menuARState.selectedSize
-
-        );
-
-
-
-    if (
-        blocked
-    ) {
-
-
-        menuARState.placementBlocked =
-            true;
-
-
-
-        setStatus(
-
-            "That spot is too close to another dish. Choose another spot."
-
-        );
-
-
-        return;
-
-    }
-
-
-
-    menuARState.placementBlocked =
-        false;
 
 
 
@@ -4285,6 +4019,23 @@ function repositionPlacedFood() {
 
 
 
+    menuARState.placedObject.quaternion.copy(
+        savedQuaternion
+    );
+
+
+
+    menuARState.placedObject.scale.copy(
+        savedScale
+    );
+
+
+
+    menuARState.currentRotation =
+        savedRotation;
+
+
+
     if (
         menuARState.activeShadow
     ) {
@@ -4293,6 +4044,7 @@ function repositionPlacedFood() {
         positionShadowFromReticle(
             menuARState.activeShadow
         );
+
 
 
         updateShadowAppearance(
@@ -4304,6 +4056,7 @@ function repositionPlacedFood() {
             menuARState.selectedSize
 
         );
+
 
 
         menuARState.activeShadow.visible =
@@ -4368,17 +4121,16 @@ function removeFood() {
 
 
 
+    menuARState.currentRotation =
+        0;
+
+
     menuARState.surfaceFound =
         false;
 
 
     menuARState.appState =
         "SCANNING";
-
-
-    menuARState.placementBlocked =
-        false;
-
 
 
     reticle.visible =
@@ -4475,7 +4227,7 @@ function addCurrentItemToOrder() {
 
 
     // The dish remains in the Three.js scene,
-    // but is no longer the active dish.
+    // but it is no longer the active dish.
 
     menuARState.placedObject =
         null;
@@ -4483,6 +4235,10 @@ function addCurrentItemToOrder() {
 
     menuARState.activeShadow =
         null;
+
+
+    menuARState.currentRotation =
+        0;
 
 
 
@@ -4598,8 +4354,8 @@ function addAnotherDish() {
         "medium";
 
 
-    menuARState.placementBlocked =
-        false;
+    menuARState.currentRotation =
+        0;
 
 
     reticle.visible =
@@ -4853,6 +4609,7 @@ function updateOrderPulseAnimation(
             );
 
 
+
             item.object.scale.multiplyScalar(
                 pulse
             );
@@ -4949,10 +4706,6 @@ function placeOrder() {
 
 
     menuARState.surfaceFound =
-        false;
-
-
-    menuARState.placementBlocked =
         false;
 
 
@@ -5062,24 +4815,6 @@ function onXRSelect() {
     ) {
 
 
-        if (
-            menuARState.placementBlocked
-        ) {
-
-
-            setStatus(
-
-                "That spot is too close to another dish. Choose another spot."
-
-            );
-
-
-            return;
-
-        }
-
-
-
         placeSelectedFood();
 
 
@@ -5116,24 +4851,6 @@ function onXRSelect() {
 
 
 
-        if (
-            menuARState.placementBlocked
-        ) {
-
-
-            setStatus(
-
-                "That spot is too close to another dish. Choose another spot."
-
-            );
-
-
-            return;
-
-        }
-
-
-
         repositionPlacedFood();
 
     }
@@ -5158,6 +4875,7 @@ function render(
     updatePlacementAnimation(
         timestamp
     );
+
 
 
     updateOrderPulseAnimation(
@@ -5210,6 +4928,7 @@ function render(
                 hitTestResults[0];
 
 
+
             const pose =
                 hit.getPose(
                     referenceSpace
@@ -5238,10 +4957,6 @@ function render(
 
 
 
-                updateReticlePlacementState();
-
-
-
                 if (
 
                     !menuARState.placedObject &&
@@ -5257,28 +4972,11 @@ function render(
 
 
 
-                    if (
-                        menuARState.placementBlocked
-                    ) {
+                    setStatus(
 
+                        `Perfect — tap the white circle to place your ${getFoodName(menuARState.selectedFood)}.`
 
-                        setStatus(
-
-                            "That spot is too close to another dish. Move the circle to a clear area."
-
-                        );
-
-
-                    } else {
-
-
-                        setStatus(
-
-                            `Perfect — tap the circle to place your ${getFoodName(menuARState.selectedFood)}.`
-
-                        );
-
-                    }
+                    );
 
                 }
 
@@ -5305,10 +5003,6 @@ function render(
 
 
             menuARState.surfaceFound =
-                false;
-
-
-            menuARState.placementBlocked =
                 false;
 
 
@@ -5520,6 +5214,30 @@ sizeLargeBtn.addEventListener(
         );
 
     }
+
+);
+
+
+
+// ==========================================
+// ROTATION
+// ==========================================
+
+rotateLeftBtn.addEventListener(
+
+    "click",
+
+    rotateLeft
+
+);
+
+
+
+rotateRightBtn.addEventListener(
+
+    "click",
+
+    rotateRight
 
 );
 
