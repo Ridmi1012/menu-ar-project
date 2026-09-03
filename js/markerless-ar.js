@@ -277,12 +277,13 @@ let referenceSpace =
 let latestHitTestResult =
     null;
 
-
-
 let isEndingXRSession =
     false;
 
 let isCleaningUpXRSession =
+    false;
+
+let reloadPageAfterSessionEnd =
     false;
 
 
@@ -2303,7 +2304,6 @@ async function finishOrder() {
         menuARState.appState !==
             "ORDER_CONFIRMED"
     ) {
-
         return;
     }
 
@@ -2311,9 +2311,12 @@ async function finishOrder() {
     if (
         isEndingXRSession
     ) {
-
         return;
     }
+
+
+    reloadPageAfterSessionEnd =
+        true;
 
 
     doneBtn.disabled =
@@ -2580,13 +2583,16 @@ function onARSessionEnded() {
     if (
         isCleaningUpXRSession
     ) {
-
         return;
     }
 
 
     isCleaningUpXRSession =
         true;
+
+
+    const shouldReload =
+        reloadPageAfterSessionEnd;
 
 
     try {
@@ -2601,6 +2607,9 @@ function onARSessionEnded() {
 
             } catch (error) {
 
+                console.warn(
+                    "Hit test already closed."
+                );
             }
         }
 
@@ -2608,14 +2617,11 @@ function onARSessionEnded() {
         hitTestSource =
             null;
 
-
         viewerSpace =
             null;
 
-
         referenceSpace =
             null;
-
 
         latestHitTestResult =
             null;
@@ -2629,6 +2635,43 @@ function onARSessionEnded() {
                 false;
         }
 
+
+        xrSession =
+            null;
+
+
+        document.body.classList.remove(
+            "xr-session-active"
+        );
+
+
+        // ==================================
+        // DONE
+        // Reload markerless.html completely.
+        // This gives us a clean fresh state.
+        // ==================================
+
+        if (
+            shouldReload
+        ) {
+
+            window.setTimeout(
+                () => {
+
+                    window.location.reload();
+
+                },
+                300
+            );
+
+
+            return;
+        }
+
+
+        // ==================================
+        // NORMAL CANCEL ORDER
+        // ==================================
 
         removeActivePreviewFromScene();
 
@@ -2676,15 +2719,6 @@ function onARSessionEnded() {
             0;
 
 
-        xrSession =
-            null;
-
-
-        document.body.classList.remove(
-            "xr-session-active"
-        );
-
-
         resetControls();
 
 
@@ -2695,23 +2729,6 @@ function onARSessionEnded() {
 
 
         updateStartButton();
-
-
-        try {
-
-            window.scrollTo({
-                top: 0,
-                left: 0,
-                behavior: "auto"
-            });
-
-        } catch (error) {
-
-            window.scrollTo(
-                0,
-                0
-            );
-        }
 
 
     } catch (error) {
@@ -2731,6 +2748,24 @@ function onARSessionEnded() {
         );
 
 
+        if (
+            shouldReload
+        ) {
+
+            window.setTimeout(
+                () => {
+
+                    window.location.reload();
+
+                },
+                300
+            );
+
+
+            return;
+        }
+
+
         resetControls();
 
 
@@ -2747,6 +2782,10 @@ function onARSessionEnded() {
 
 
         isCleaningUpXRSession =
+            false;
+
+
+        reloadPageAfterSessionEnd =
             false;
     }
 }
