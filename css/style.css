@@ -1,5 +1,5 @@
 /* =========================================
-   MenuAR - Global Reset
+   MENUAR - GLOBAL RESET
    ========================================= */
 
 * {
@@ -33,7 +33,7 @@ body {
 
 
 /* =========================================
-   Home Page
+   HOME PAGE
    ========================================= */
 
 .home-page {
@@ -56,7 +56,7 @@ body {
 
 
 /* =========================================
-   Branding
+   BRAND
    ========================================= */
 
 .brand {
@@ -86,7 +86,7 @@ body {
 
 
 /* =========================================
-   Intro Text
+   INTRO TEXT
    ========================================= */
 
 .tagline {
@@ -110,7 +110,7 @@ body {
 
 
 /* =========================================
-   Home Mode Cards
+   HOME MODE CARDS
    ========================================= */
 
 .mode-container {
@@ -152,11 +152,9 @@ body {
 
 
 .mode-card:hover {
-    transform:
-        translateY(-2px);
+    transform: translateY(-2px);
 
-    border-color:
-        #f3b27c;
+    border-color: #f3b27c;
 
     box-shadow:
         0 12px 28px
@@ -165,14 +163,9 @@ body {
 
 
 .mode-card:active {
-    transform:
-        scale(0.98);
+    transform: scale(0.98);
 }
 
-
-/* =========================================
-   Home Card Content
-   ========================================= */
 
 .mode-icon {
     width: 55px;
@@ -184,8 +177,7 @@ body {
     justify-content: center;
     align-items: center;
 
-    background-color:
-        #fff2e5;
+    background-color: #fff2e5;
 
     border-radius: 14px;
 
@@ -224,10 +216,6 @@ body {
 }
 
 
-/* =========================================
-   Device Note
-   ========================================= */
-
 .device-note {
     margin-top: 28px;
 
@@ -238,7 +226,7 @@ body {
 
 
 /* =========================================
-   Shared AR Header
+   SHARED AR HEADER
    ========================================= */
 
 .ar-header {
@@ -251,11 +239,9 @@ body {
 
     padding: 15px 20px;
 
-    background-color:
-        #ffffff;
+    background-color: #ffffff;
 
-    border-bottom:
-        1px solid #eeeeee;
+    border-bottom: 1px solid #eeeeee;
 }
 
 
@@ -286,8 +272,7 @@ body {
 
     border-radius: 12px;
 
-    background-color:
-        #fff2e5;
+    background-color: #fff2e5;
 
     color: #e85d04;
 
@@ -298,14 +283,13 @@ body {
 
 
 /* =========================================
-   Shared AR Controls
+   SHARED AR CONTROLS
    ========================================= */
 
 .ar-controls {
     padding: 20px;
 
-    background-color:
-        #ffffff;
+    background-color: #ffffff;
 }
 
 
@@ -339,8 +323,7 @@ body {
 
     border-radius: 12px;
 
-    background-color:
-        #ffffff;
+    background-color: #ffffff;
 
     color: #333333;
 
@@ -352,19 +335,16 @@ body {
 
 
 .food-button.active {
-    border-color:
-        #e85d04;
+    border-color: #e85d04;
 
-    background-color:
-        #fff2e5;
+    background-color: #fff2e5;
 
-    color:
-        #d95400;
+    color: #d95400;
 }
 
 
 /* =========================================
-   Status / Instructions
+   STATUS / INSTRUCTION FEEDBACK
    ========================================= */
 
 .instruction,
@@ -375,8 +355,7 @@ body {
 
     border-radius: 10px;
 
-    background-color:
-        #fff8f1;
+    background-color: #fff8f1;
 
     font-size: 12px;
     line-height: 1.5;
@@ -396,11 +375,18 @@ body {
 
 
 /* =========================================
-   Interaction Controls
+   INTERACTION CONTROLS
    ========================================= */
 
 .interaction-controls {
-    margin-top: 18px;
+    display: none;
+
+    margin-top: 12px;
+}
+
+
+.interaction-controls.is-visible {
+    display: block;
 }
 
 
@@ -417,6 +403,7 @@ body {
 
 
 .control-button,
+.move-button,
 .remove-button,
 .confirm-button {
     min-height: 46px;
@@ -425,6 +412,8 @@ body {
 
     font-size: 13px;
     font-weight: 600;
+
+    cursor: pointer;
 }
 
 
@@ -432,27 +421,60 @@ body {
     border:
         1px solid #dddddd;
 
-    background-color:
-        #ffffff;
+    background-color: #ffffff;
 
     color: #333333;
 }
 
 
-.remove-button {
+/* =========================================
+   MOVE
+   ========================================= */
+
+.move-button {
     width: 100%;
 
     margin-top: 2px;
 
     border:
+        1px solid #8bb5df;
+
+    background-color: #f3f8fd;
+
+    color: #286aa6;
+}
+
+
+.move-button.active {
+    border-color: #286aa6;
+
+    background-color: #e3f1ff;
+
+    color: #174d7d;
+}
+
+
+/* =========================================
+   REMOVE
+   ========================================= */
+
+.remove-button {
+    width: 100%;
+
+    margin-top: 10px;
+
+    border:
         1px solid #e2aaaa;
 
-    background-color:
-        #fff5f5;
+    background-color: #fff5f5;
 
     color: #b83232;
 }
 
+
+/* =========================================
+   CONFIRM
+   ========================================= */
 
 .confirm-button {
     width: 100%;
@@ -461,12 +483,15 @@ body {
 
     border: none;
 
-    background-color:
-        #e85d04;
+    background-color: #e85d04;
 
     color: #ffffff;
 }
 
+
+/* =========================================
+   DISABLED BUTTONS
+   ========================================= */
 
 button:disabled {
     opacity: 0.4;
@@ -476,11 +501,12 @@ button:disabled {
 
 
 /* =========================================
-   Temporary Generic Camera Area
+   GENERIC CAMERA PLACEHOLDER
    ========================================= */
 
 .camera-placeholder {
     min-height: 430px;
+
     flex: 1;
 
     display: flex;
@@ -532,7 +558,7 @@ button:disabled {
 
 
 /* =========================================
-   Marker AR
+   MARKER AR
    ========================================= */
 
 .marker-ar-page {
@@ -541,8 +567,7 @@ button:disabled {
 
     overflow: hidden;
 
-    background-color:
-        #000000;
+    background-color: #000000;
 }
 
 
@@ -570,8 +595,7 @@ button:disabled {
     display: flex;
     flex-direction: column;
 
-    justify-content:
-        space-between;
+    justify-content: space-between;
 }
 
 
@@ -603,8 +627,7 @@ button:disabled {
             0.94
         );
 
-    backdrop-filter:
-        blur(8px);
+    backdrop-filter: blur(8px);
 
     border-bottom:
         1px solid
@@ -661,8 +684,7 @@ button:disabled {
 
     text-align: center;
 
-    backdrop-filter:
-        blur(5px);
+    backdrop-filter: blur(5px);
 }
 
 
@@ -694,20 +716,18 @@ button:disabled {
             0.96
         );
 
-    backdrop-filter:
-        blur(10px);
+    backdrop-filter: blur(10px);
 }
 
 
 /* =========================================
-   Markerless WebXR
+   MARKERLESS WEBXR
    ========================================= */
 
 .markerless-page {
     min-height: 100vh;
 
-    background-color:
-        #f8f8f8;
+    background-color: #f8f8f8;
 }
 
 
@@ -723,7 +743,7 @@ button:disabled {
 
 
 /* =========================================
-   WebXR Viewport
+   WEBXR VIEWPORT
    ========================================= */
 
 .xr-viewport {
@@ -768,7 +788,7 @@ button:disabled {
 
 
 /* =========================================
-   Start / Exit AR Buttons
+   START AR
    ========================================= */
 
 .start-ar-button {
@@ -781,8 +801,7 @@ button:disabled {
     border: none;
     border-radius: 12px;
 
-    background-color:
-        #e85d04;
+    background-color: #e85d04;
 
     color: #ffffff;
 
@@ -794,10 +813,13 @@ button:disabled {
 
 
 .start-ar-button:disabled {
-    background-color:
-        #888888;
+    background-color: #888888;
 }
 
+
+/* =========================================
+   EXIT AR
+   ========================================= */
 
 .exit-ar-button {
     display: none;
@@ -813,75 +835,76 @@ button:disabled {
 
     border-radius: 10px;
 
-    background-color:
-        #ffffff;
+    background-color: #ffffff;
 
     color: #555555;
 
     font-size: 12px;
     font-weight: 600;
+
+    cursor: pointer;
 }
 
 
 /* =========================================
-   Immersive WebXR DOM Overlay
+   WEBXR DOM OVERLAY
    ========================================= */
 
-body:xr-overlay {
-    background-color:
-        transparent;
+body:xr-overlay,
+body.xr-session-active {
+    background-color: transparent;
 }
 
 
-/*
-    Hide the normal page header and
-    introduction during immersive AR.
-*/
+/* Hide normal webpage header */
 
-body:xr-overlay
-.ar-header {
+body:xr-overlay .ar-header,
+body.xr-session-active .ar-header {
     display: none;
 }
 
 
-body:xr-overlay
-#xrIntro {
+/* Hide normal Start AR introduction */
+
+body:xr-overlay #xrIntro,
+body.xr-session-active #xrIntro {
     display: none;
 }
 
 
-body:xr-overlay
-.markerless-layout {
+body:xr-overlay .markerless-layout,
+body.xr-session-active .markerless-layout {
     min-height: 100vh;
 }
 
 
-body:xr-overlay
-.xr-viewport {
+/* Camera / WebXR world occupies screen */
+
+body:xr-overlay .xr-viewport,
+body.xr-session-active .xr-viewport {
     position: fixed;
 
     inset: 0;
 
     min-height: 100vh;
 
-    background:
-        transparent;
+    background: transparent;
 
     pointer-events: none;
 }
 
 
-/*
-    Compact bottom control panel so
-    the real world remains visible.
-*/
+/* =========================================
+   COMPACT XR CONTROL PANEL
+   ========================================= */
 
-body:xr-overlay
-.ar-controls {
+body:xr-overlay .ar-controls,
+body.xr-session-active .ar-controls {
     position: fixed;
 
     left: 12px;
     right: 12px;
+
     bottom:
         calc(
             12px +
@@ -892,9 +915,13 @@ body:xr-overlay
 
     max-width: 620px;
 
+    max-height: 48vh;
+
     margin: 0 auto;
 
     padding: 12px;
+
+    overflow-y: auto;
 
     border-radius: 16px;
 
@@ -906,8 +933,7 @@ body:xr-overlay
             0.94
         );
 
-    backdrop-filter:
-        blur(8px);
+    backdrop-filter: blur(8px);
 
     box-shadow:
         0 8px 30px
@@ -920,9 +946,9 @@ body:xr-overlay
 }
 
 
-body:xr-overlay
-.status-message {
-    margin-bottom: 10px;
+body:xr-overlay .status-message,
+body.xr-session-active .status-message {
+    margin-bottom: 9px;
 
     padding: 8px 10px;
 
@@ -930,40 +956,73 @@ body:xr-overlay
 }
 
 
-body:xr-overlay
-.control-label {
+body:xr-overlay .control-label,
+body.xr-session-active .control-label {
     display: none;
 }
 
 
-body:xr-overlay
-.food-button {
-    min-height: 42px;
+body:xr-overlay .food-button,
+body.xr-session-active .food-button {
+    min-height: 40px;
 
     font-size: 13px;
 }
 
 
-/*
-    We have not implemented manipulation
-    yet, so don't waste camera space
-    showing disabled controls in XR.
-*/
+/* Manipulation panel is compact in XR */
 
 body:xr-overlay
-.interaction-controls {
-    display: none;
+.interaction-controls.is-visible,
+
+body.xr-session-active
+.interaction-controls.is-visible {
+    display: block;
+
+    margin-top: 8px;
 }
 
 
-body:xr-overlay
-.exit-ar-button {
+body:xr-overlay .control-row,
+body.xr-session-active .control-row {
+    gap: 7px;
+
+    margin-bottom: 7px;
+}
+
+
+body:xr-overlay .control-button,
+body:xr-overlay .move-button,
+body:xr-overlay .remove-button,
+body:xr-overlay .confirm-button,
+
+body.xr-session-active .control-button,
+body.xr-session-active .move-button,
+body.xr-session-active .remove-button,
+body.xr-session-active .confirm-button {
+    min-height: 38px;
+
+    font-size: 12px;
+}
+
+
+body:xr-overlay .remove-button,
+body:xr-overlay .confirm-button,
+
+body.xr-session-active .remove-button,
+body.xr-session-active .confirm-button {
+    margin-top: 7px;
+}
+
+
+body:xr-overlay .exit-ar-button,
+body.xr-session-active .exit-ar-button {
     display: block;
 }
 
 
 /* =========================================
-   Mobile Home Adjustments
+   MOBILE HOME
    ========================================= */
 
 @media (
@@ -971,8 +1030,7 @@ body:xr-overlay
 ) {
 
     .home-page {
-        padding:
-            25px 16px;
+        padding: 25px 16px;
     }
 
 
@@ -1014,7 +1072,7 @@ body:xr-overlay
 
 
 /* =========================================
-   Larger Screens
+   LARGER SCREENS
    ========================================= */
 
 @media (

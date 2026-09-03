@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -8,81 +10,948 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>MenuAR | Food Preview</title>
+    <title>MenuAR | Interactive Menu</title>
 
-    <link rel="stylesheet" href="css/style.css">
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+
+    <!-- =====================================
+         HOME PAGE ONLY STYLES
+         ===================================== -->
+
+    <style>
+
+        /* ==================================
+           RESTAURANT HOME
+           ================================== */
+
+        .restaurant-home {
+
+            min-height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            padding:
+                40px
+                20px;
+
+            background:
+                radial-gradient(
+                    circle at top,
+                    #fffaf2 0%,
+                    #fffdf9 42%,
+                    #ffffff 100%
+                );
+
+        }
+
+
+        .restaurant-home .hero {
+
+            width: 100%;
+            max-width: 560px;
+
+            text-align: center;
+
+        }
+
+
+        /* ==================================
+           BRAND
+           ================================== */
+
+        .restaurant-wordmark {
+
+            margin-bottom: 28px;
+
+            animation:
+                homeFadeDown
+                450ms
+                ease-out
+                both;
+
+        }
+
+
+        .restaurant-wordmark h1 {
+
+            margin: 0;
+
+            color: #d95605;
+
+            font-size: 38px;
+            font-weight: 800;
+
+            letter-spacing: -1px;
+
+        }
+
+
+        .restaurant-wordmark p {
+
+            margin-top: 4px;
+
+            color: #9b7a62;
+
+            font-size: 10px;
+            font-weight: 700;
+
+            letter-spacing: 3px;
+
+            text-transform: uppercase;
+
+        }
+
+
+        /* ==================================
+           HERO COPY
+           ================================== */
+
+        .restaurant-eyebrow {
+
+            margin-bottom: 10px;
+
+            color: #b78761;
+
+            font-size: 11px;
+            font-weight: 700;
+
+            letter-spacing: 2px;
+
+            text-transform: uppercase;
+
+            animation:
+                homeFadeUp
+                450ms
+                80ms
+                ease-out
+                both;
+
+        }
+
+
+        .restaurant-heading {
+
+            max-width: 500px;
+
+            margin:
+                0 auto
+                14px;
+
+            color: #24201d;
+
+            font-size: 32px;
+            font-weight: 750;
+
+            line-height: 1.12;
+
+            letter-spacing: -0.8px;
+
+            animation:
+                homeFadeUp
+                450ms
+                130ms
+                ease-out
+                both;
+
+        }
+
+
+        .restaurant-description {
+
+            max-width: 430px;
+
+            margin:
+                0 auto
+                34px;
+
+            color: #756d67;
+
+            font-size: 14px;
+
+            line-height: 1.65;
+
+            animation:
+                homeFadeUp
+                450ms
+                180ms
+                ease-out
+                both;
+
+        }
+
+
+        /* ==================================
+           EXPERIENCE CARDS
+           ================================== */
+
+        .restaurant-modes {
+
+            display: flex;
+            flex-direction: column;
+
+            gap: 14px;
+
+        }
+
+
+        .restaurant-card {
+
+            position: relative;
+
+            width: 100%;
+
+            display: flex;
+            align-items: center;
+
+            gap: 16px;
+
+            padding:
+                20px
+                18px;
+
+            overflow: hidden;
+
+            border:
+                1px solid
+                #eee2d8;
+
+            border-radius:
+                18px;
+
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.92
+                );
+
+            color:
+                #25211e;
+
+            text-decoration:
+                none;
+
+            text-align:
+                left;
+
+            box-shadow:
+                0 10px 28px
+                rgba(
+                    72,
+                    42,
+                    18,
+                    0.055
+                );
+
+            transition:
+                transform 220ms ease,
+                border-color 220ms ease,
+                box-shadow 220ms ease;
+
+        }
+
+
+        .restaurant-card:nth-child(1) {
+
+            animation:
+                homeCardReveal
+                500ms
+                240ms
+                ease-out
+                both;
+
+        }
+
+
+        .restaurant-card:nth-child(2) {
+
+            animation:
+                homeCardReveal
+                500ms
+                320ms
+                ease-out
+                both;
+
+        }
+
+
+        .restaurant-card:active {
+
+            transform:
+                scale(0.985);
+
+        }
+
+
+        /* ==================================
+           CARD LABEL
+           ================================== */
+
+        .experience-label {
+
+            width: 58px;
+            height: 58px;
+
+            flex-shrink: 0;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            border-radius:
+                15px;
+
+            background:
+                #fff3e7;
+
+            color:
+                #d95605;
+
+            font-size:
+                10px;
+
+            font-weight:
+                800;
+
+            letter-spacing:
+                1px;
+
+        }
+
+
+        .restaurant-card:nth-child(2)
+        .experience-label {
+
+            background:
+                #f5efe8;
+
+            color:
+                #765d49;
+
+        }
+
+
+        /* ==================================
+           CARD TEXT
+           ================================== */
+
+        .experience-content {
+
+            flex: 1;
+
+            min-width: 0;
+
+        }
+
+
+        .experience-small {
+
+            display: block;
+
+            margin-bottom: 4px;
+
+            color: #ad8b72;
+
+            font-size: 9px;
+            font-weight: 700;
+
+            letter-spacing: 1.4px;
+
+            text-transform: uppercase;
+
+        }
+
+
+        .experience-content h2 {
+
+            margin:
+                0
+                0
+                6px;
+
+            color:
+                #2a2521;
+
+            font-size:
+                18px;
+
+            font-weight:
+                750;
+
+        }
+
+
+        .experience-content p {
+
+            margin: 0;
+
+            color:
+                #746d67;
+
+            font-size:
+                12.5px;
+
+            line-height:
+                1.5;
+
+        }
+
+
+        /* ==================================
+           ARROW
+           ================================== */
+
+        .restaurant-arrow {
+
+            flex-shrink:
+                0;
+
+            color:
+                #d95605;
+
+            font-size:
+                22px;
+
+            transition:
+                transform
+                180ms
+                ease;
+
+        }
+
+
+        /* ==================================
+           MARKER HINT
+           ================================== */
+
+        .marker-hint {
+
+            display: flex;
+            align-items: center;
+
+            gap: 6px;
+
+            margin-top: 8px;
+
+            color: #9a7961;
+
+            font-size: 10.5px;
+
+            font-weight: 600;
+
+        }
+
+
+        .marker-hint-dot {
+
+            width: 5px;
+            height: 5px;
+
+            flex-shrink: 0;
+
+            border-radius:
+                50%;
+
+            background:
+                #d95605;
+
+        }
+
+
+        /* ==================================
+           FOOTER NOTE
+           ================================== */
+
+        .restaurant-note {
+
+            margin-top:
+                28px;
+
+            color:
+                #a59a92;
+
+            font-size:
+                10.5px;
+
+            line-height:
+                1.5;
+
+            animation:
+                homeFadeUp
+                450ms
+                400ms
+                ease-out
+                both;
+
+        }
+
+
+        /* ==================================
+           DESKTOP / HOVER DEVICES
+           ================================== */
+
+        @media
+        (hover: hover)
+        and
+        (pointer: fine) {
+
+            .restaurant-card:hover {
+
+                transform:
+                    translateY(-3px);
+
+                border-color:
+                    #e7c4a8;
+
+                box-shadow:
+                    0 15px 32px
+                    rgba(
+                        72,
+                        42,
+                        18,
+                        0.09
+                    );
+
+            }
+
+
+            .restaurant-card:hover
+            .restaurant-arrow {
+
+                transform:
+                    translateX(4px);
+
+            }
+
+        }
+
+
+        /* ==================================
+           SMALL PHONE PORTRAIT
+           ================================== */
+
+        @media
+        (max-width: 480px) {
+
+            .restaurant-home {
+
+                padding:
+                    28px
+                    15px;
+
+            }
+
+
+            .restaurant-wordmark {
+
+                margin-bottom:
+                    23px;
+
+            }
+
+
+            .restaurant-wordmark h1 {
+
+                font-size:
+                    34px;
+
+            }
+
+
+            .restaurant-heading {
+
+                font-size:
+                    28px;
+
+            }
+
+
+            .restaurant-description {
+
+                margin-bottom:
+                    27px;
+
+                font-size:
+                    13px;
+
+            }
+
+
+            .restaurant-card {
+
+                gap:
+                    13px;
+
+                padding:
+                    17px
+                    15px;
+
+            }
+
+
+            .experience-label {
+
+                width:
+                    50px;
+
+                height:
+                    50px;
+
+                border-radius:
+                    13px;
+
+                font-size:
+                    9px;
+
+            }
+
+
+            .experience-content h2 {
+
+                font-size:
+                    16px;
+
+            }
+
+
+            .experience-content p {
+
+                font-size:
+                    11.5px;
+
+            }
+
+
+            .marker-hint {
+
+                font-size:
+                    10px;
+
+            }
+
+        }
+
+
+        /* ==================================
+           ANIMATIONS
+           ================================== */
+
+        @keyframes homeFadeDown {
+
+            from {
+
+                opacity:
+                    0;
+
+                transform:
+                    translateY(-10px);
+
+            }
+
+
+            to {
+
+                opacity:
+                    1;
+
+                transform:
+                    translateY(0);
+
+            }
+
+        }
+
+
+        @keyframes homeFadeUp {
+
+            from {
+
+                opacity:
+                    0;
+
+                transform:
+                    translateY(12px);
+
+            }
+
+
+            to {
+
+                opacity:
+                    1;
+
+                transform:
+                    translateY(0);
+
+            }
+
+        }
+
+
+        @keyframes homeCardReveal {
+
+            from {
+
+                opacity:
+                    0;
+
+                transform:
+                    translateY(18px)
+                    scale(0.985);
+
+            }
+
+
+            to {
+
+                opacity:
+                    1;
+
+                transform:
+                    translateY(0)
+                    scale(1);
+
+            }
+
+        }
+
+
+        /* ==================================
+           REDUCED MOTION
+           ================================== */
+
+        @media
+        (prefers-reduced-motion: reduce) {
+
+            .restaurant-wordmark,
+
+            .restaurant-eyebrow,
+
+            .restaurant-heading,
+
+            .restaurant-description,
+
+            .restaurant-card,
+
+            .restaurant-note {
+
+                animation:
+                    none;
+
+            }
+
+
+            .restaurant-card,
+
+            .restaurant-arrow {
+
+                transition:
+                    none;
+
+            }
+
+        }
+
+    </style>
+
 </head>
+
 
 <body>
 
-    <main class="home-page">
+
+    <main class="restaurant-home">
+
 
         <section class="hero">
 
-            <div class="brand">
-                <span class="brand-icon">🍽️</span>
-                <h1>MenuAR</h1>
+
+            <!-- =================================
+                 MENUAR BRAND
+                 ================================= -->
+
+            <div class="restaurant-wordmark">
+
+                <h1>
+                    MenuAR
+                </h1>
+
+                <p>
+                    Interactive Menu
+                </p>
+
             </div>
 
-            <p class="tagline">
-                Preview your food before ordering
+
+
+            <!-- =================================
+                 RESTAURANT INTRODUCTION
+                 ================================= -->
+
+            <p class="restaurant-eyebrow">
+                Your table. Your choice.
             </p>
 
-            <p class="description">
-                Experience selected menu items in augmented reality
-                using your mobile device.
+
+            <h2 class="restaurant-heading">
+                See your dish before you order.
+            </h2>
+
+
+            <p class="restaurant-description">
+
+                Explore our featured Burger and Pizza
+                before making your choice.
+
+                Choose how you would like to view your dish.
+
             </p>
 
-            <div class="mode-container">
 
-                <a href="marker.html" class="mode-card">
 
-                    <div class="mode-icon">
-                        📷
+            <!-- =================================
+                 EXPERIENCES
+                 ================================= -->
+
+            <div class="restaurant-modes">
+
+
+                <!-- =============================
+                     MENU MARKER EXPERIENCE
+                     ============================= -->
+
+                <a
+                    href="marker.html"
+                    class="restaurant-card"
+                >
+
+
+                    <div class="experience-label">
+                        SCAN
                     </div>
 
-                    <div class="mode-content">
-                        <h2>Marker AR Preview</h2>
+
+                    <div class="experience-content">
+
+
+                        <span class="experience-small">
+                            From the menu
+                        </span>
+
+
+                        <h2>
+                            Scan the Menu
+                        </h2>
+
 
                         <p>
-                            Point your camera at an AR marker to
-                            preview Burger or Pizza in 3D.
+
+                            Point your camera at the marker
+                            image on the table to reveal menu items.
+
                         </p>
+
+
+                        <div class="marker-hint">
+
+                            <span class="marker-hint-dot">
+                            </span>
+
+                            Look for the square marker image
+                            on the table
+
+                        </div>
+
+
                     </div>
 
-                    <span class="arrow">→</span>
+
+                    <span class="restaurant-arrow">
+                        →
+                    </span>
+
 
                 </a>
 
 
-                <a href="markerless.html" class="mode-card">
 
-                    <div class="mode-icon">
-                        🍔
+                <!-- =============================
+                     TABLE EXPERIENCE
+                     ============================= -->
+
+                <a
+                    href="markerless.html"
+                    class="restaurant-card"
+                >
+
+
+                    <div class="experience-label">
+                        TABLE
                     </div>
 
-                    <div class="mode-content">
-                        <h2>View Food on Table</h2>
+
+                    <div class="experience-content">
+
+
+                        <span class="experience-small">
+                            At your table
+                        </span>
+
+
+                        <h2>
+                            View on Your Table
+                        </h2>
+
 
                         <p>
-                            Place a virtual food item on a real
-                            table using augmented reality.
+
+                            Place a virtual dish on a real
+                            table, then rotate, resize and
+                            move it to explore the preview.
+
                         </p>
+
+
                     </div>
 
-                    <span class="arrow">→</span>
+
+                    <span class="restaurant-arrow">
+                        →
+                    </span>
+
 
                 </a>
 
+
             </div>
 
-            <p class="device-note">
-                Best experienced on a compatible mobile device.
+
+
+            <!-- =================================
+                 DEVICE NOTE
+                 ================================= -->
+
+            <p class="restaurant-note">
+
+                Use a compatible mobile device and allow
+                camera access when requested.
+
             </p>
+
 
         </section>
 
+
     </main>
 
+
 </body>
+
 </html>

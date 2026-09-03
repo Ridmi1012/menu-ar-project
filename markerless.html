@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -11,11 +12,15 @@
 
     <title>MenuAR | View Food on Table</title>
 
+
+    <!-- Main Styles -->
     <link
         rel="stylesheet"
-        href="css/style.css?v=3"
+        href="css/style.css?v=7"
     >
 
+
+    <!-- Three.js Import Map -->
     <script type="importmap">
         {
             "imports": {
@@ -25,55 +30,441 @@
         }
     </script>
 
+
+    <!-- =====================================
+         MARKERLESS AR PAGE POLISH
+         ===================================== -->
+
+    <style>
+
+        /* ==================================
+           SUPPORT MESSAGE
+           ================================== */
+
+        .xr-support-message {
+
+            max-width: 320px;
+
+            margin:
+                16px auto 0;
+
+            padding:
+                10px 12px;
+
+            border-radius:
+                10px;
+
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.10
+                );
+
+            color:
+                #ffffff;
+
+            font-size:
+                12px;
+
+            line-height:
+                1.45;
+
+        }
+
+
+        /* ==================================
+           SIZE SECTION
+           ================================== */
+
+        .size-section {
+
+            margin-top:
+                9px;
+
+        }
+
+
+        .size-title {
+
+            margin-bottom:
+                7px;
+
+            color:
+                #666666;
+
+            font-size:
+                11px;
+
+            font-weight:
+                700;
+
+            text-align:
+                center;
+
+        }
+
+
+        .size-selector {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap:
+                7px;
+
+        }
+
+
+        .size-option {
+
+            min-height:
+                38px;
+
+            padding:
+                7px 5px;
+
+            border:
+                1px solid
+                #dddddd;
+
+            border-radius:
+                10px;
+
+            background:
+                #ffffff;
+
+            color:
+                #555555;
+
+            font-size:
+                11px;
+
+            font-weight:
+                700;
+
+            cursor:
+                pointer;
+
+            transition:
+                transform 160ms ease,
+                border-color 180ms ease,
+                background-color 180ms ease,
+                color 180ms ease;
+
+        }
+
+
+        .size-option:active {
+
+            transform:
+                scale(0.96);
+
+        }
+
+
+        .size-option.active {
+
+            border-color:
+                #e85d04;
+
+            background:
+                #fff2e5;
+
+            color:
+                #d95400;
+
+        }
+
+
+        .size-option:disabled {
+
+            opacity:
+                0.4;
+
+            cursor:
+                not-allowed;
+
+        }
+
+
+        /* ==================================
+           AR PANEL ENTRANCE
+           ================================== */
+
+        .ar-controls.xr-panel-enter {
+
+            animation:
+                xrPanelEnter
+                320ms
+                ease-out
+                both;
+
+        }
+
+
+        @keyframes xrPanelEnter {
+
+            from {
+
+                opacity:
+                    0;
+
+                transform:
+                    translateY(18px);
+
+            }
+
+
+            to {
+
+                opacity:
+                    1;
+
+                transform:
+                    translateY(0);
+
+            }
+
+        }
+
+
+        /* ==================================
+           CONFIRM FEEDBACK
+           ================================== */
+
+        .confirm-button.confirmed-feedback {
+
+            animation:
+                confirmPulse
+                560ms
+                ease-out;
+
+        }
+
+
+        .status-message.confirmed-feedback {
+
+            animation:
+                statusPulse
+                650ms
+                ease-out;
+
+        }
+
+
+        @keyframes confirmPulse {
+
+            0% {
+
+                transform:
+                    scale(1);
+
+            }
+
+
+            40% {
+
+                transform:
+                    scale(1.05);
+
+            }
+
+
+            100% {
+
+                transform:
+                    scale(1);
+
+            }
+
+        }
+
+
+        @keyframes statusPulse {
+
+            0% {
+
+                transform:
+                    scale(1);
+
+            }
+
+
+            40% {
+
+                transform:
+                    scale(1.025);
+
+            }
+
+
+            100% {
+
+                transform:
+                    scale(1);
+
+            }
+
+        }
+
+
+        /* ==================================
+           XR COMPACT SIZE BUTTONS
+           ================================== */
+
+        body:xr-overlay .size-section,
+        body.xr-session-active .size-section {
+
+            margin-top:
+                7px;
+
+        }
+
+
+        body:xr-overlay .size-title,
+        body.xr-session-active .size-title {
+
+            margin-bottom:
+                5px;
+
+            font-size:
+                10px;
+
+        }
+
+
+        body:xr-overlay .size-option,
+        body.xr-session-active .size-option {
+
+            min-height:
+                34px;
+
+            font-size:
+                10px;
+
+        }
+
+
+        /* ==================================
+           REDUCED MOTION
+           ================================== */
+
+        @media
+        (prefers-reduced-motion: reduce) {
+
+            .ar-controls.xr-panel-enter,
+
+            .confirm-button.confirmed-feedback,
+
+            .status-message.confirmed-feedback {
+
+                animation:
+                    none;
+
+            }
+
+
+            .size-option {
+
+                transition:
+                    none;
+
+            }
+
+        }
+
+    </style>
+
 </head>
 
 
 <body class="markerless-page">
 
+
+    <!-- =====================================
+         NORMAL PAGE HEADER
+         ===================================== -->
+
     <header class="ar-header">
+
 
         <a
             href="index.html"
             class="back-button"
+            aria-label="Back to home"
         >
             ←
         </a>
 
+
         <div>
-            <h1>View Food on Table</h1>
+
+            <h1>
+                View Food on Table
+            </h1>
 
             <p>
-                Place food on a real surface
+                See how your dish looks before you order
             </p>
+
         </div>
+
 
     </header>
 
 
+
+    <!-- =====================================
+         MAIN AREA
+         ===================================== -->
+
     <main class="markerless-layout">
+
+
+        <!-- =================================
+             PRE-AR
+             ================================= -->
 
         <section
             class="xr-viewport"
             id="xrViewport"
         >
 
+
             <div
                 class="camera-message"
                 id="xrIntro"
             >
 
+
                 <span class="camera-icon">
                     📱
                 </span>
 
+
                 <h2>
-                    AR Surface View
+                    Find Your Table
                 </h2>
 
+
                 <p>
-                    Start AR, then move your tablet
-                    slowly across a well-lit table.
+                    Move your device slowly across
+                    a well-lit, textured table.
                 </p>
+
+
+                <p
+                    id="xrSupportMessage"
+                    class="xr-support-message"
+                    hidden
+                >
+                </p>
+
 
                 <button
                     type="button"
@@ -84,30 +475,47 @@
                     Loading...
                 </button>
 
+
             </div>
+
 
         </section>
 
 
+
+        <!-- =================================
+             AR CONTROL PANEL
+             ================================= -->
+
         <section
             class="ar-controls"
             id="arControls"
+            hidden
         >
+
+
+            <!-- Friendly status -->
 
             <p
                 class="status-message"
                 id="statusMessage"
             >
-                Loading MenuAR...
+                Ready
             </p>
 
 
+
+            <!-- =================================
+                 FOOD SELECTION
+                 ================================= -->
+
             <p class="control-label">
-                Select Food
+                Choose Your Dish
             </p>
 
 
             <div class="food-selector">
+
 
                 <button
                     type="button"
@@ -117,6 +525,7 @@
                     🍔 Burger
                 </button>
 
+
                 <button
                     type="button"
                     class="food-button"
@@ -125,15 +534,82 @@
                     🍕 Pizza
                 </button>
 
+
             </div>
 
+
+
+            <!-- =================================
+                 MANIPULATION CONTROLS
+                 ================================= -->
 
             <div
                 class="interaction-controls"
                 id="interactionControls"
             >
 
-                <div class="control-row">
+
+                <!-- =================================
+                     SIZE CHOICES
+                     ================================= -->
+
+                <div class="size-section">
+
+
+                    <p class="size-title">
+                        Preview Size
+                    </p>
+
+
+                    <div class="size-selector">
+
+
+                        <button
+                            type="button"
+                            class="size-option"
+                            id="sizeSmallBtn"
+                            disabled
+                        >
+                            Small
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="size-option active"
+                            id="sizeMediumBtn"
+                            disabled
+                        >
+                            Medium
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="size-option"
+                            id="sizeLargeBtn"
+                            disabled
+                        >
+                            Large
+                        </button>
+
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- =================================
+                     ROTATION
+                     ================================= -->
+
+                <div
+                    class="control-row"
+                    style="margin-top: 9px;"
+                >
+
 
                     <button
                         type="button"
@@ -141,8 +617,9 @@
                         id="rotateLeftBtn"
                         disabled
                     >
-                        ↶ Rotate Left
+                        ↶ Turn Left
                     </button>
+
 
                     <button
                         type="button"
@@ -150,34 +627,32 @@
                         id="rotateRightBtn"
                         disabled
                     >
-                        Rotate Right ↷
+                        Turn Right ↷
                     </button>
+
 
                 </div>
 
 
-                <div class="control-row">
 
-                    <button
-                        type="button"
-                        class="control-button"
-                        id="sizeDownBtn"
-                        disabled
-                    >
-                        − Size
-                    </button>
+                <!-- =================================
+                     MOVE
+                     ================================= -->
 
-                    <button
-                        type="button"
-                        class="control-button"
-                        id="sizeUpBtn"
-                        disabled
-                    >
-                        + Size
-                    </button>
+                <button
+                    type="button"
+                    class="move-button"
+                    id="moveBtn"
+                    disabled
+                >
+                    ↔ Move Dish
+                </button>
 
-                </div>
 
+
+                <!-- =================================
+                     REMOVE
+                     ================================= -->
 
                 <button
                     type="button"
@@ -185,9 +660,14 @@
                     id="removeBtn"
                     disabled
                 >
-                    Remove Food
+                    Remove Dish
                 </button>
 
+
+
+                <!-- =================================
+                     CONFIRM
+                     ================================= -->
 
                 <button
                     type="button"
@@ -198,26 +678,36 @@
                     Confirm Preview
                 </button>
 
+
             </div>
 
+
+
+            <!-- =================================
+                 EXIT
+                 ================================= -->
 
             <button
                 type="button"
                 class="exit-ar-button"
                 id="exitARBtn"
             >
-                Exit AR
+                Exit Preview
             </button>
 
+
         </section>
+
 
     </main>
 
 
     <script
         type="module"
-        src="js/markerless-ar.js?v=5"
-    ></script>
+        src="js/markerless-ar.js?v=10"
+    >
+    </script>
+
 
 </body>
 
