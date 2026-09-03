@@ -10,7 +10,13 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title> Menu | Interactive Menu</title>
+    <meta
+        name="theme-color"
+        content="#fffaf4"
+    >
+
+    <title>MenuAR | Interactive Menu</title>
+
 
     <link
         rel="stylesheet"
@@ -18,17 +24,25 @@
     >
 
 
-    <!-- =====================================
-         HOME PAGE ONLY STYLES
-         ===================================== -->
-
     <style>
 
         /* ==================================
-           RESTAURANT HOME
+           HOME PAGE
            ================================== */
 
+        body {
+
+            margin: 0;
+
+            background:
+                #fffaf4;
+
+        }
+
+
         .restaurant-home {
+
+            position: relative;
 
             min-height: 100vh;
 
@@ -36,16 +50,99 @@
             justify-content: center;
             align-items: center;
 
+            box-sizing: border-box;
+
             padding:
-                40px
+                42px
                 20px;
 
+            overflow: hidden;
+
             background:
+
                 radial-gradient(
-                    circle at top,
-                    #fffaf2 0%,
-                    #fffdf9 42%,
+                    circle at 15% 5%,
+                    rgba(
+                        255,
+                        215,
+                        177,
+                        0.42
+                    ),
+                    transparent 28%
+                ),
+
+                radial-gradient(
+                    circle at 92% 82%,
+                    rgba(
+                        255,
+                        236,
+                        214,
+                        0.55
+                    ),
+                    transparent 31%
+                ),
+
+                linear-gradient(
+                    180deg,
+                    #fff8f0 0%,
+                    #fffdf9 48%,
                     #ffffff 100%
+                );
+
+        }
+
+
+        /* Decorative soft circles */
+
+        .restaurant-home::before,
+        .restaurant-home::after {
+
+            content: "";
+
+            position: absolute;
+
+            border-radius: 50%;
+
+            pointer-events: none;
+
+            filter: blur(1px);
+
+        }
+
+
+        .restaurant-home::before {
+
+            width: 220px;
+            height: 220px;
+
+            top: -110px;
+            right: -80px;
+
+            background:
+                rgba(
+                    232,
+                    93,
+                    4,
+                    0.07
+                );
+
+        }
+
+
+        .restaurant-home::after {
+
+            width: 170px;
+            height: 170px;
+
+            bottom: -85px;
+            left: -75px;
+
+            background:
+                rgba(
+                    197,
+                    139,
+                    85,
+                    0.08
                 );
 
         }
@@ -53,8 +150,12 @@
 
         .restaurant-home .hero {
 
+            position: relative;
+
+            z-index: 2;
+
             width: 100%;
-            max-width: 560px;
+            max-width: 570px;
 
             text-align: center;
 
@@ -67,11 +168,11 @@
 
         .restaurant-wordmark {
 
-            margin-bottom: 28px;
+            margin-bottom: 29px;
 
             animation:
                 homeFadeDown
-                450ms
+                480ms
                 ease-out
                 both;
 
@@ -82,80 +183,153 @@
 
             margin: 0;
 
-            color: #d95605;
+            color:
+                #d95605;
 
-            font-size: 38px;
-            font-weight: 800;
+            font-size:
+                40px;
 
-            letter-spacing: -1px;
+            font-weight:
+                850;
+
+            line-height:
+                1;
+
+            letter-spacing:
+                -1.4px;
 
         }
 
 
         .restaurant-wordmark p {
 
-            margin-top: 4px;
+            margin:
+                7px
+                0
+                0;
 
-            color: #9b7a62;
+            color:
+                #a67b5b;
 
-            font-size: 10px;
-            font-weight: 700;
+            font-size:
+                10px;
 
-            letter-spacing: 3px;
+            font-weight:
+                800;
 
-            text-transform: uppercase;
+            letter-spacing:
+                3.1px;
+
+            text-transform:
+                uppercase;
 
         }
 
 
         /* ==================================
-           HERO COPY
+           HERO INTRO
            ================================== */
 
         .restaurant-eyebrow {
 
-            margin-bottom: 10px;
+            display: inline-flex;
 
-            color: #b78761;
+            align-items: center;
+            justify-content: center;
 
-            font-size: 11px;
-            font-weight: 700;
+            gap: 7px;
 
-            letter-spacing: 2px;
+            margin:
+                0
+                0
+                12px;
 
-            text-transform: uppercase;
+            padding:
+                7px
+                11px;
+
+            border:
+                1px solid
+                #f1dcc9;
+
+            border-radius:
+                999px;
+
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.75
+                );
+
+            color:
+                #a56334;
+
+            font-size:
+                10px;
+
+            font-weight:
+                800;
+
+            letter-spacing:
+                1.5px;
+
+            text-transform:
+                uppercase;
 
             animation:
                 homeFadeUp
-                450ms
-                80ms
+                460ms
+                90ms
                 ease-out
                 both;
 
         }
 
 
+        .restaurant-eyebrow-dot {
+
+            width: 5px;
+            height: 5px;
+
+            border-radius:
+                50%;
+
+            background:
+                #e85d04;
+
+        }
+
+
         .restaurant-heading {
 
-            max-width: 500px;
+            max-width:
+                520px;
 
             margin:
                 0 auto
-                14px;
+                15px;
 
-            color: #24201d;
+            color:
+                #261f1a;
 
-            font-size: 32px;
-            font-weight: 750;
+            font-size:
+                34px;
 
-            line-height: 1.12;
+            font-weight:
+                800;
 
-            letter-spacing: -0.8px;
+            line-height:
+                1.12;
+
+            letter-spacing:
+                -1px;
 
             animation:
                 homeFadeUp
-                450ms
-                130ms
+                460ms
+                140ms
                 ease-out
                 both;
 
@@ -164,22 +338,26 @@
 
         .restaurant-description {
 
-            max-width: 430px;
+            max-width:
+                450px;
 
             margin:
                 0 auto
                 34px;
 
-            color: #756d67;
+            color:
+                #716862;
 
-            font-size: 14px;
+            font-size:
+                14px;
 
-            line-height: 1.65;
+            line-height:
+                1.7;
 
             animation:
                 homeFadeUp
-                450ms
-                180ms
+                460ms
+                190ms
                 ease-out
                 both;
 
@@ -187,7 +365,7 @@
 
 
         /* ==================================
-           EXPERIENCE CARDS
+           EXPERIENCE OPTIONS
            ================================== */
 
         .restaurant-modes {
@@ -195,34 +373,45 @@
             display: flex;
             flex-direction: column;
 
-            gap: 14px;
+            gap:
+                14px;
 
         }
 
 
         .restaurant-card {
 
-            position: relative;
+            position:
+                relative;
 
-            width: 100%;
+            width:
+                100%;
 
-            display: flex;
-            align-items: center;
+            box-sizing:
+                border-box;
 
-            gap: 16px;
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            gap:
+                16px;
 
             padding:
-                20px
+                19px
                 18px;
 
-            overflow: hidden;
+            overflow:
+                hidden;
 
             border:
                 1px solid
-                #eee2d8;
+                #eee0d4;
 
             border-radius:
-                18px;
+                19px;
 
             background:
                 rgba(
@@ -242,18 +431,53 @@
                 left;
 
             box-shadow:
-                0 10px 28px
+                0 12px 30px
                 rgba(
-                    72,
-                    42,
+                    79,
+                    45,
                     18,
-                    0.055
+                    0.06
                 );
 
+            backdrop-filter:
+                blur(12px);
+
+            -webkit-backdrop-filter:
+                blur(12px);
+
             transition:
-                transform 220ms ease,
-                border-color 220ms ease,
-                box-shadow 220ms ease;
+                transform 200ms ease,
+                border-color 200ms ease,
+                box-shadow 200ms ease,
+                background-color 200ms ease;
+
+        }
+
+
+        .restaurant-card::before {
+
+            content: "";
+
+            position:
+                absolute;
+
+            top: 0;
+            left: 0;
+
+            width:
+                4px;
+
+            height:
+                100%;
+
+            background:
+                #e85d04;
+
+            opacity:
+                0;
+
+            transition:
+                opacity 200ms ease;
 
         }
 
@@ -262,8 +486,8 @@
 
             animation:
                 homeCardReveal
-                500ms
-                240ms
+                520ms
+                250ms
                 ease-out
                 both;
 
@@ -274,8 +498,8 @@
 
             animation:
                 homeCardReveal
-                500ms
-                320ms
+                520ms
+                330ms
                 ease-out
                 both;
 
@@ -291,37 +515,54 @@
 
 
         /* ==================================
-           CARD LABEL
+           CARD ICON
            ================================== */
 
         .experience-label {
 
-            width: 58px;
-            height: 58px;
+            width:
+                60px;
 
-            flex-shrink: 0;
+            height:
+                60px;
 
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            flex-shrink:
+                0;
+
+            display:
+                flex;
+
+            justify-content:
+                center;
+
+            align-items:
+                center;
 
             border-radius:
-                15px;
+                16px;
 
             background:
-                #fff3e7;
+                linear-gradient(
+                    145deg,
+                    #fff4e9,
+                    #ffead6
+                );
 
-            color:
-                #d95605;
+            box-shadow:
+                inset
+                0
+                0
+                0
+                1px
+                rgba(
+                    226,
+                    125,
+                    48,
+                    0.08
+                );
 
             font-size:
-                10px;
-
-            font-weight:
-                800;
-
-            letter-spacing:
-                1px;
+                27px;
 
         }
 
@@ -330,41 +571,52 @@
         .experience-label {
 
             background:
-                #f5efe8;
-
-            color:
-                #765d49;
+                linear-gradient(
+                    145deg,
+                    #f6f0ea,
+                    #eee5dd
+                );
 
         }
 
 
         /* ==================================
-           CARD TEXT
+           CARD CONTENT
            ================================== */
 
         .experience-content {
 
-            flex: 1;
+            flex:
+                1;
 
-            min-width: 0;
+            min-width:
+                0;
 
         }
 
 
         .experience-small {
 
-            display: block;
+            display:
+                block;
 
-            margin-bottom: 4px;
+            margin-bottom:
+                4px;
 
-            color: #ad8b72;
+            color:
+                #b07f5d;
 
-            font-size: 9px;
-            font-weight: 700;
+            font-size:
+                9px;
 
-            letter-spacing: 1.4px;
+            font-weight:
+                800;
 
-            text-transform: uppercase;
+            letter-spacing:
+                1.35px;
+
+            text-transform:
+                uppercase;
 
         }
 
@@ -377,90 +629,138 @@
                 6px;
 
             color:
-                #2a2521;
+                #29231f;
 
             font-size:
                 18px;
 
             font-weight:
-                750;
+                800;
+
+            line-height:
+                1.25;
 
         }
 
 
         .experience-content p {
 
-            margin: 0;
+            margin:
+                0;
 
             color:
-                #746d67;
+                #746b65;
 
             font-size:
                 12.5px;
 
             line-height:
-                1.5;
+                1.55;
 
         }
 
 
         /* ==================================
-           ARROW
-           ================================== */
-
-        .restaurant-arrow {
-
-            flex-shrink:
-                0;
-
-            color:
-                #d95605;
-
-            font-size:
-                22px;
-
-            transition:
-                transform
-                180ms
-                ease;
-
-        }
-
-
-        /* ==================================
-           MARKER HINT
+           MARKER TIP
            ================================== */
 
         .marker-hint {
 
-            display: flex;
-            align-items: center;
+            display:
+                flex;
 
-            gap: 6px;
+            align-items:
+                center;
 
-            margin-top: 8px;
+            gap:
+                7px;
 
-            color: #9a7961;
+            margin-top:
+                9px;
 
-            font-size: 10.5px;
+            color:
+                #9b7052;
 
-            font-weight: 600;
+            font-size:
+                10.5px;
+
+            font-weight:
+                650;
 
         }
 
 
         .marker-hint-dot {
 
-            width: 5px;
-            height: 5px;
+            width:
+                6px;
 
-            flex-shrink: 0;
+            height:
+                6px;
+
+            flex-shrink:
+                0;
 
             border-radius:
                 50%;
 
             background:
+                #e85d04;
+
+            box-shadow:
+                0 0 0 3px
+                rgba(
+                    232,
+                    93,
+                    4,
+                    0.08
+                );
+
+        }
+
+
+        /* ==================================
+           CARD ARROW
+           ================================== */
+
+        .restaurant-arrow {
+
+            width:
+                35px;
+
+            height:
+                35px;
+
+            flex-shrink:
+                0;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            border-radius:
+                50%;
+
+            background:
+                #fff4ea;
+
+            color:
                 #d95605;
+
+            font-size:
+                20px;
+
+            font-weight:
+                700;
+
+            transition:
+                transform 180ms ease,
+                background-color 180ms ease;
 
         }
 
@@ -471,30 +771,45 @@
 
         .restaurant-note {
 
-            margin-top:
-                28px;
+            max-width:
+                390px;
+
+            margin:
+                27px auto
+                0;
 
             color:
-                #a59a92;
+                #9e938b;
 
             font-size:
                 10.5px;
 
             line-height:
-                1.5;
+                1.55;
 
             animation:
                 homeFadeUp
                 450ms
-                400ms
+                420ms
                 ease-out
                 both;
 
         }
 
 
+        .restaurant-note strong {
+
+            color:
+                #7d7067;
+
+            font-weight:
+                700;
+
+        }
+
+
         /* ==================================
-           DESKTOP / HOVER DEVICES
+           HOVER
            ================================== */
 
         @media
@@ -505,19 +820,30 @@
             .restaurant-card:hover {
 
                 transform:
-                    translateY(-3px);
+                    translateY(-4px);
 
                 border-color:
                     #e7c4a8;
 
+                background:
+                    #ffffff;
+
                 box-shadow:
-                    0 15px 32px
+                    0 17px 38px
                     rgba(
-                        72,
-                        42,
+                        79,
+                        45,
                         18,
-                        0.09
+                        0.10
                     );
+
+            }
+
+
+            .restaurant-card:hover::before {
+
+                opacity:
+                    1;
 
             }
 
@@ -526,7 +852,10 @@
             .restaurant-arrow {
 
                 transform:
-                    translateX(4px);
+                    translateX(3px);
+
+                background:
+                    #ffe9d7;
 
             }
 
@@ -534,7 +863,7 @@
 
 
         /* ==================================
-           SMALL PHONE PORTRAIT
+           SMALL PHONE
            ================================== */
 
         @media
@@ -542,9 +871,13 @@
 
             .restaurant-home {
 
+                align-items:
+                    flex-start;
+
                 padding:
                     28px
-                    15px;
+                    15px
+                    26px;
 
             }
 
@@ -552,7 +885,7 @@
             .restaurant-wordmark {
 
                 margin-bottom:
-                    23px;
+                    24px;
 
             }
 
@@ -560,26 +893,50 @@
             .restaurant-wordmark h1 {
 
                 font-size:
-                    34px;
+                    36px;
 
             }
 
 
             .restaurant-heading {
 
+                max-width:
+                    350px;
+
                 font-size:
-                    28px;
+                    29px;
+
+                letter-spacing:
+                    -0.7px;
 
             }
 
 
             .restaurant-description {
 
+                max-width:
+                    350px;
+
                 margin-bottom:
                     27px;
 
                 font-size:
                     13px;
+
+                line-height:
+                    1.6;
+
+            }
+
+
+            .restaurant-eyebrow {
+
+                padding:
+                    6px
+                    10px;
+
+                font-size:
+                    9px;
 
             }
 
@@ -590,8 +947,11 @@
                     13px;
 
                 padding:
-                    17px
-                    15px;
+                    16px
+                    14px;
+
+                border-radius:
+                    16px;
 
             }
 
@@ -599,16 +959,16 @@
             .experience-label {
 
                 width:
-                    50px;
+                    52px;
 
                 height:
-                    50px;
+                    52px;
 
                 border-radius:
-                    13px;
+                    14px;
 
                 font-size:
-                    9px;
+                    23px;
 
             }
 
@@ -629,10 +989,102 @@
             }
 
 
+            .experience-small {
+
+                font-size:
+                    8.5px;
+
+            }
+
+
             .marker-hint {
+
+                margin-top:
+                    7px;
+
+                font-size:
+                    9.5px;
+
+                line-height:
+                    1.4;
+
+            }
+
+
+            .restaurant-arrow {
+
+                width:
+                    31px;
+
+                height:
+                    31px;
+
+                font-size:
+                    18px;
+
+            }
+
+
+            .restaurant-note {
+
+                margin-top:
+                    23px;
 
                 font-size:
                     10px;
+
+            }
+
+        }
+
+
+        /* ==================================
+           VERY SMALL PHONE
+           ================================== */
+
+        @media
+        (max-width: 360px) {
+
+            .restaurant-card {
+
+                align-items:
+                    flex-start;
+
+            }
+
+
+            .experience-label {
+
+                width:
+                    47px;
+
+                height:
+                    47px;
+
+                font-size:
+                    21px;
+
+            }
+
+
+            .restaurant-arrow {
+
+                width:
+                    28px;
+
+                height:
+                    28px;
+
+                font-size:
+                    16px;
+
+            }
+
+
+            .restaurant-heading {
+
+                font-size:
+                    27px;
 
             }
 
@@ -651,7 +1103,7 @@
                     0;
 
                 transform:
-                    translateY(-10px);
+                    translateY(-11px);
 
             }
 
@@ -677,7 +1129,7 @@
                     0;
 
                 transform:
-                    translateY(12px);
+                    translateY(13px);
 
             }
 
@@ -731,15 +1183,10 @@
         (prefers-reduced-motion: reduce) {
 
             .restaurant-wordmark,
-
             .restaurant-eyebrow,
-
             .restaurant-heading,
-
             .restaurant-description,
-
             .restaurant-card,
-
             .restaurant-note {
 
                 animation:
@@ -749,7 +1196,6 @@
 
 
             .restaurant-card,
-
             .restaurant-arrow {
 
                 transition:
@@ -774,7 +1220,7 @@
 
 
             <!-- =================================
-                 MENUAR BRAND
+                 BRAND
                  ================================= -->
 
             <div class="restaurant-wordmark">
@@ -792,49 +1238,58 @@
 
 
             <!-- =================================
-                 RESTAURANT INTRODUCTION
+                 INTRODUCTION
                  ================================= -->
 
-            <p class="restaurant-eyebrow">
-                Your table. Your choice.
-            </p>
+            <div class="restaurant-eyebrow">
+
+                <span class="restaurant-eyebrow-dot">
+                </span>
+
+                Explore before you order
+
+            </div>
 
 
             <h2 class="restaurant-heading">
-                See your dish before you order.
+                Preview your food before you order
             </h2>
 
 
             <p class="restaurant-description">
 
-                Explore our featured Burger and Pizza
-                before making your choice.
-
-                Choose how you would like to view your dish.
+                Discover our Burger and Pizza in a more
+                interactive way. Scan the menu for a quick
+                preview or place dishes directly on your
+                table to build your order.
 
             </p>
 
 
 
             <!-- =================================
-                 EXPERIENCES
+                 EXPERIENCE OPTIONS
                  ================================= -->
 
             <div class="restaurant-modes">
 
 
                 <!-- =============================
-                     MENU MARKER EXPERIENCE
+                     SCAN MENU
                      ============================= -->
 
                 <a
                     href="marker.html"
                     class="restaurant-card"
+                    aria-label="Scan the menu to preview food"
                 >
 
 
-                    <div class="experience-label">
-                        SCAN
+                    <div
+                        class="experience-label"
+                        aria-hidden="true"
+                    >
+                        📷
                     </div>
 
 
@@ -842,7 +1297,7 @@
 
 
                         <span class="experience-small">
-                            From the menu
+                            Quick Preview
                         </span>
 
 
@@ -854,7 +1309,8 @@
                         <p>
 
                             Point your camera at the marker
-                            image on the table to reveal menu items.
+                            on the menu to reveal a 3D preview
+                            of the available dishes.
 
                         </p>
 
@@ -864,8 +1320,7 @@
                             <span class="marker-hint-dot">
                             </span>
 
-                            Look for the square marker image
-                            on the table
+                            Look for the square marker on the menu
 
                         </div>
 
@@ -873,7 +1328,10 @@
                     </div>
 
 
-                    <span class="restaurant-arrow">
+                    <span
+                        class="restaurant-arrow"
+                        aria-hidden="true"
+                    >
                         →
                     </span>
 
@@ -889,25 +1347,36 @@
                 <a
                     href="markerless.html"
                     class="restaurant-card"
+                    aria-label="Preview food and build your order on the table"
                 >
 
 
-                    <div class="experience-label">
-                        TABLE
+                    <div
+                        class="experience-label"
+                        aria-hidden="true"
+                    >
+                        🍽️
                     </div>
 
 
                     <div class="experience-content">
 
+
+                        <span class="experience-small">
+                            Table Experience
+                        </span>
+
+
                         <h2>
-                            View Your Order on Your Table
+                            Build Your Order on the Table
                         </h2>
 
 
                         <p>
 
-                            Place a virtual dish on the real
-                            table, and create your own order.
+                            Place dishes on your real table,
+                            choose a size, arrange your selections
+                            and confirm your order when you are ready.
 
                         </p>
 
@@ -915,7 +1384,10 @@
                     </div>
 
 
-                    <span class="restaurant-arrow">
+                    <span
+                        class="restaurant-arrow"
+                        aria-hidden="true"
+                    >
                         →
                     </span>
 
@@ -933,8 +1405,9 @@
 
             <p class="restaurant-note">
 
-                Use a compatible device and allow
-                camera access when requested.
+                For the best experience, use a compatible
+                mobile device and <strong>allow camera access</strong>
+                when requested.
 
             </p>
 
