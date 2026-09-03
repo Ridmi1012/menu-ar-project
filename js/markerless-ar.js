@@ -46,11 +46,14 @@ const rotateLeftBtn =
 const rotateRightBtn =
     document.getElementById("rotateRightBtn");
 
-const sizeDownBtn =
-    document.getElementById("sizeDownBtn");
+const sizeSmallBtn =
+    document.getElementById("sizeSmallBtn");
 
-const sizeUpBtn =
-    document.getElementById("sizeUpBtn");
+const sizeMediumBtn =
+    document.getElementById("sizeMediumBtn");
+
+const sizeLargeBtn =
+    document.getElementById("sizeLargeBtn");
 
 const moveBtn =
     document.getElementById("moveBtn");
@@ -64,6 +67,55 @@ const confirmBtn =
 
 
 // ==========================================
+// SIZE PRESETS
+// ==========================================
+//
+// These are visual preview categories.
+//
+// Do not describe them as exact restaurant
+// dimensions unless the restaurant provides
+// actual serving measurements.
+// ==========================================
+
+const SIZE_PRESETS = {
+
+    small: {
+
+        label:
+            "Small",
+
+        factor:
+            0.78
+
+    },
+
+
+    medium: {
+
+        label:
+            "Medium",
+
+        factor:
+            1.0
+
+    },
+
+
+    large: {
+
+        label:
+            "Large",
+
+        factor:
+            1.30
+
+    }
+
+};
+
+
+
+// ==========================================
 // APPLICATION STATE
 // ==========================================
 
@@ -71,6 +123,9 @@ const menuARState = {
 
     selectedFood:
         "burger",
+
+    selectedSize:
+        "medium",
 
     appState:
         "INITIALIZING",
@@ -87,9 +142,6 @@ const menuARState = {
     xrSupported:
         false,
 
-    scaleFactor:
-        1,
-
     currentRotation:
         0
 
@@ -101,9 +153,12 @@ const menuARState = {
 // MODEL CONFIGURATION
 // ==========================================
 //
-// Increased after real mobile testing.
-// These are starting real-world calibration
-// values for the new realistic models.
+// Increased from the previous calibration.
+//
+// Medium is now the default.
+//
+// Small and Large are calculated using
+// SIZE_PRESETS.
 // ==========================================
 
 const MODEL_CONFIG = {
@@ -115,10 +170,16 @@ const MODEL_CONFIG = {
             "assets/models/burger.glb",
 
         baseScale:
-            0.60,
+            0.72,
 
         surfaceOffset:
-            0.018
+            0.018,
+
+        shadowWidth:
+            0.28,
+
+        shadowDepth:
+            0.23
 
     },
 
@@ -129,10 +190,16 @@ const MODEL_CONFIG = {
             "assets/models/pizza.glb",
 
         baseScale:
-            0.53,
+            0.64,
 
         surfaceOffset:
-            0.014
+            0.014,
+
+        shadowWidth:
+            0.38,
+
+        shadowDepth:
+            0.35
 
     }
 
@@ -149,18 +216,6 @@ const ROTATION_STEP =
     THREE.MathUtils.degToRad(15);
 
 
-const SCALE_STEP =
-    0.15;
-
-
-const MIN_SCALE_FACTOR =
-    0.55;
-
-
-const MAX_SCALE_FACTOR =
-    2.0;
-
-
 const UI_SELECT_GUARD_MS =
     650;
 
@@ -170,24 +225,32 @@ const MOVE_ACTIVATION_DELAY_MS =
 
 
 
+let ignoreXRSelectUntil =
+    0;
+
+
+let moveModeStartedAt =
+    0;
+
+
+
 // ==========================================
 // PLACEMENT ANIMATION
 // ==========================================
+//
+// More noticeable than the previous version.
+// ==========================================
 
-const PLACEMENT_ANIMATION_DURATION =
-    420;
+const PLACEMENT_DURATION =
+    560;
 
 
 const PLACEMENT_START_SCALE_FACTOR =
-    0.78;
+    0.45;
 
 
 const PLACEMENT_LIFT =
-    0.055;
-
-
-const SHADOW_FINAL_OPACITY =
-    0.26;
+    0.10;
 
 
 
@@ -201,15 +264,11 @@ let confirmationAnimation =
 
 
 // ==========================================
-// UI GUARD STATE
+// SHADOW SETTINGS
 // ==========================================
 
-let ignoreXRSelectUntil =
-    0;
-
-
-let moveModeStartedAt =
-    0;
+const SHADOW_OPACITY =
+    0.44;
 
 
 
@@ -226,8 +285,6 @@ let renderer;
 let reticle;
 
 let controller;
-
-let directionalLight;
 
 let shadowReceiver;
 
@@ -250,7 +307,7 @@ let referenceSpace =
 
 
 // ==========================================
-// WEB AUDIO
+// AUDIO
 // ==========================================
 
 let audioContext =
@@ -271,6 +328,114 @@ const modelTemplates = {
         null
 
 };
+
+
+
+// ==========================================
+// CREATE SOFT SHADOW TEXTURE
+// ==========================================
+//
+// A radial-gradient texture gives a much
+// clearer contact shadow than the previous
+// real-time ShadowMaterial approach.
+//
+// No image file is required.
+// ==========================================
+
+function createSoftShadowTexture() {
+
+
+    const canvas =
+        document.createElement(
+            "canvas"
+        );
+
+
+    canvas.width =
+        256;
+
+
+    canvas.height =
+        256;
+
+
+
+    const context =
+        canvas.getContext(
+            "2d"
+        );
+
+
+
+    const gradient =
+        context.createRadialGradient(
+
+            128,
+            128,
+            10,
+
+            128,
+            128,
+            118
+
+        );
+
+
+
+    gradient.addColorStop(
+        0,
+        "rgba(0, 0, 0, 0.58)"
+    );
+
+
+    gradient.addColorStop(
+        0.35,
+        "rgba(0, 0, 0, 0.34)"
+    );
+
+
+    gradient.addColorStop(
+        0.72,
+        "rgba(0, 0, 0, 0.12)"
+    );
+
+
+    gradient.addColorStop(
+        1,
+        "rgba(0, 0, 0, 0)"
+    );
+
+
+
+    context.fillStyle =
+        gradient;
+
+
+
+    context.fillRect(
+        0,
+        0,
+        256,
+        256
+    );
+
+
+
+    const texture =
+        new THREE.CanvasTexture(
+            canvas
+        );
+
+
+
+    texture.colorSpace =
+        THREE.SRGBColorSpace;
+
+
+
+    return texture;
+
+}
 
 
 
@@ -345,15 +510,19 @@ function initThreeJS() {
 
 
     // ======================================
-    // SHADOW SUPPORT
+    // PBR DISPLAY QUALITY
     // ======================================
 
-    renderer.shadowMap.enabled =
-        true;
+    renderer.outputColorSpace =
+        THREE.SRGBColorSpace;
 
 
-    renderer.shadowMap.type =
-        THREE.PCFSoftShadowMap;
+    renderer.toneMapping =
+        THREE.ACESFilmicToneMapping;
+
+
+    renderer.toneMappingExposure =
+        1.08;
 
 
 
@@ -378,9 +547,9 @@ function initThreeJS() {
 
             0xffffff,
 
-            0x666666,
+            0x777777,
 
-            2.2
+            1.8
 
         );
 
@@ -391,19 +560,14 @@ function initThreeJS() {
 
 
 
-    directionalLight =
+    const directionalLight =
         new THREE.DirectionalLight(
 
             0xffffff,
 
-            1.7
+            2.0
 
         );
-
-
-
-    directionalLight.castShadow =
-        true;
 
 
 
@@ -419,77 +583,22 @@ function initThreeJS() {
 
 
 
-    directionalLight.shadow.mapSize.width =
-        1024;
-
-
-    directionalLight.shadow.mapSize.height =
-        1024;
-
-
-
-    directionalLight.shadow.camera.near =
-        0.1;
-
-
-    directionalLight.shadow.camera.far =
-        6;
-
-
-
-    directionalLight.shadow.camera.left =
-        -1.2;
-
-
-    directionalLight.shadow.camera.right =
-        1.2;
-
-
-    directionalLight.shadow.camera.top =
-        1.2;
-
-
-    directionalLight.shadow.camera.bottom =
-        -1.2;
-
-
-
-    directionalLight.shadow.bias =
-        -0.0004;
-
-
-    directionalLight.shadow.normalBias =
-        0.015;
-
-
-
     scene.add(
         directionalLight
     );
 
 
 
-    scene.add(
-        directionalLight.target
-    );
-
-
-
     // ======================================
-    // CONTACT SHADOW RECEIVER
-    // ======================================
-    //
-    // This is a transparent virtual plane.
-    // Only the model's soft shadow is visible
-    // over the real camera image.
+    // SOFT CONTACT SHADOW
     // ======================================
 
     const shadowGeometry =
         new THREE.PlaneGeometry(
 
-            0.75,
+            1,
 
-            0.75
+            1
 
         );
 
@@ -502,16 +611,22 @@ function initThreeJS() {
 
 
     const shadowMaterial =
-        new THREE.ShadowMaterial({
+        new THREE.MeshBasicMaterial({
 
-            color:
-                0x000000,
-
-            opacity:
-                SHADOW_FINAL_OPACITY,
+            map:
+                createSoftShadowTexture(),
 
             transparent:
-                true
+                true,
+
+            opacity:
+                SHADOW_OPACITY,
+
+            depthWrite:
+                false,
+
+            side:
+                THREE.DoubleSide
 
         });
 
@@ -528,12 +643,13 @@ function initThreeJS() {
 
 
 
-    shadowReceiver.receiveShadow =
-        true;
-
-
     shadowReceiver.visible =
         false;
+
+
+
+    shadowReceiver.renderOrder =
+        1;
 
 
 
@@ -639,7 +755,7 @@ function initThreeJS() {
 
 
 // ==========================================
-// AUDIO INITIALIZATION
+// AUDIO
 // ==========================================
 
 function ensureAudioContext() {
@@ -840,13 +956,28 @@ function playPlacementSound() {
 
     playTone(
 
-        190,
+        220,
 
-        115,
+        125,
 
-        0.14,
+        0.18,
 
-        0.028
+        0.045
+
+    );
+
+
+    playTone(
+
+        420,
+
+        320,
+
+        0.10,
+
+        0.018,
+
+        0.03
 
     );
 
@@ -867,11 +998,9 @@ function playConfirmationSound() {
 
         523,
 
-        0.11,
+        0.12,
 
-        0.022,
-
-        0
+        0.035
 
     );
 
@@ -882,9 +1011,9 @@ function playConfirmationSound() {
 
         659,
 
-        0.16,
+        0.17,
 
-        0.024,
+        0.038,
 
         0.09
 
@@ -964,32 +1093,41 @@ function getFoodName(food) {
 
 
 // ==========================================
-// MODEL SHADOW PREPARATION
+// CURRENT SIZE
 // ==========================================
 
-function prepareModelForAR(model) {
+function getCurrentSizePreset() {
 
 
-    model.traverse(
+    return SIZE_PRESETS[
+        menuARState.selectedSize
+    ];
 
-        (child) => {
-
-
-            if (
-                child.isMesh
-            ) {
+}
 
 
-                child.castShadow =
-                    true;
+
+// ==========================================
+// CURRENT MODEL SCALE
+// ==========================================
+
+function getCurrentModelScale(food) {
 
 
-                child.receiveShadow =
-                    false;
+    const config =
+        MODEL_CONFIG[food];
 
-            }
 
-        }
+    const size =
+        getCurrentSizePreset();
+
+
+
+    return (
+
+        config.baseScale *
+
+        size.factor
 
     );
 
@@ -1033,12 +1171,6 @@ function loadModel(food) {
 
                     modelTemplates[food] =
                         gltf.scene;
-
-
-
-                    prepareModelForAR(
-                        modelTemplates[food]
-                    );
 
 
 
@@ -1123,7 +1255,7 @@ async function loadModels() {
 
 
         showSupportMessage(
-            "The 3D food models could not be loaded. Refresh the page and try again."
+            "The food previews could not be loaded. Refresh the page and try again."
         );
 
 
@@ -1140,47 +1272,315 @@ async function loadModels() {
 
 
 // ==========================================
-// FOOD BUTTON APPEARANCE
+// FOOD BUTTON STATE
 // ==========================================
 
 function updateFoodButtons(food) {
 
 
-    if (
-        food === "burger"
-    ) {
+    const burgerActive =
+        food === "burger";
 
 
-        burgerBtn.classList.add(
-            "active"
-        );
+
+    burgerBtn.classList.toggle(
+        "active",
+        burgerActive
+    );
 
 
-        pizzaBtn.classList.remove(
-            "active"
-        );
+    pizzaBtn.classList.toggle(
+        "active",
+        !burgerActive
+    );
 
 
-    } else {
+
+    burgerBtn.setAttribute(
+        "aria-pressed",
+        burgerActive
+    );
 
 
-        pizzaBtn.classList.add(
-            "active"
-        );
-
-
-        burgerBtn.classList.remove(
-            "active"
-        );
-
-    }
+    pizzaBtn.setAttribute(
+        "aria-pressed",
+        !burgerActive
+    );
 
 }
 
 
 
 // ==========================================
-// SELECT FOOD
+// SIZE BUTTON STATE
+// ==========================================
+
+function updateSizeButtons() {
+
+
+    const selected =
+        menuARState.selectedSize;
+
+
+
+    const buttons = {
+
+        small:
+            sizeSmallBtn,
+
+        medium:
+            sizeMediumBtn,
+
+        large:
+            sizeLargeBtn
+
+    };
+
+
+
+    Object.entries(
+        buttons
+    ).forEach(
+
+        (
+            [
+                key,
+                button
+            ]
+        ) => {
+
+
+            const active =
+                key === selected;
+
+
+
+            button.classList.toggle(
+                "active",
+                active
+            );
+
+
+            button.setAttribute(
+                "aria-pressed",
+                active
+            );
+
+        }
+
+    );
+
+}
+
+
+
+// ==========================================
+// UPDATE SHADOW SIZE
+// ==========================================
+
+function updateShadowAppearance() {
+
+
+    if (
+        !shadowReceiver
+    ) {
+
+        return;
+
+    }
+
+
+
+    const config =
+        MODEL_CONFIG[
+            menuARState.selectedFood
+        ];
+
+
+
+    const size =
+        getCurrentSizePreset();
+
+
+
+    shadowReceiver.scale.set(
+
+        config.shadowWidth *
+        size.factor,
+
+        config.shadowDepth *
+        size.factor,
+
+        1
+
+    );
+
+
+
+    shadowReceiver.material.opacity =
+        SHADOW_OPACITY;
+
+}
+
+
+
+// ==========================================
+// POSITION SHADOW AT HIT TEST
+// ==========================================
+
+function positionShadowFromReticle() {
+
+
+    if (
+        !shadowReceiver
+    ) {
+
+        return;
+
+    }
+
+
+
+    const position =
+        new THREE.Vector3();
+
+
+
+    const quaternion =
+        new THREE.Quaternion();
+
+
+
+    const ignoredScale =
+        new THREE.Vector3();
+
+
+
+    reticle.matrix.decompose(
+
+        position,
+
+        quaternion,
+
+        ignoredScale
+
+    );
+
+
+
+    shadowReceiver.position.copy(
+        position
+    );
+
+
+
+    shadowReceiver.quaternion.copy(
+        quaternion
+    );
+
+
+
+    const surfaceNormal =
+        new THREE.Vector3(
+            0,
+            1,
+            0
+        );
+
+
+
+    surfaceNormal.applyQuaternion(
+        quaternion
+    );
+
+
+
+    shadowReceiver.position.addScaledVector(
+
+        surfaceNormal,
+
+        0.003
+
+    );
+
+
+
+    updateShadowAppearance();
+
+
+
+    shadowReceiver.visible =
+        true;
+
+}
+
+
+
+// ==========================================
+// SELECT SIZE
+// ==========================================
+
+function selectPreviewSize(sizeKey) {
+
+
+    if (
+
+        menuARState.appState !==
+            "PLACED" ||
+
+        !menuARState.placedObject
+
+    ) {
+
+        return;
+
+    }
+
+
+
+    menuARState.selectedSize =
+        sizeKey;
+
+
+
+    updateSizeButtons();
+
+
+
+    const scale =
+        getCurrentModelScale(
+            menuARState.selectedFood
+        );
+
+
+
+    menuARState.placedObject.scale.setScalar(
+        scale
+    );
+
+
+
+    updateShadowAppearance();
+
+
+
+    const sizeName =
+        getCurrentSizePreset().label;
+
+
+
+    setStatus(
+
+        `${getFoodName(menuARState.selectedFood)} size changed to ${sizeName}.`
+
+    );
+
+}
+
+
+
+// ==========================================
+// SELECT / CHANGE FOOD
 // ==========================================
 
 function selectFood(food) {
@@ -1236,23 +1636,9 @@ function selectFood(food) {
         ) {
 
 
-            if (
-                menuARState.appState ===
-                "MOVE_MODE"
-            ) {
-
-
-                setMoveModeStatus();
-
-
-            } else {
-
-
-                setStatus(
-                    `${foodName} is already displayed.`
-                );
-
-            }
+            setStatus(
+                `${foodName} is already on your table.`
+            );
 
 
             return;
@@ -1289,7 +1675,9 @@ function selectFood(food) {
 
 
             setStatus(
-                `${foodName} selected. Tap the white circle to place it.`
+
+                `Great — tap the white circle to place your ${foodName}.`
+
             );
 
 
@@ -1297,154 +1685,14 @@ function selectFood(food) {
 
 
             setStatus(
-                `${foodName} selected. Move your device slowly across the table.`
+
+                `${foodName} selected. Move your device slowly over the table.`
+
             );
 
         }
 
     }
-
-}
-
-
-
-// ==========================================
-// UPDATE SHADOW LIGHT
-// ==========================================
-
-function updateLightForObject(object) {
-
-
-    if (
-
-        !object ||
-
-        !directionalLight
-
-    ) {
-
-        return;
-
-    }
-
-
-
-    directionalLight.target.position.copy(
-        object.position
-    );
-
-
-
-    directionalLight.position.copy(
-        object.position
-    );
-
-
-
-    directionalLight.position.add(
-
-        new THREE.Vector3(
-            0.9,
-            1.8,
-            0.8
-        )
-
-    );
-
-
-
-    directionalLight.target.updateMatrixWorld();
-
-}
-
-
-
-// ==========================================
-// POSITION SHADOW FROM RETICLE
-// ==========================================
-
-function positionShadowFromReticle() {
-
-
-    if (
-        !shadowReceiver
-    ) {
-
-        return;
-
-    }
-
-
-
-    const position =
-        new THREE.Vector3();
-
-
-
-    const quaternion =
-        new THREE.Quaternion();
-
-
-
-    const ignoredScale =
-        new THREE.Vector3();
-
-
-
-    reticle.matrix.decompose(
-
-        position,
-
-        quaternion,
-
-        ignoredScale
-
-    );
-
-
-
-    shadowReceiver.position.copy(
-        position
-    );
-
-
-
-    shadowReceiver.quaternion.copy(
-        quaternion
-    );
-
-
-
-    // Slight offset above surface
-    // helps avoid visual z-fighting.
-
-    const surfaceNormal =
-        new THREE.Vector3(
-            0,
-            1,
-            0
-        );
-
-
-
-    surfaceNormal.applyQuaternion(
-        quaternion
-    );
-
-
-
-    shadowReceiver.position.addScaledVector(
-
-        surfaceNormal,
-
-        0.002
-
-    );
-
-
-
-    shadowReceiver.visible =
-        true;
 
 }
 
@@ -1513,11 +1761,6 @@ function replacePlacedFood(
 
 
 
-    const savedScaleFactor =
-        menuARState.scaleFactor;
-
-
-
     scene.remove(
         oldModel
     );
@@ -1526,12 +1769,6 @@ function replacePlacedFood(
 
     const newModel =
         template.clone(true);
-
-
-
-    prepareModelForAR(
-        newModel
-    );
 
 
 
@@ -1557,9 +1794,9 @@ function replacePlacedFood(
 
     newModel.scale.setScalar(
 
-        newConfig.baseScale *
-
-        savedScaleFactor
+        getCurrentModelScale(
+            newFood
+        )
 
     );
 
@@ -1576,46 +1813,25 @@ function replacePlacedFood(
 
 
 
-    menuARState.scaleFactor =
-        savedScaleFactor;
+    updateShadowAppearance();
 
 
 
-    updateLightForObject(
-        newModel
+    const sizeName =
+        getCurrentSizePreset().label;
+
+
+
+    menuARState.appState =
+        "PLACED";
+
+
+
+    setStatus(
+
+        `Changed to ${getFoodName(newFood)} — ${sizeName} size kept.`
+
     );
-
-
-
-    const foodName =
-        getFoodName(
-            newFood
-        );
-
-
-
-    if (
-        menuARState.appState ===
-        "MOVE_MODE"
-    ) {
-
-
-        setMoveModeStatus();
-
-
-    } else {
-
-
-        menuARState.appState =
-            "PLACED";
-
-
-
-        setStatus(
-            `Changed to ${foodName}. Position, rotation and size preserved.`
-        );
-
-    }
 
 }
 
@@ -1643,7 +1859,7 @@ async function checkXRSupport() {
 
 
         showSupportMessage(
-            "Markerless AR is not supported on this device or browser."
+            "Table preview is not supported on this device or browser."
         );
 
 
@@ -1694,7 +1910,7 @@ async function checkXRSupport() {
 
 
             showSupportMessage(
-                "Markerless AR is not supported on this device or browser."
+                "Table preview is not supported on this device or browser."
             );
 
         }
@@ -1724,7 +1940,7 @@ async function checkXRSupport() {
 
 
         showSupportMessage(
-            "Unable to confirm markerless AR support on this device."
+            "Unable to check table-preview support on this device."
         );
 
 
@@ -1836,7 +2052,7 @@ function showARInterface() {
 
 
 // ==========================================
-// PRE-AR INTERFACE
+// SHOW PRE-AR
 // ==========================================
 
 function showPreARInterface() {
@@ -1860,7 +2076,7 @@ function showPreARInterface() {
 
 
 // ==========================================
-// START AR SESSION
+// START AR
 // ==========================================
 
 async function startARSession() {
@@ -1886,7 +2102,6 @@ async function startARSession() {
 
     startARBtn.disabled =
         true;
-
 
 
     startARBtn.textContent =
@@ -2001,17 +2216,20 @@ async function startARSession() {
             "SCANNING";
 
 
-
         menuARState.surfaceFound =
             false;
 
 
-        menuARState.scaleFactor =
-            1;
-
-
         menuARState.currentRotation =
             0;
+
+
+        menuARState.selectedSize =
+            "medium";
+
+
+
+        updateSizeButtons();
 
 
 
@@ -2036,7 +2254,9 @@ async function startARSession() {
 
 
         setStatus(
-            `${getFoodName(menuARState.selectedFood)} selected. Move your device slowly across the table.`
+
+            `Move your device slowly over the table to find a clear spot for your ${getFoodName(menuARState.selectedFood)}.`
+
         );
 
 
@@ -2066,7 +2286,7 @@ async function startARSession() {
 
 
             showSupportMessage(
-                "AR permission was not granted. Allow camera and AR access, then try again."
+                "Camera permission was not granted. Allow access and try again."
             );
 
 
@@ -2100,9 +2320,8 @@ async function startARSession() {
 
 
             showSupportMessage(
-                "This device or browser does not support the markerless AR features required by MenuAR."
+                "This device does not support the table-preview features required by MenuAR."
             );
-
 
 
             startARBtn.disabled =
@@ -2120,9 +2339,8 @@ async function startARSession() {
 
 
         showSupportMessage(
-            "Markerless AR could not start. Check browser permissions and try again."
+            "The table preview could not start. Check permissions and try again."
         );
-
 
 
         startARBtn.disabled =
@@ -2247,11 +2465,15 @@ function enableManipulationControls() {
         false;
 
 
-    sizeDownBtn.disabled =
+    sizeSmallBtn.disabled =
         false;
 
 
-    sizeUpBtn.disabled =
+    sizeMediumBtn.disabled =
+        false;
+
+
+    sizeLargeBtn.disabled =
         false;
 
 
@@ -2269,7 +2491,7 @@ function enableManipulationControls() {
 
 
     moveBtn.textContent =
-        "↔ Move";
+        "↔ Move Dish";
 
 
     moveBtn.classList.remove(
@@ -2300,11 +2522,15 @@ function disableManipulationControls() {
         true;
 
 
-    sizeDownBtn.disabled =
+    sizeSmallBtn.disabled =
         true;
 
 
-    sizeUpBtn.disabled =
+    sizeMediumBtn.disabled =
+        true;
+
+
+    sizeLargeBtn.disabled =
         true;
 
 
@@ -2338,11 +2564,15 @@ function setMoveModeControls() {
         true;
 
 
-    sizeDownBtn.disabled =
+    sizeSmallBtn.disabled =
         true;
 
 
-    sizeUpBtn.disabled =
+    sizeMediumBtn.disabled =
+        true;
+
+
+    sizeLargeBtn.disabled =
         true;
 
 
@@ -2360,7 +2590,7 @@ function setMoveModeControls() {
 
 
     moveBtn.textContent =
-        "Move Mode Active";
+        "Choose New Spot";
 
 
     moveBtn.classList.add(
@@ -2387,6 +2617,15 @@ function resetControls() {
 
 
 
+    menuARState.selectedSize =
+        "medium";
+
+
+
+    updateSizeButtons();
+
+
+
     disableManipulationControls();
 
 
@@ -2396,7 +2635,7 @@ function resetControls() {
 
 
     moveBtn.textContent =
-        "↔ Move";
+        "↔ Move Dish";
 
 
     moveBtn.classList.remove(
@@ -2409,11 +2648,9 @@ function resetControls() {
         "Confirm Preview";
 
 
-
     confirmBtn.classList.remove(
         "confirmed-feedback"
     );
-
 
 
     statusMessage.classList.remove(
@@ -2458,7 +2695,6 @@ function onARSessionEnded() {
         null;
 
 
-
     reticle.visible =
         false;
 
@@ -2470,10 +2706,6 @@ function onARSessionEnded() {
 
     menuARState.surfaceFound =
         false;
-
-
-    menuARState.scaleFactor =
-        1;
 
 
     menuARState.currentRotation =
@@ -2500,6 +2732,63 @@ function onARSessionEnded() {
 
 
     updateStartButton();
+
+}
+
+
+
+// ==========================================
+// EASING
+// ==========================================
+
+function easeOutCubic(t) {
+
+
+    return (
+
+        1 -
+
+        Math.pow(
+            1 - t,
+            3
+        )
+
+    );
+
+}
+
+
+
+function easeOutBack(t) {
+
+
+    const c1 =
+        1.70158;
+
+
+    const c3 =
+        c1 +
+        1;
+
+
+
+    return (
+
+        1 +
+
+        c3 *
+        Math.pow(
+            t - 1,
+            3
+        ) +
+
+        c1 *
+        Math.pow(
+            t - 1,
+            2
+        )
+
+    );
 
 }
 
@@ -2575,7 +2864,7 @@ function startPlacementAnimation(
             null,
 
         duration:
-            PLACEMENT_ANIMATION_DURATION,
+            PLACEMENT_DURATION,
 
         startScale:
             startScale,
@@ -2595,60 +2884,8 @@ function startPlacementAnimation(
 
 
     setStatus(
-        `Placing ${getFoodName(food)}...`
-    );
 
-}
-
-
-
-// ==========================================
-// EASING
-// ==========================================
-
-function easeOutCubic(t) {
-
-
-    return (
-        1 -
-        Math.pow(
-            1 - t,
-            3
-        )
-    );
-
-}
-
-
-
-function easeOutBack(t) {
-
-
-    const c1 =
-        1.70158;
-
-
-    const c3 =
-        c1 +
-        1;
-
-
-
-    return (
-
-        1 +
-
-        c3 *
-        Math.pow(
-            t - 1,
-            3
-        ) +
-
-        c1 *
-        Math.pow(
-            t - 1,
-            2
-        )
+        `Serving your ${getFoodName(food)} preview...`
 
     );
 
@@ -2765,7 +3002,7 @@ function updatePlacementAnimation(timestamp) {
 
     shadowReceiver.material.opacity =
 
-        SHADOW_FINAL_OPACITY *
+        SHADOW_OPACITY *
 
         positionEase;
 
@@ -2794,7 +3031,7 @@ function updatePlacementAnimation(timestamp) {
 
 
         shadowReceiver.material.opacity =
-            SHADOW_FINAL_OPACITY;
+            SHADOW_OPACITY;
 
 
 
@@ -2825,8 +3062,14 @@ function updatePlacementAnimation(timestamp) {
 
 
 
+        updateSizeButtons();
+
+
+
         setStatus(
-            `${getFoodName(completedFood)} placed. Rotate, resize, move, change dish, remove or confirm.`
+
+            `${getFoodName(completedFood)} is on your table — choose Small, Medium or Large.`
+
         );
 
 
@@ -2890,12 +3133,6 @@ function placeSelectedFood() {
 
 
 
-    prepareModelForAR(
-        placedModel
-    );
-
-
-
     const placementPosition =
         new THREE.Vector3();
 
@@ -2951,8 +3188,10 @@ function placeSelectedFood() {
 
 
 
-    menuARState.scaleFactor =
-        1;
+    const finalScale =
+        getCurrentModelScale(
+            food
+        );
 
 
 
@@ -2964,7 +3203,6 @@ function placeSelectedFood() {
 
     menuARState.placedObject =
         placedModel;
-
 
 
     menuARState.currentRotation =
@@ -2980,9 +3218,8 @@ function placeSelectedFood() {
 
 
 
-    updateLightForObject(
-        placedModel
-    );
+    shadowReceiver.material.opacity =
+        0;
 
 
 
@@ -2992,7 +3229,6 @@ function placeSelectedFood() {
 
 
     hideInteractionControls();
-
 
 
     disableManipulationControls();
@@ -3005,7 +3241,7 @@ function placeSelectedFood() {
 
         food,
 
-        config.baseScale,
+        finalScale,
 
         finalY
 
@@ -3044,7 +3280,9 @@ function rotateLeft() {
 
 
     setStatus(
-        `${getFoodName(menuARState.selectedFood)} rotated left.`
+
+        `${getFoodName(menuARState.selectedFood)} turned left.`
+
     );
 
 }
@@ -3076,7 +3314,9 @@ function rotateRight() {
 
 
     setStatus(
-        `${getFoodName(menuARState.selectedFood)} rotated right.`
+
+        `${getFoodName(menuARState.selectedFood)} turned right.`
+
     );
 
 }
@@ -3105,74 +3345,6 @@ function canManipulate() {
 
 
 // ==========================================
-// SIZE
-// ==========================================
-
-function changeSize(direction) {
-
-
-    if (
-        !canManipulate()
-    ) {
-
-        return;
-
-    }
-
-
-
-    const newFactor =
-
-        menuARState.scaleFactor +
-
-        (
-            SCALE_STEP *
-            direction
-        );
-
-
-
-    menuARState.scaleFactor =
-        THREE.MathUtils.clamp(
-
-            newFactor,
-
-            MIN_SCALE_FACTOR,
-
-            MAX_SCALE_FACTOR
-
-        );
-
-
-
-    const config =
-        MODEL_CONFIG[
-            menuARState.selectedFood
-        ];
-
-
-
-    menuARState.placedObject.scale.setScalar(
-
-        config.baseScale *
-
-        menuARState.scaleFactor
-
-    );
-
-
-
-    setStatus(
-
-        `${getFoodName(menuARState.selectedFood)} size: ${Math.round(menuARState.scaleFactor * 100)}%.`
-
-    );
-
-}
-
-
-
-// ==========================================
 // MOVE MODE
 // ==========================================
 
@@ -3193,10 +3365,8 @@ function enterMoveMode() {
         "MOVE_MODE";
 
 
-
     menuARState.surfaceFound =
         false;
-
 
 
     reticle.visible =
@@ -3222,7 +3392,9 @@ function enterMoveMode() {
 
 
     setStatus(
-        "Move mode — point at a new position, then tap the white circle."
+
+        "Choose a new spot on the table, then tap the white circle."
+
     );
 
 }
@@ -3230,17 +3402,10 @@ function enterMoveMode() {
 
 
 // ==========================================
-// MOVE STATUS
+// MOVE MODE STATUS
 // ==========================================
 
 function setMoveModeStatus() {
-
-
-    const foodName =
-        getFoodName(
-            menuARState.selectedFood
-        );
-
 
 
     if (
@@ -3249,7 +3414,7 @@ function setMoveModeStatus() {
 
 
         setStatus(
-            `${foodName} move mode — tap the white circle to reposition it.`
+            "New spot found — tap the white circle to move your dish."
         );
 
 
@@ -3257,7 +3422,7 @@ function setMoveModeStatus() {
 
 
         setStatus(
-            `${foodName} move mode — scan for a new position.`
+            "Move your device slowly to find a new spot."
         );
 
     }
@@ -3267,7 +3432,7 @@ function setMoveModeStatus() {
 
 
 // ==========================================
-// REPOSITION MODEL
+// REPOSITION FOOD
 // ==========================================
 
 function repositionPlacedFood() {
@@ -3290,6 +3455,8 @@ function repositionPlacedFood() {
 
 
 
+    // Save rotation + scale.
+
     const savedQuaternion =
 
         menuARState.placedObject
@@ -3306,15 +3473,12 @@ function repositionPlacedFood() {
 
 
 
-    const savedScaleFactor =
-        menuARState.scaleFactor;
-
-
-
     const savedRotation =
         menuARState.currentRotation;
 
 
+
+    // New position.
 
     const newPosition =
         new THREE.Vector3();
@@ -3345,20 +3509,19 @@ function repositionPlacedFood() {
 
 
 
+    // Restore rotation.
+
     menuARState.placedObject.quaternion.copy(
         savedQuaternion
     );
 
 
 
+    // Restore selected size.
+
     menuARState.placedObject.scale.copy(
         savedScale
     );
-
-
-
-    menuARState.scaleFactor =
-        savedScaleFactor;
 
 
 
@@ -3371,14 +3534,7 @@ function repositionPlacedFood() {
 
 
 
-    shadowReceiver.material.opacity =
-        SHADOW_FINAL_OPACITY;
-
-
-
-    updateLightForObject(
-        menuARState.placedObject
-    );
+    updateShadowAppearance();
 
 
 
@@ -3400,7 +3556,9 @@ function repositionPlacedFood() {
 
 
     setStatus(
-        `${getFoodName(menuARState.selectedFood)} moved. Size and rotation preserved.`
+
+        `${getFoodName(menuARState.selectedFood)} moved to the new spot.`
+
     );
 
 }
@@ -3408,7 +3566,7 @@ function repositionPlacedFood() {
 
 
 // ==========================================
-// REMOVE
+// REMOVE FOOD
 // ==========================================
 
 function removeFood() {
@@ -3429,12 +3587,15 @@ function removeFood() {
 
 
 
+    const removedFood =
+        getFoodName(
+            menuARState.selectedFood
+        );
+
+
+
     removePlacedObjectFromScene();
 
-
-
-    menuARState.scaleFactor =
-        1;
 
 
     menuARState.currentRotation =
@@ -3457,13 +3618,14 @@ function removeFood() {
     hideInteractionControls();
 
 
-
     disableManipulationControls();
 
 
 
     setStatus(
-        `${getFoodName(menuARState.selectedFood)} removed. Scan to place again.`
+
+        `${removedFood} removed. Move your device to choose another spot.`
+
     );
 
 }
@@ -3510,7 +3672,7 @@ function startConfirmationAnimation() {
 
 
 // ==========================================
-// UPDATE CONFIRMATION ANIMATION
+// UPDATE CONFIRM ANIMATION
 // ==========================================
 
 function updateConfirmationAnimation(timestamp) {
@@ -3568,7 +3730,7 @@ function updateConfirmationAnimation(timestamp) {
         1 +
 
         (
-            0.055 *
+            0.06 *
 
             Math.sin(
                 Math.PI *
@@ -3616,7 +3778,7 @@ function updateConfirmationAnimation(timestamp) {
 
 
 // ==========================================
-// CONFIRM UI ANIMATION
+// CONFIRM UI FEEDBACK
 // ==========================================
 
 function triggerConfirmationUIAnimation() {
@@ -3698,8 +3860,22 @@ function confirmPreview() {
 
 
 
+    const foodName =
+        getFoodName(
+            menuARState.selectedFood
+        );
+
+
+
+    const sizeName =
+        getCurrentSizePreset().label;
+
+
+
     setStatus(
-        `Preview confirmed — ${getFoodName(menuARState.selectedFood)} is locked in place.`
+
+        `Looks good! Your ${sizeName} ${foodName} preview is confirmed.`
+
     );
 
 
@@ -3798,7 +3974,7 @@ function onXRSelect() {
 
 
 // ==========================================
-// HIT TEST / RENDER
+// HIT TEST / RENDER LOOP
 // ==========================================
 
 function render(
@@ -3810,14 +3986,9 @@ function render(
 ) {
 
 
-    // --------------------------------------
-    // 3D Animations
-    // --------------------------------------
-
     updatePlacementAnimation(
         timestamp
     );
-
 
 
     updateConfirmationAnimation(
@@ -3914,7 +4085,9 @@ function render(
 
 
                     setStatus(
-                        `${getFoodName(menuARState.selectedFood)} selected. Tap the white circle to place it.`
+
+                        `Great — tap the white circle to place your ${getFoodName(menuARState.selectedFood)}.`
+
                     );
 
                 }
@@ -3964,7 +4137,9 @@ function render(
 
 
                 setStatus(
-                    `${getFoodName(menuARState.selectedFood)} selected. Move your device slowly across the table.`
+
+                    `Move your device slowly over the table to find a clear spot for your ${getFoodName(menuARState.selectedFood)}.`
+
                 );
 
             }
@@ -4103,7 +4278,62 @@ pizzaBtn.addEventListener(
 
 
 // ==========================================
-// ROTATION
+// SIZE EVENTS
+// ==========================================
+
+sizeSmallBtn.addEventListener(
+
+    "click",
+
+    () => {
+
+
+        selectPreviewSize(
+            "small"
+        );
+
+    }
+
+);
+
+
+
+sizeMediumBtn.addEventListener(
+
+    "click",
+
+    () => {
+
+
+        selectPreviewSize(
+            "medium"
+        );
+
+    }
+
+);
+
+
+
+sizeLargeBtn.addEventListener(
+
+    "click",
+
+    () => {
+
+
+        selectPreviewSize(
+            "large"
+        );
+
+    }
+
+);
+
+
+
+// ==========================================
+// ROTATION EVENTS
 // ==========================================
 
 rotateLeftBtn.addEventListener(
@@ -4121,44 +4351,6 @@ rotateRightBtn.addEventListener(
     "click",
 
     rotateRight
-
-);
-
-
-
-// ==========================================
-// SIZE
-// ==========================================
-
-sizeDownBtn.addEventListener(
-
-    "click",
-
-    () => {
-
-
-        changeSize(
-            -1
-        );
-
-    }
-
-);
-
-
-
-sizeUpBtn.addEventListener(
-
-    "click",
-
-    () => {
-
-
-        changeSize(
-            1
-        );
-
-    }
 
 );
 
@@ -4318,6 +4510,9 @@ async function initializeApplication() {
     updateFoodButtons(
         "burger"
     );
+
+
+    updateSizeButtons();
 
 
 
