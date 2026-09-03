@@ -47,12 +47,7 @@
             border-radius: 10px;
 
             background:
-                rgba(
-                    255,
-                    255,
-                    255,
-                    0.10
-                );
+                rgba(255, 255, 255, 0.10);
 
             color: #ffffff;
 
@@ -86,8 +81,7 @@
 
             border-radius: 11px;
 
-            background:
-                #fff8f1;
+            background: #fff8f1;
 
         }
 
@@ -178,22 +172,18 @@
 
         .size-option:active {
 
-            transform:
-                scale(0.96);
+            transform: scale(0.96);
 
         }
 
 
         .size-option.active {
 
-            border-color:
-                #e85d04;
+            border-color: #e85d04;
 
-            background:
-                #fff2e5;
+            background: #fff2e5;
 
-            color:
-                #d95400;
+            color: #d95400;
 
         }
 
@@ -214,11 +204,9 @@
 
             border-radius: 11px;
 
-            background:
-                #e85d04;
+            background: #e85d04;
 
-            color:
-                #ffffff;
+            color: #ffffff;
 
             font-size: 13px;
             font-weight: 700;
@@ -229,7 +217,7 @@
 
 
         /* ==================================
-           ORDER REVIEW PANEL
+           ORDER REVIEW
            ================================== */
 
         .order-review-panel {
@@ -307,8 +295,7 @@
 
             border-radius: 10px;
 
-            background:
-                #fffaf5;
+            background: #fffaf5;
 
         }
 
@@ -383,11 +370,9 @@
 
             border: none;
 
-            background:
-                #e85d04;
+            background: #e85d04;
 
-            color:
-                #ffffff;
+            color: #ffffff;
 
         }
 
@@ -411,15 +396,9 @@
             border-radius: 11px;
 
             background:
-                rgba(
-                    255,
-                    255,
-                    255,
-                    0.95
-                );
+                rgba(255, 255, 255, 0.95);
 
-            color:
-                #8a4646;
+            color: #8a4646;
 
             font-size: 12px;
             font-weight: 700;
@@ -439,7 +418,7 @@
 
 
         /* ==================================
-           FINAL ORDER PANEL
+           FINAL ORDER
            ================================== */
 
         .order-complete-panel {
@@ -474,11 +453,9 @@
 
             border-radius: 50%;
 
-            background:
-                #eaf7ed;
+            background: #eaf7ed;
 
-            color:
-                #238247;
+            color: #238247;
 
             font-size: 27px;
             font-weight: 800;
@@ -526,11 +503,9 @@
 
             border-radius: 11px;
 
-            background:
-                #238247;
+            background: #238247;
 
-            color:
-                #ffffff;
+            color: #ffffff;
 
             font-size: 13px;
             font-weight: 800;
@@ -588,8 +563,7 @@
 
                 opacity: 1;
 
-                transform:
-                    scale(1);
+                transform: scale(1);
 
             }
 
@@ -635,40 +609,6 @@
         }
 
 
-        /* ==================================
-           XR COMPACT MODE
-           ================================== */
-
-        body:xr-overlay .size-option,
-        body.xr-session-active .size-option {
-
-            min-height: 34px;
-
-            font-size: 10px;
-
-        }
-
-
-        body:xr-overlay .order-summary-row,
-        body.xr-session-active .order-summary-row {
-
-            padding: 7px 9px;
-
-        }
-
-
-        body:xr-overlay .order-summary,
-        body.xr-session-active .order-summary {
-
-            gap: 5px;
-
-        }
-
-
-        /* ==================================
-           REDUCED MOTION
-           ================================== */
-
         @media
         (prefers-reduced-motion: reduce) {
 
@@ -695,10 +635,6 @@
 
 <body class="markerless-page">
 
-
-    <!-- =====================================
-         HEADER
-         ===================================== -->
 
     <header class="ar-header">
 
@@ -732,9 +668,7 @@
     <main class="markerless-layout">
 
 
-        <!-- =================================
-             PRE-AR SCREEN
-             ================================= -->
+        <!-- PRE AR -->
 
         <section
             class="xr-viewport"
@@ -789,9 +723,7 @@
 
 
 
-        <!-- =================================
-             AR CONTROL PANEL
-             ================================= -->
+        <!-- AR CONTROLS -->
 
         <section
             class="ar-controls"
@@ -799,8 +731,6 @@
             hidden
         >
 
-
-            <!-- STATUS -->
 
             <p
                 class="status-message"
@@ -811,17 +741,11 @@
 
 
 
-            <!-- =================================
-                 ORDER COUNT ONLY
-                 No Review Order button
-                 ================================= -->
-
             <div
                 class="order-badge"
                 id="orderBadge"
                 hidden
             >
-
 
                 <span
                     class="order-badge-text"
@@ -830,14 +754,11 @@
                     Your Order · 1 item
                 </span>
 
-
             </div>
 
 
 
-            <!-- =================================
-                 DISH SELECTION
-                 ================================= -->
+            <!-- DISH SELECTION -->
 
             <div id="dishSelectionArea">
 
@@ -875,9 +796,7 @@
 
 
 
-            <!-- =================================
-                 ACTIVE DISH CONTROLS
-                 ================================= -->
+            <!-- DISH CONTROLS -->
 
             <div
                 class="interaction-controls"
@@ -969,11 +888,7 @@
 
 
 
-            <!-- =================================
-                 ORDER REVIEW
-                 Automatically appears after
-                 Add to Order
-                 ================================= -->
+            <!-- ORDER REVIEW -->
 
             <div
                 class="order-review-panel"
@@ -1028,9 +943,7 @@
 
 
 
-            <!-- =================================
-                 ORDER COMPLETE
-                 ================================= -->
+            <!-- ORDER COMPLETE -->
 
             <div
                 class="order-complete-panel"
@@ -1063,8 +976,6 @@
                 </div>
 
 
-                <!-- ONLY shown after confirmation -->
-
                 <button
                     type="button"
                     class="done-button"
@@ -1078,10 +989,7 @@
 
 
 
-            <!-- =================================
-                 CANCEL ORDER
-                 Hidden after final confirmation
-                 ================================= -->
+            <!-- CANCEL -->
 
             <button
                 type="button"
@@ -1098,11 +1006,11 @@
     </main>
 
 
-    <!-- New cache version -->
+    <!-- IMPORTANT CACHE VERSION -->
 
     <script
         type="module"
-        src="js/markerless-ar.js?v=15"
+        src="js/markerless-ar.js?v=16"
     >
     </script>
 

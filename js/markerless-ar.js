@@ -22,8 +22,11 @@ const statusMessage =
 const startARBtn =
     document.getElementById("startARBtn");
 
-const tableActionBtn =
-    document.getElementById("tableActionBtn");
+const cancelOrderBtn =
+    document.getElementById("cancelOrderBtn");
+
+const doneBtn =
+    document.getElementById("doneBtn");
 
 const xrViewport =
     document.getElementById("xrViewport");
@@ -88,7 +91,7 @@ const finalOrderSummary =
 
 
 // ==========================================
-// HOME PAGE URL
+// HOME PAGE
 // ==========================================
 
 const HOME_PAGE_URL =
@@ -125,7 +128,7 @@ const SIZE_PRESETS = {
 
 
 // ==========================================
-// APPLICATION STATE
+// STATE
 // ==========================================
 
 const menuARState = {
@@ -223,18 +226,6 @@ const UI_SELECT_GUARD_MS =
 const MOVE_ACTIVATION_DELAY_MS =
     700;
 
-let ignoreXRSelectUntil =
-    0;
-
-let moveModeStartedAt =
-    0;
-
-
-
-// ==========================================
-// PLACEMENT ANIMATION
-// ==========================================
-
 const PLACEMENT_DURATION =
     560;
 
@@ -244,31 +235,21 @@ const PLACEMENT_START_SCALE_FACTOR =
 const PLACEMENT_LIFT =
     0.10;
 
-let placementAnimation =
-    null;
-
-
-
-// ==========================================
-// ORDER ANIMATION
-// ==========================================
-
-let orderPulseAnimation =
-    null;
-
-
-
-// ==========================================
-// SHADOW
-// ==========================================
-
 const SHADOW_OPACITY =
     0.44;
 
-let shadowTexture =
+
+
+let ignoreXRSelectUntil =
+    0;
+
+let moveModeStartedAt =
+    0;
+
+let placementAnimation =
     null;
 
-let shadowGeometry =
+let orderPulseAnimation =
     null;
 
 
@@ -278,10 +259,20 @@ let shadowGeometry =
 // ==========================================
 
 let scene;
+
 let camera;
+
 let renderer;
+
 let reticle;
+
 let controller;
+
+let shadowTexture =
+    null;
+
+let shadowGeometry =
+    null;
 
 let xrSession =
     null;
@@ -299,10 +290,6 @@ let latestHitTestResult =
     null;
 
 
-
-// ==========================================
-// XR END STATE
-// ==========================================
 
 let isEndingXRSession =
     false;
@@ -325,7 +312,7 @@ let audioContext =
 
 
 // ==========================================
-// MODEL TEMPLATES
+// MODELS
 // ==========================================
 
 const modelTemplates = {
@@ -347,7 +334,9 @@ const modelTemplates = {
 function createSoftShadowTexture() {
 
     const canvas =
-        document.createElement("canvas");
+        document.createElement(
+            "canvas"
+        );
 
     canvas.width =
         256;
@@ -355,18 +344,26 @@ function createSoftShadowTexture() {
     canvas.height =
         256;
 
+
     const context =
-        canvas.getContext("2d");
+        canvas.getContext(
+            "2d"
+        );
+
 
     const gradient =
         context.createRadialGradient(
+
             128,
             128,
             10,
+
             128,
             128,
             118
+
         );
+
 
     gradient.addColorStop(
         0,
@@ -388,8 +385,10 @@ function createSoftShadowTexture() {
         "rgba(0, 0, 0, 0)"
     );
 
+
     context.fillStyle =
         gradient;
+
 
     context.fillRect(
         0,
@@ -398,11 +397,16 @@ function createSoftShadowTexture() {
         256
     );
 
+
     const texture =
-        new THREE.CanvasTexture(canvas);
+        new THREE.CanvasTexture(
+            canvas
+        );
+
 
     texture.colorSpace =
         THREE.SRGBColorSpace;
+
 
     return texture;
 }
@@ -418,47 +422,72 @@ function initThreeJS() {
     scene =
         new THREE.Scene();
 
+
     camera =
         new THREE.PerspectiveCamera(
+
             70,
-            window.innerWidth / window.innerHeight,
+
+            window.innerWidth /
+                window.innerHeight,
+
             0.01,
+
             20
+
         );
+
 
     renderer =
         new THREE.WebGLRenderer({
-            alpha: true,
-            antialias: true
+
+            alpha:
+                true,
+
+            antialias:
+                true
+
         });
 
+
     renderer.setPixelRatio(
+
         Math.min(
             window.devicePixelRatio,
             2
         )
+
     );
 
+
     renderer.setSize(
+
         window.innerWidth,
         window.innerHeight
+
     );
+
 
     renderer.xr.enabled =
         true;
 
+
     renderer.outputColorSpace =
         THREE.SRGBColorSpace;
+
 
     renderer.toneMapping =
         THREE.ACESFilmicToneMapping;
 
+
     renderer.toneMappingExposure =
         1.08;
+
 
     renderer.domElement.classList.add(
         "xr-canvas"
     );
+
 
     xrViewport.appendChild(
         renderer.domElement
@@ -466,24 +495,29 @@ function initThreeJS() {
 
 
 
-    // LIGHTING
-
     const hemisphereLight =
         new THREE.HemisphereLight(
+
             0xffffff,
             0x777777,
             1.8
+
         );
+
 
     scene.add(
         hemisphereLight
     );
 
+
     const directionalLight =
         new THREE.DirectionalLight(
+
             0xffffff,
             2.0
+
         );
+
 
     directionalLight.position.set(
         1,
@@ -491,16 +525,16 @@ function initThreeJS() {
         2
     );
 
+
     scene.add(
         directionalLight
     );
 
 
 
-    // SHADOW
-
     shadowTexture =
         createSoftShadowTexture();
+
 
     shadowGeometry =
         new THREE.PlaneGeometry(
@@ -508,42 +542,56 @@ function initThreeJS() {
             1
         );
 
+
     shadowGeometry.rotateX(
         -Math.PI / 2
     );
 
 
 
-    // RETICLE
-
     const reticleGeometry =
         new THREE.RingGeometry(
+
             0.065,
             0.085,
             32
+
         );
+
 
     reticleGeometry.rotateX(
         -Math.PI / 2
     );
 
+
     const reticleMaterial =
         new THREE.MeshBasicMaterial({
-            color: 0xffffff,
-            side: THREE.DoubleSide
+
+            color:
+                0xffffff,
+
+            side:
+                THREE.DoubleSide
+
         });
+
 
     reticle =
         new THREE.Mesh(
+
             reticleGeometry,
             reticleMaterial
+
         );
+
 
     reticle.matrixAutoUpdate =
         false;
 
+
     reticle.visible =
         false;
+
 
     scene.add(
         reticle
@@ -551,23 +599,27 @@ function initThreeJS() {
 
 
 
-    // XR CONTROLLER
-
     controller =
         renderer.xr.getController(0);
 
+
     controller.addEventListener(
+
         "select",
         onXRSelect
+
     );
+
 
     scene.add(
         controller
     );
 
+
     renderer.setAnimationLoop(
         render
     );
+
 }
 
 
@@ -601,14 +653,19 @@ function createShadowMesh(
 
         });
 
+
     const shadow =
         new THREE.Mesh(
+
             shadowGeometry,
             material
+
         );
+
 
     shadow.renderOrder =
         1;
+
 
     updateShadowAppearance(
         shadow,
@@ -616,7 +673,9 @@ function createShadowMesh(
         sizeKey
     );
 
+
     return shadow;
+
 }
 
 
@@ -633,20 +692,31 @@ function updateShadowAppearance(
         return;
     }
 
+
     const config =
         MODEL_CONFIG[food];
+
 
     const size =
         SIZE_PRESETS[sizeKey];
 
+
     shadow.scale.set(
-        config.shadowWidth * size.factor,
-        config.shadowDepth * size.factor,
+
+        config.shadowWidth *
+            size.factor,
+
+        config.shadowDepth *
+            size.factor,
+
         1
+
     );
+
 
     shadow.material.opacity =
         SHADOW_OPACITY;
+
 }
 
 
@@ -661,28 +731,37 @@ function positionShadowFromReticle(
         return;
     }
 
+
     const position =
         new THREE.Vector3();
+
 
     const quaternion =
         new THREE.Quaternion();
 
+
     const ignoredScale =
         new THREE.Vector3();
 
+
     reticle.matrix.decompose(
+
         position,
         quaternion,
         ignoredScale
+
     );
+
 
     shadow.position.copy(
         position
     );
 
+
     shadow.quaternion.copy(
         quaternion
     );
+
 
     const surfaceNormal =
         new THREE.Vector3(
@@ -691,20 +770,25 @@ function positionShadowFromReticle(
             0
         );
 
+
     surfaceNormal.applyQuaternion(
         quaternion
     );
 
+
     shadow.position.addScaledVector(
+
         surfaceNormal,
         0.003
+
     );
+
 }
 
 
 
 // ==========================================
-// WEBXR ANCHORS
+// ANCHORS
 // ==========================================
 
 async function createAnchorForHitResult(
@@ -715,8 +799,11 @@ async function createAnchorForHitResult(
         !hitResult ||
         typeof hitResult.createAnchor !== "function"
     ) {
+
         return null;
+
     }
+
 
     try {
 
@@ -725,12 +812,15 @@ async function createAnchorForHitResult(
     } catch (error) {
 
         console.warn(
-            "Anchor creation failed. Static placement will be used.",
+            "Anchor creation failed.",
             error
         );
 
+
         return null;
+
     }
+
 }
 
 
@@ -752,13 +842,17 @@ function deleteAnchorFromObject(
         } catch (error) {
 
             console.warn(
-                "Anchor was already unavailable."
+                "Anchor already unavailable."
             );
+
         }
+
 
         object.userData.anchor =
             null;
+
     }
+
 }
 
 
@@ -776,14 +870,20 @@ function applyAnchorTracking(
         !frame ||
         !space
     ) {
+
         return;
+
     }
+
 
     const anchorPose =
         frame.getPose(
+
             object.userData.anchor.anchorSpace,
             space
+
         );
+
 
     if (
         !anchorPose
@@ -791,25 +891,35 @@ function applyAnchorTracking(
         return;
     }
 
+
     const matrix =
         new THREE.Matrix4().fromArray(
+
             anchorPose.transform.matrix
+
         );
+
 
     const position =
         new THREE.Vector3();
 
+
     const quaternion =
         new THREE.Quaternion();
+
 
     const ignoredScale =
         new THREE.Vector3();
 
+
     matrix.decompose(
+
         position,
         quaternion,
         ignoredScale
+
     );
+
 
     const up =
         new THREE.Vector3(
@@ -820,21 +930,27 @@ function applyAnchorTracking(
             quaternion
         );
 
+
     const offsetY =
-        object.userData.surfaceOffset || 0;
+        object.userData.surfaceOffset ||
+        0;
+
 
     object.position.copy(
         position
     );
+
 
     object.position.addScaledVector(
         up,
         offsetY
     );
 
+
     object.quaternion.copy(
         quaternion
     );
+
 
     if (
         shadow
@@ -844,15 +960,19 @@ function applyAnchorTracking(
             position
         );
 
+
         shadow.quaternion.copy(
             quaternion
         );
+
 
         shadow.position.addScaledVector(
             up,
             0.003
         );
+
     }
+
 }
 
 
@@ -864,14 +984,19 @@ function applyAnchorTracking(
 function ensureAudioContext() {
 
     const AudioContextClass =
+
         window.AudioContext ||
         window.webkitAudioContext;
+
 
     if (
         !AudioContextClass
     ) {
+
         return false;
+
     }
+
 
     if (
         !audioContext
@@ -879,16 +1004,22 @@ function ensureAudioContext() {
 
         audioContext =
             new AudioContextClass();
+
     }
 
+
     if (
-        audioContext.state === "suspended"
+        audioContext.state ===
+        "suspended"
     ) {
 
         audioContext.resume();
+
     }
 
+
     return true;
+
 }
 
 
@@ -904,64 +1035,98 @@ function playTone(
     if (
         !ensureAudioContext()
     ) {
+
         return;
+
     }
 
+
     const now =
-        audioContext.currentTime + delay;
+
+        audioContext.currentTime +
+        delay;
+
 
     const oscillator =
         audioContext.createOscillator();
 
+
     const gain =
         audioContext.createGain();
 
+
     oscillator.type =
         "sine";
+
 
     oscillator.frequency.setValueAtTime(
         startFrequency,
         now
     );
 
+
     oscillator.frequency.exponentialRampToValueAtTime(
+
         Math.max(
             endFrequency,
             1
         ),
-        now + duration
+
+        now +
+            duration
+
     );
+
 
     gain.gain.setValueAtTime(
         0.0001,
         now
     );
 
-    gain.gain.exponentialRampToValueAtTime(
-        volume,
-        now + 0.015
-    );
 
     gain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        now + duration
+
+        volume,
+
+        now +
+            0.015
+
     );
+
+
+    gain.gain.exponentialRampToValueAtTime(
+
+        0.0001,
+
+        now +
+            duration
+
+    );
+
 
     oscillator.connect(
         gain
     );
 
+
     gain.connect(
         audioContext.destination
     );
+
 
     oscillator.start(
         now
     );
 
+
     oscillator.stop(
-        now + duration + 0.03
+
+        now +
+            duration +
+            0.03
+
     );
+
 }
 
 
@@ -975,6 +1140,7 @@ function playPlacementSound() {
         0.045
     );
 
+
     playTone(
         420,
         320,
@@ -982,6 +1148,7 @@ function playPlacementSound() {
         0.018,
         0.03
     );
+
 }
 
 
@@ -994,6 +1161,7 @@ function playAddedSound() {
         0.11,
         0.025
     );
+
 }
 
 
@@ -1004,9 +1172,9 @@ function playOrderConfirmationSound() {
         523,
         523,
         0.13,
-        0.035,
-        0
+        0.035
     );
+
 
     playTone(
         659,
@@ -1016,6 +1184,7 @@ function playOrderConfirmationSound() {
         0.10
     );
 
+
     playTone(
         784,
         784,
@@ -1023,25 +1192,22 @@ function playOrderConfirmationSound() {
         0.040,
         0.21
     );
+
 }
 
 
 
 // ==========================================
-// BASIC HELPERS
+// HELPERS
 // ==========================================
 
 function setStatus(
     message
 ) {
 
-    if (
-        statusMessage.textContent !== message
-    ) {
+    statusMessage.textContent =
+        message;
 
-        statusMessage.textContent =
-            message;
-    }
 }
 
 
@@ -1053,8 +1219,10 @@ function showSupportMessage(
     xrSupportMessage.textContent =
         message;
 
+
     xrSupportMessage.hidden =
         false;
+
 }
 
 
@@ -1064,8 +1232,10 @@ function hideSupportMessage() {
     xrSupportMessage.textContent =
         "";
 
+
     xrSupportMessage.hidden =
         true;
+
 }
 
 
@@ -1074,9 +1244,11 @@ function getFoodName(
     food
 ) {
 
-    return food === "burger"
+    return food ===
+        "burger"
         ? "Burger"
         : "Pizza";
+
 }
 
 
@@ -1086,6 +1258,7 @@ function getCurrentSizePreset() {
     return SIZE_PRESETS[
         menuARState.selectedSize
     ];
+
 }
 
 
@@ -1094,16 +1267,14 @@ function getCurrentModelScale(
     food
 ) {
 
-    const config =
-        MODEL_CONFIG[food];
-
-    const size =
-        getCurrentSizePreset();
-
     return (
-        config.baseScale *
-        size.factor
+
+        MODEL_CONFIG[food].baseScale *
+
+        getCurrentSizePreset().factor
+
     );
+
 }
 
 
@@ -1125,23 +1296,25 @@ function loadModel(
             const loader =
                 new GLTFLoader();
 
+
             loader.load(
 
                 MODEL_CONFIG[food].src,
+
 
                 (gltf) => {
 
                     modelTemplates[food] =
                         gltf.scene;
 
-                    console.log(
-                        `${food} model loaded.`
-                    );
 
                     resolve();
+
                 },
 
+
                 undefined,
+
 
                 (error) => {
 
@@ -1150,13 +1323,18 @@ function loadModel(
                         error
                     );
 
+
                     reject(
                         error
                     );
+
                 }
+
             );
+
         }
     );
+
 }
 
 
@@ -1177,23 +1355,23 @@ async function loadModels() {
 
         ]);
 
+
         menuARState.modelsReady =
             true;
+
 
     } catch (error) {
 
         menuARState.modelsReady =
             false;
 
+
         showSupportMessage(
             "The food previews could not be loaded. Refresh the page and try again."
         );
 
-        console.error(
-            "Model loading failed:",
-            error
-        );
     }
+
 }
 
 
@@ -1207,72 +1385,50 @@ function updateFoodButtons(
 ) {
 
     const burgerActive =
-        food === "burger";
+        food ===
+        "burger";
+
 
     burgerBtn.classList.toggle(
         "active",
         burgerActive
     );
 
+
     pizzaBtn.classList.toggle(
         "active",
         !burgerActive
     );
 
-    burgerBtn.setAttribute(
-        "aria-pressed",
-        burgerActive
-    );
-
-    pizzaBtn.setAttribute(
-        "aria-pressed",
-        !burgerActive
-    );
 }
 
 
 
 function updateSizeButtons() {
 
-    const selected =
-        menuARState.selectedSize;
+    sizeSmallBtn.classList.toggle(
 
-    const buttons = {
+        "active",
+        menuARState.selectedSize === "small"
 
-        small:
-            sizeSmallBtn,
-
-        medium:
-            sizeMediumBtn,
-
-        large:
-            sizeLargeBtn
-    };
-
-    Object.entries(
-        buttons
-    ).forEach(
-        (
-            [
-                key,
-                button
-            ]
-        ) => {
-
-            const active =
-                key === selected;
-
-            button.classList.toggle(
-                "active",
-                active
-            );
-
-            button.setAttribute(
-                "aria-pressed",
-                active
-            );
-        }
     );
+
+
+    sizeMediumBtn.classList.toggle(
+
+        "active",
+        menuARState.selectedSize === "medium"
+
+    );
+
+
+    sizeLargeBtn.classList.toggle(
+
+        "active",
+        menuARState.selectedSize === "large"
+
+    );
+
 }
 
 
@@ -1286,11 +1442,13 @@ function getGroupedOrderItems() {
     const grouped =
         new Map();
 
+
     menuARState.confirmedItems.forEach(
         (item) => {
 
             const key =
                 `${item.sizeKey}-${item.food}`;
+
 
             if (
                 !grouped.has(key)
@@ -1299,21 +1457,33 @@ function getGroupedOrderItems() {
                 grouped.set(
                     key,
                     {
-                        food: item.food,
-                        sizeKey: item.sizeKey,
-                        count: 0
+
+                        food:
+                            item.food,
+
+                        sizeKey:
+                            item.sizeKey,
+
+                        count:
+                            0
+
                     }
                 );
+
             }
+
 
             grouped.get(key).count +=
                 1;
+
         }
     );
+
 
     return Array.from(
         grouped.values()
     );
+
 }
 
 
@@ -1325,10 +1495,8 @@ function renderOrderSummary(
     container.innerHTML =
         "";
 
-    const groups =
-        getGroupedOrderItems();
 
-    groups.forEach(
+    getGroupedOrderItems().forEach(
         (group) => {
 
             const row =
@@ -1336,44 +1504,57 @@ function renderOrderSummary(
                     "div"
                 );
 
+
             row.className =
                 "order-summary-row";
+
 
             const name =
                 document.createElement(
                     "span"
                 );
 
+
             name.className =
                 "order-summary-name";
 
+
             name.textContent =
+
                 `${SIZE_PRESETS[group.sizeKey].label} ${getFoodName(group.food)}`;
+
 
             const count =
                 document.createElement(
                     "span"
                 );
 
+
             count.className =
                 "order-summary-count";
 
+
             count.textContent =
                 `${group.count} ×`;
+
 
             row.appendChild(
                 name
             );
 
+
             row.appendChild(
                 count
             );
 
+
             container.appendChild(
                 row
             );
+
         }
     );
+
 }
 
 
@@ -1383,29 +1564,38 @@ function updateOrderBadge() {
     const count =
         menuARState.confirmedItems.length;
 
+
     if (
         count === 0 ||
-        menuARState.appState === "ORDER_REVIEW" ||
-        menuARState.appState === "ORDER_CONFIRMED"
+        menuARState.appState ===
+            "ORDER_REVIEW" ||
+        menuARState.appState ===
+            "ORDER_CONFIRMED"
     ) {
 
         orderBadge.hidden =
             true;
 
+
         return;
+
     }
+
 
     orderBadge.hidden =
         false;
 
+
     orderBadgeText.textContent =
+
         `Your Order · ${count} ${count === 1 ? "item" : "items"}`;
+
 }
 
 
 
 // ==========================================
-// SELECT SIZE
+// SIZE
 // ==========================================
 
 function selectPreviewSize(
@@ -1413,38 +1603,55 @@ function selectPreviewSize(
 ) {
 
     if (
-        menuARState.appState !== "PLACED" ||
+        menuARState.appState !==
+            "PLACED" ||
         !menuARState.placedObject
     ) {
+
         return;
+
     }
+
 
     menuARState.selectedSize =
         sizeKey;
 
+
     updateSizeButtons();
 
+
     menuARState.placedObject.scale.setScalar(
+
         getCurrentModelScale(
             menuARState.selectedFood
         )
+
     );
+
 
     updateShadowAppearance(
+
         menuARState.activeShadow,
+
         menuARState.selectedFood,
+
         menuARState.selectedSize
+
     );
 
+
     setStatus(
+
         `${getCurrentSizePreset().label} ${getFoodName(menuARState.selectedFood)} selected.`
+
     );
+
 }
 
 
 
 // ==========================================
-// SELECT FOOD
+// FOOD
 // ==========================================
 
 function selectFood(
@@ -1452,77 +1659,69 @@ function selectFood(
 ) {
 
     if (
-        menuARState.appState === "ORDER_REVIEW" ||
-        menuARState.appState === "ORDER_CONFIRMED" ||
-        menuARState.appState === "PLACING"
+        menuARState.appState ===
+            "ORDER_REVIEW" ||
+        menuARState.appState ===
+            "ORDER_CONFIRMED" ||
+        menuARState.appState ===
+            "PLACING"
     ) {
+
         return;
+
     }
+
 
     const previousFood =
         menuARState.selectedFood;
 
+
     menuARState.selectedFood =
         food;
+
 
     updateFoodButtons(
         food
     );
 
-    const foodName =
-        getFoodName(
-            food
-        );
 
     if (
         menuARState.placedObject
     ) {
 
         if (
-            previousFood === food
+            previousFood !==
+            food
         ) {
 
-            setStatus(
-                `${foodName} is already selected.`
+            replacePlacedFood(
+                food,
+                previousFood
             );
 
-            return;
         }
 
-        replacePlacedFood(
-            food,
-            previousFood
-        );
 
         return;
+
     }
+
 
     if (
         xrSession
     ) {
 
-        if (
-            menuARState.appState === "SURFACE_FOUND"
-        ) {
+        setStatus(
 
-            setStatus(
-                `Perfect, tap the white circle to place your ${foodName}.`
-            );
+            `${getFoodName(food)} selected. Find a spot on the table.`
 
-        } else {
+        );
 
-            setStatus(
-                `${foodName} selected. Find a spot on the table.`
-            );
-        }
     }
+
 }
 
 
-
-// ==========================================
-// REPLACE FOOD
-// ==========================================
 
 function replacePlacedFood(
     newFood,
@@ -1532,111 +1731,123 @@ function replacePlacedFood(
     if (
         !menuARState.placedObject
     ) {
+
         return;
+
     }
+
 
     const template =
         modelTemplates[newFood];
 
+
     if (
         !template
     ) {
+
         return;
+
     }
+
 
     const oldModel =
         menuARState.placedObject;
 
-    const newConfig =
-        MODEL_CONFIG[newFood];
 
-    const previousConfig =
-        MODEL_CONFIG[previousFood];
-
-    const savedPosition =
+    const oldPosition =
         oldModel.position.clone();
 
-    const savedQuaternion =
+
+    const oldQuaternion =
         oldModel.quaternion.clone();
+
+
+    const oldAnchor =
+        oldModel.userData.anchor ||
+        null;
+
 
     scene.remove(
         oldModel
     );
 
+
     const newModel =
         template.clone(true);
 
+
     newModel.position.copy(
-        savedPosition
+        oldPosition
     );
+
 
     newModel.position.y +=
-        newConfig.surfaceOffset -
-        previousConfig.surfaceOffset;
+
+        MODEL_CONFIG[newFood].surfaceOffset -
+
+        MODEL_CONFIG[previousFood].surfaceOffset;
+
 
     newModel.quaternion.copy(
-        savedQuaternion
+        oldQuaternion
     );
 
+
     newModel.scale.setScalar(
+
         getCurrentModelScale(
             newFood
         )
+
     );
 
+
     newModel.userData.surfaceOffset =
-        newConfig.surfaceOffset;
+        MODEL_CONFIG[newFood].surfaceOffset;
+
 
     if (
-        oldModel.userData.anchor
+        oldAnchor
     ) {
 
         newModel.userData.anchor =
-            oldModel.userData.anchor;
+            oldAnchor;
 
-        oldModel.userData.anchor =
-            null;
     }
+
 
     scene.add(
         newModel
     );
 
+
     menuARState.placedObject =
         newModel;
 
+
     updateShadowAppearance(
+
         menuARState.activeShadow,
+
         newFood,
+
         menuARState.selectedSize
+
     );
 
-    const sizeName =
-        getCurrentSizePreset().label;
 
-    if (
-        menuARState.appState === "MOVE_MODE"
-    ) {
+    setStatus(
 
-        setStatus(
-            `Changed to ${getFoodName(newFood)}. ${sizeName} size kept. Choose a new spot.`
-        );
+        `Changed to ${getFoodName(newFood)}.`
 
-    } else {
+    );
 
-        menuARState.appState =
-            "PLACED";
-
-        setStatus(
-            `Changed to ${getFoodName(newFood)}. ${sizeName} size kept.`
-        );
-    }
 }
 
 
 
 // ==========================================
-// WEBXR SUPPORT
+// XR SUPPORT
 // ==========================================
 
 async function checkXRSupport() {
@@ -1648,34 +1859,40 @@ async function checkXRSupport() {
         menuARState.xrSupported =
             false;
 
+
         menuARState.appState =
             "UNSUPPORTED";
+
 
         showSupportMessage(
             "Table preview is not supported on this device or browser."
         );
 
+
         updateStartButton();
 
+
         return;
+
     }
+
 
     try {
 
-        const supported =
+        menuARState.xrSupported =
+
             await navigator.xr.isSessionSupported(
                 "immersive-ar"
             );
 
-        menuARState.xrSupported =
-            supported;
 
         if (
-            supported
+            menuARState.xrSupported
         ) {
 
             menuARState.appState =
                 "READY_TO_SCAN";
+
 
             hideSupportMessage();
 
@@ -1684,45 +1901,42 @@ async function checkXRSupport() {
             menuARState.appState =
                 "UNSUPPORTED";
 
+
             showSupportMessage(
                 "Table preview is not supported on this device or browser."
             );
+
         }
+
 
         updateStartButton();
 
-    } catch (error) {
 
-        console.error(
-            "WebXR support check failed:",
-            error
-        );
+    } catch (error) {
 
         menuARState.xrSupported =
             false;
 
+
         menuARState.appState =
             "UNSUPPORTED";
 
-        showSupportMessage(
-            "Unable to check table preview support on this device."
-        );
 
         updateStartButton();
+
     }
+
 }
 
 
 
-// ==========================================
-// START BUTTON
-// ==========================================
-
 function updateStartButton() {
 
     const ready =
+
         menuARState.xrSupported &&
         menuARState.modelsReady;
+
 
     if (
         ready
@@ -1731,16 +1945,22 @@ function updateStartButton() {
         startARBtn.disabled =
             false;
 
+
         startARBtn.textContent =
             "Start";
 
+
         hideSupportMessage();
 
+
         return;
+
     }
+
 
     startARBtn.disabled =
         true;
+
 
     if (
         !menuARState.xrSupported
@@ -1749,17 +1969,21 @@ function updateStartButton() {
         startARBtn.textContent =
             "Not Supported";
 
+
         return;
+
     }
+
 
     startARBtn.textContent =
         "Loading...";
+
 }
 
 
 
 // ==========================================
-// AR UI
+// INTERFACE
 // ==========================================
 
 function showARInterface() {
@@ -1767,18 +1991,10 @@ function showARInterface() {
     xrIntro.hidden =
         true;
 
+
     arControls.hidden =
         false;
 
-    arControls.classList.remove(
-        "xr-panel-enter"
-    );
-
-    void arControls.offsetWidth;
-
-    arControls.classList.add(
-        "xr-panel-enter"
-    );
 }
 
 
@@ -1788,8 +2004,10 @@ function showPreARInterface() {
     arControls.hidden =
         true;
 
+
     xrIntro.hidden =
         false;
+
 }
 
 
@@ -1806,59 +2024,81 @@ async function startARSession() {
         xrSession ||
         isEndingXRSession
     ) {
+
         return;
+
     }
+
 
     ensureAudioContext();
 
-    hideSupportMessage();
 
     navigateHomeAfterSessionEnd =
         false;
 
+
     startARBtn.disabled =
         true;
+
 
     startARBtn.textContent =
         "Starting...";
 
+
     try {
 
         const newSession =
+
             await navigator.xr.requestSession(
+
                 "immersive-ar",
+
                 {
+
                     requiredFeatures: [
                         "hit-test"
                     ],
 
                     optionalFeatures: [
+
                         "dom-overlay",
                         "local-floor",
                         "anchors"
+
                     ],
 
                     domOverlay: {
-                        root: document.body
+
+                        root:
+                            document.body
+
                     }
+
                 }
+
             );
+
 
         xrSession =
             newSession;
+
 
         await renderer.xr.setSession(
             newSession
         );
 
+
         viewerSpace =
+
             await newSession.requestReferenceSpace(
                 "viewer"
             );
 
+
         try {
 
             referenceSpace =
+
                 await newSession.requestReferenceSpace(
                     "local-floor"
                 );
@@ -1866,92 +2106,132 @@ async function startARSession() {
         } catch (error) {
 
             referenceSpace =
+
                 await newSession.requestReferenceSpace(
                     "local"
                 );
+
         }
 
+
         hitTestSource =
+
             await newSession.requestHitTestSource({
-                space: viewerSpace
+
+                space:
+                    viewerSpace
+
             });
 
+
         newSession.addEventListener(
+
             "end",
+
             onARSessionEnded,
+
             {
-                once: true
+                once:
+                    true
             }
+
         );
+
 
         isEndingXRSession =
             false;
 
+
         isCleaningUpXRSession =
             false;
+
 
         menuARState.appState =
             "SCANNING";
 
+
         menuARState.surfaceFound =
             false;
+
 
         menuARState.selectedFood =
             "burger";
 
+
         menuARState.selectedSize =
             "medium";
+
 
         menuARState.confirmedItems =
             [];
 
+
         menuARState.orderPlaced =
             false;
 
+
         menuARState.nextItemId =
             1;
+
 
         document.body.classList.add(
             "xr-session-active"
         );
 
+
         showARInterface();
+
 
         dishSelectionArea.hidden =
             false;
 
+
         orderReviewPanel.hidden =
             true;
+
 
         orderCompletePanel.hidden =
             true;
 
-        tableActionBtn.hidden =
+
+        cancelOrderBtn.hidden =
             false;
 
-        tableActionBtn.disabled =
+
+        cancelOrderBtn.disabled =
             false;
 
-        tableActionBtn.textContent =
-            "Clear Table";
 
-        tableActionBtn.classList.remove(
-            "done-state"
-        );
+        cancelOrderBtn.textContent =
+            "Cancel Order";
+
+
+        doneBtn.disabled =
+            false;
+
+
+        doneBtn.textContent =
+            "Done";
+
 
         hideInteractionControls();
 
+
         updateFoodButtons(
-            menuARState.selectedFood
+            "burger"
         );
+
 
         updateSizeButtons();
 
+
         updateOrderBadge();
+
 
         setStatus(
             "Choose a dish and move your device slowly over the table."
         );
+
 
     } catch (error) {
 
@@ -1960,109 +2240,52 @@ async function startARSession() {
             error
         );
 
+
         xrSession =
             null;
 
-        viewerSpace =
-            null;
-
-        referenceSpace =
-            null;
-
-        hitTestSource =
-            null;
-
-        latestHitTestResult =
-            null;
-
-        isEndingXRSession =
-            false;
-
-        isCleaningUpXRSession =
-            false;
-
-        document.body.classList.remove(
-            "xr-session-active"
-        );
 
         showPreARInterface();
 
-        if (
-            error.name === "NotAllowedError"
-        ) {
 
-            showSupportMessage(
-                "Camera permission was not granted. Allow access and try again."
-            );
+        updateStartButton();
 
-            startARBtn.disabled =
-                false;
-
-            startARBtn.textContent =
-                "Try Again";
-
-            return;
-        }
-
-        if (
-            error.name === "NotSupportedError"
-        ) {
-
-            menuARState.xrSupported =
-                false;
-
-            menuARState.appState =
-                "UNSUPPORTED";
-
-            showSupportMessage(
-                "This device does not support the table preview features required by MenuAR."
-            );
-
-            startARBtn.disabled =
-                true;
-
-            startARBtn.textContent =
-                "Not Supported";
-
-            return;
-        }
-
-        showSupportMessage(
-            "The table preview could not start. Check permissions and try again."
-        );
-
-        startARBtn.disabled =
-            false;
-
-        startARBtn.textContent =
-            "Try Again";
     }
+
 }
 
 
 
 // ==========================================
-// HOME NAVIGATION
+// GO HOME
 // ==========================================
 
 function goToHomePage() {
 
+    const destination =
+        HOME_PAGE_URL;
+
+
     window.setTimeout(
+
         () => {
 
             window.location.replace(
-                HOME_PAGE_URL
+                destination
             );
 
         },
-        250
+
+        350
+
     );
+
 }
 
 
 
 // ==========================================
-// END AR
+// END XR SESSION
 // ==========================================
 
 async function endARSession() {
@@ -2082,22 +2305,31 @@ async function endARSession() {
             showPreARInterface();
 
             updateStartButton();
+
         }
 
+
         return;
+
     }
+
 
     if (
         isEndingXRSession
     ) {
+
         return;
+
     }
+
 
     isEndingXRSession =
         true;
 
+
     const sessionToEnd =
         xrSession;
+
 
     try {
 
@@ -2106,24 +2338,28 @@ async function endARSession() {
     } catch (error) {
 
         console.warn(
-            "XR session could not end normally. Running cleanup.",
+            "XR end failed:",
             error
         );
 
+
         onARSessionEnded();
+
     }
+
 }
 
 
 
 // ==========================================
-// REMOVE ACTIVE PREVIEW
+// REMOVE OBJECTS
 // ==========================================
 
 function removeActivePreviewFromScene() {
 
     placementAnimation =
         null;
+
 
     if (
         menuARState.placedObject
@@ -2133,13 +2369,17 @@ function removeActivePreviewFromScene() {
             menuARState.placedObject
         );
 
+
         scene.remove(
             menuARState.placedObject
         );
 
+
         menuARState.placedObject =
             null;
+
     }
+
 
     if (
         menuARState.activeShadow
@@ -2149,16 +2389,15 @@ function removeActivePreviewFromScene() {
             menuARState.activeShadow
         );
 
+
         menuARState.activeShadow =
             null;
+
     }
+
 }
 
 
-
-// ==========================================
-// CLEAR CONFIRMED ITEMS
-// ==========================================
 
 function clearConfirmedItemsFromScene() {
 
@@ -2173,10 +2412,13 @@ function clearConfirmedItemsFromScene() {
                     item.object
                 );
 
+
                 scene.remove(
                     item.object
                 );
+
             }
+
 
             if (
                 item.shadow
@@ -2185,94 +2427,83 @@ function clearConfirmedItemsFromScene() {
                 scene.remove(
                     item.shadow
                 );
+
             }
+
         }
     );
 
+
     menuARState.confirmedItems =
         [];
+
 }
 
 
 
 // ==========================================
-// CLEAR TABLE
+// CANCEL ORDER
 // ==========================================
 
-function clearTable() {
+async function cancelOrder() {
 
     if (
-        menuARState.appState === "ORDER_CONFIRMED"
+        menuARState.appState ===
+            "ORDER_CONFIRMED"
     ) {
+
         return;
+
     }
+
+
+    if (
+        isEndingXRSession
+    ) {
+
+        return;
+
+    }
+
+
+    navigateHomeAfterSessionEnd =
+        false;
+
+
+    cancelOrderBtn.disabled =
+        true;
+
+
+    cancelOrderBtn.textContent =
+        "Cancelling...";
+
+
+    if (
+        reticle
+    ) {
+
+        reticle.visible =
+            false;
+
+    }
+
 
     removeActivePreviewFromScene();
 
+
     clearConfirmedItemsFromScene();
+
 
     menuARState.surfaceFound =
         false;
 
+
     menuARState.orderPlaced =
         false;
 
-    menuARState.nextItemId =
-        1;
 
-    menuARState.selectedFood =
-        "burger";
+    await endARSession();
 
-    menuARState.selectedSize =
-        "medium";
-
-    menuARState.appState =
-        "SCANNING";
-
-    reticle.visible =
-        false;
-
-    latestHitTestResult =
-        null;
-
-    orderReviewPanel.hidden =
-        true;
-
-    orderCompletePanel.hidden =
-        true;
-
-    orderBadge.hidden =
-        true;
-
-    dishSelectionArea.hidden =
-        false;
-
-    hideInteractionControls();
-
-    disableManipulationControls();
-
-    updateFoodButtons(
-        menuARState.selectedFood
-    );
-
-    updateSizeButtons();
-
-    tableActionBtn.hidden =
-        false;
-
-    tableActionBtn.disabled =
-        false;
-
-    tableActionBtn.textContent =
-        "Clear Table";
-
-    tableActionBtn.classList.remove(
-        "done-state"
-    );
-
-    setStatus(
-        "Table cleared. Choose a dish and find a new spot."
-    );
 }
 
 
@@ -2284,33 +2515,44 @@ function clearTable() {
 async function finishOrder() {
 
     if (
-        menuARState.appState !== "ORDER_CONFIRMED"
+        menuARState.appState !==
+            "ORDER_CONFIRMED"
     ) {
+
         return;
+
     }
+
 
     if (
         isEndingXRSession
     ) {
+
         return;
+
     }
+
 
     navigateHomeAfterSessionEnd =
         true;
 
-    tableActionBtn.disabled =
+
+    doneBtn.disabled =
         true;
 
-    tableActionBtn.textContent =
+
+    doneBtn.textContent =
         "Closing...";
 
+
     await endARSession();
+
 }
 
 
 
 // ==========================================
-// CONTROLS
+// INTERACTION CONTROLS
 // ==========================================
 
 function showInteractionControls() {
@@ -2318,6 +2560,7 @@ function showInteractionControls() {
     interactionControls.classList.add(
         "is-visible"
     );
+
 }
 
 
@@ -2327,6 +2570,7 @@ function hideInteractionControls() {
     interactionControls.classList.remove(
         "is-visible"
     );
+
 }
 
 
@@ -2336,33 +2580,34 @@ function enableManipulationControls() {
     sizeSmallBtn.disabled =
         false;
 
+
     sizeMediumBtn.disabled =
         false;
+
 
     sizeLargeBtn.disabled =
         false;
 
+
     moveBtn.disabled =
         false;
+
 
     removeBtn.disabled =
         false;
 
+
     addToOrderBtn.disabled =
         false;
+
 
     burgerBtn.disabled =
         false;
 
+
     pizzaBtn.disabled =
         false;
 
-    moveBtn.textContent =
-        "↔ Move Dish";
-
-    moveBtn.classList.remove(
-        "active"
-    );
 }
 
 
@@ -2372,50 +2617,38 @@ function disableManipulationControls() {
     sizeSmallBtn.disabled =
         true;
 
+
     sizeMediumBtn.disabled =
         true;
+
 
     sizeLargeBtn.disabled =
         true;
 
+
     moveBtn.disabled =
         true;
+
 
     removeBtn.disabled =
         true;
 
+
     addToOrderBtn.disabled =
         true;
+
 }
 
 
 
 function setMoveModeControls() {
 
-    sizeSmallBtn.disabled =
-        true;
+    disableManipulationControls();
 
-    sizeMediumBtn.disabled =
-        true;
-
-    sizeLargeBtn.disabled =
-        true;
-
-    removeBtn.disabled =
-        true;
-
-    addToOrderBtn.disabled =
-        true;
-
-    moveBtn.disabled =
-        true;
 
     moveBtn.textContent =
         "Choose New Spot";
 
-    moveBtn.classList.add(
-        "active"
-    );
 }
 
 
@@ -2426,81 +2659,85 @@ function setMoveModeControls() {
 
 function resetControls() {
 
-    burgerBtn.disabled =
-        false;
-
-    pizzaBtn.disabled =
-        false;
-
     menuARState.selectedFood =
         "burger";
+
 
     menuARState.selectedSize =
         "medium";
 
+
+    burgerBtn.disabled =
+        false;
+
+
+    pizzaBtn.disabled =
+        false;
+
+
     updateFoodButtons(
-        menuARState.selectedFood
+        "burger"
     );
+
 
     updateSizeButtons();
 
+
     disableManipulationControls();
 
+
     hideInteractionControls();
+
 
     dishSelectionArea.hidden =
         false;
 
+
     orderReviewPanel.hidden =
         true;
+
 
     orderCompletePanel.hidden =
         true;
 
+
     orderBadge.hidden =
         true;
 
-    tableActionBtn.hidden =
+
+    cancelOrderBtn.hidden =
         false;
 
-    tableActionBtn.disabled =
+
+    cancelOrderBtn.disabled =
         false;
 
-    tableActionBtn.textContent =
-        "Clear Table";
 
-    tableActionBtn.classList.remove(
-        "done-state"
-    );
+    cancelOrderBtn.textContent =
+        "Cancel Order";
 
-    if (
-        orderSummary
-    ) {
 
-        orderSummary.innerHTML =
-            "";
-    }
+    doneBtn.disabled =
+        false;
 
-    if (
-        finalOrderSummary
-    ) {
 
-        finalOrderSummary.innerHTML =
-            "";
-    }
+    doneBtn.textContent =
+        "Done";
 
-    moveBtn.textContent =
-        "↔ Move Dish";
 
-    moveBtn.classList.remove(
-        "active"
-    );
+    orderSummary.innerHTML =
+        "";
+
+
+    finalOrderSummary.innerHTML =
+        "";
+
 }
 
 
 
 // ==========================================
-// SESSION CLEANUP
+// SESSION ENDED
 // ==========================================
 
 function onARSessionEnded() {
@@ -2508,14 +2745,19 @@ function onARSessionEnded() {
     if (
         isCleaningUpXRSession
     ) {
+
         return;
+
     }
+
 
     isCleaningUpXRSession =
         true;
 
+
     const shouldNavigateHome =
         navigateHomeAfterSessionEnd;
+
 
     try {
 
@@ -2529,23 +2771,26 @@ function onARSessionEnded() {
 
             } catch (error) {
 
-                console.warn(
-                    "Hit-test source already closed."
-                );
             }
+
         }
+
 
         hitTestSource =
             null;
 
+
         viewerSpace =
             null;
+
 
         referenceSpace =
             null;
 
+
         latestHitTestResult =
             null;
+
 
         if (
             reticle
@@ -2553,48 +2798,44 @@ function onARSessionEnded() {
 
             reticle.visible =
                 false;
+
         }
+
 
         removeActivePreviewFromScene();
 
+
         clearConfirmedItemsFromScene();
+
 
         menuARState.surfaceFound =
             false;
 
-        menuARState.selectedFood =
-            "burger";
-
-        menuARState.selectedSize =
-            "medium";
 
         menuARState.orderPlaced =
             false;
 
-        menuARState.nextItemId =
-            1;
 
         menuARState.appState =
             "READY_TO_SCAN";
 
+
         placementAnimation =
             null;
+
 
         orderPulseAnimation =
             null;
 
-        ignoreXRSelectUntil =
-            0;
-
-        moveModeStartedAt =
-            0;
 
         xrSession =
             null;
 
+
         document.body.classList.remove(
             "xr-session-active"
         );
+
 
         if (
             shouldNavigateHome
@@ -2603,29 +2844,30 @@ function onARSessionEnded() {
             goToHomePage();
 
             return;
+
         }
+
 
         resetControls();
 
+
         showPreARInterface();
 
-        hideSupportMessage();
 
         updateStartButton();
+
 
     } catch (error) {
 
         console.error(
-            "Error while cleaning up AR session:",
+            "XR cleanup error:",
             error
         );
+
 
         xrSession =
             null;
 
-        document.body.classList.remove(
-            "xr-session-active"
-        );
 
         if (
             shouldNavigateHome
@@ -2635,24 +2877,28 @@ function onARSessionEnded() {
 
         } else {
 
-            resetControls();
-
             showPreARInterface();
 
             updateStartButton();
+
         }
+
 
     } finally {
 
         isEndingXRSession =
             false;
 
+
         isCleaningUpXRSession =
             false;
 
+
         navigateHomeAfterSessionEnd =
             false;
+
     }
+
 }
 
 
@@ -2672,6 +2918,7 @@ function easeOutCubic(
             3
         )
     );
+
 }
 
 
@@ -2683,22 +2930,29 @@ function easeOutBack(
     const c1 =
         1.70158;
 
+
     const c3 =
         c1 + 1;
 
+
     return (
+
         1 +
+
         c3 *
         Math.pow(
             t - 1,
             3
         ) +
+
         c1 *
         Math.pow(
             t - 1,
             2
         )
+
     );
+
 }
 
 
@@ -2715,33 +2969,25 @@ function startPlacementAnimation(
 ) {
 
     const startScale =
+
         finalScale *
         PLACEMENT_START_SCALE_FACTOR;
+
 
     model.scale.setScalar(
         startScale
     );
 
+
     model.position.y =
+
         finalY +
         PLACEMENT_LIFT;
 
-    burgerBtn.disabled =
-        true;
-
-    pizzaBtn.disabled =
-        true;
 
     menuARState.appState =
         "PLACING";
 
-    if (
-        menuARState.activeShadow
-    ) {
-
-        menuARState.activeShadow.material.opacity =
-            0;
-    }
 
     placementAnimation = {
 
@@ -2764,15 +3010,19 @@ function startPlacementAnimation(
             finalScale,
 
         startY:
-            finalY + PLACEMENT_LIFT,
+            finalY +
+            PLACEMENT_LIFT,
 
         finalY:
             finalY
+
     };
+
 
     setStatus(
         `Serving your ${getFoodName(food)} preview...`
     );
+
 }
 
 
@@ -2784,103 +3034,116 @@ function updatePlacementAnimation(
     if (
         !placementAnimation
     ) {
+
         return;
+
     }
 
+
     if (
-        placementAnimation.startTime === null
+        placementAnimation.startTime ===
+        null
     ) {
 
         placementAnimation.startTime =
             timestamp;
+
     }
 
+
     const elapsed =
+
         timestamp -
         placementAnimation.startTime;
 
+
     const progress =
+
         THREE.MathUtils.clamp(
+
             elapsed /
             placementAnimation.duration,
+
             0,
             1
+
         );
+
 
     const positionEase =
         easeOutCubic(
             progress
         );
 
+
     const scaleEase =
         easeOutBack(
             progress
         );
 
+
     placementAnimation.model.position.y =
+
         THREE.MathUtils.lerp(
+
             placementAnimation.startY,
+
             placementAnimation.finalY,
+
             positionEase
+
         );
 
+
     placementAnimation.model.scale.setScalar(
+
         THREE.MathUtils.lerp(
+
             placementAnimation.startScale,
+
             placementAnimation.finalScale,
+
             scaleEase
+
         )
+
     );
 
-    if (
-        menuARState.activeShadow
-    ) {
-
-        menuARState.activeShadow.material.opacity =
-            SHADOW_OPACITY *
-            positionEase;
-    }
 
     if (
-        progress >= 1
+        progress >=
+        1
     ) {
 
         const completedFood =
             placementAnimation.food;
 
-        placementAnimation.model.position.y =
-            placementAnimation.finalY;
-
-        placementAnimation.model.scale.setScalar(
-            placementAnimation.finalScale
-        );
 
         placementAnimation =
             null;
 
+
         menuARState.appState =
             "PLACED";
 
-        burgerBtn.disabled =
-            false;
-
-        pizzaBtn.disabled =
-            false;
 
         showInteractionControls();
 
+
         enableManipulationControls();
 
-        updateSizeButtons();
-
-        updateOrderBadge();
 
         setStatus(
-            `Your ${getCurrentSizePreset().label} ${getFoodName(completedFood)} is ready. Adjust it, then add it to your order.`
+
+            `Your ${getCurrentSizePreset().label} ${getFoodName(completedFood)} is ready.`
+
         );
 
+
         playPlacementSound();
+
     }
+
 }
 
 
@@ -2895,166 +3158,178 @@ function placeSelectedFood() {
         !reticle.visible ||
         menuARState.placedObject
     ) {
+
         return;
+
     }
+
 
     const food =
         menuARState.selectedFood;
 
+
     const template =
         modelTemplates[food];
+
 
     if (
         !template
     ) {
+
         return;
+
     }
+
 
     const config =
         MODEL_CONFIG[food];
 
+
     const placedModel =
         template.clone(true);
 
-    const placementPosition =
+
+    const position =
         new THREE.Vector3();
 
-    placementPosition.setFromMatrixPosition(
+
+    position.setFromMatrixPosition(
         reticle.matrix
     );
 
+
     placedModel.position.copy(
-        placementPosition
+        position
     );
+
 
     placedModel.position.y +=
         config.surfaceOffset;
 
-    const finalY =
-        placedModel.position.y;
 
-    const placementRotation =
+    const quaternion =
         new THREE.Quaternion();
+
 
     const ignoredScale =
         new THREE.Vector3();
 
+
     reticle.matrix.decompose(
+
         new THREE.Vector3(),
-        placementRotation,
+
+        quaternion,
+
         ignoredScale
+
     );
+
 
     placedModel.quaternion.copy(
-        placementRotation
+        quaternion
     );
 
-    const finalScale =
+
+    placedModel.scale.setScalar(
+
         getCurrentModelScale(
             food
-        );
+        )
+
+    );
+
 
     placedModel.userData.surfaceOffset =
         config.surfaceOffset;
+
 
     scene.add(
         placedModel
     );
 
+
     menuARState.placedObject =
         placedModel;
 
+
+
     const shadow =
         createShadowMesh(
+
             food,
             menuARState.selectedSize
+
         );
+
 
     positionShadowFromReticle(
         shadow
     );
 
-    shadow.material.opacity =
-        0;
 
     scene.add(
         shadow
     );
 
+
     menuARState.activeShadow =
         shadow;
 
-    menuARState.surfaceFound =
-        false;
-
-    reticle.visible =
-        false;
-
-    hideInteractionControls();
-
-    disableManipulationControls();
 
     createAnchorForHitResult(
+
         latestHitTestResult
+
     ).then(
         (anchor) => {
 
             if (
-                !anchor
-            ) {
-                return;
-            }
-
-            const stillActive =
+                anchor &&
                 menuARState.placedObject ===
-                placedModel;
-
-            const stillInOrder =
-                menuARState.confirmedItems.some(
-                    (item) =>
-                        item.object === placedModel
-                );
-
-            if (
-                stillActive ||
-                stillInOrder
+                    placedModel
             ) {
 
                 placedModel.userData.anchor =
                     anchor;
 
-            } else {
-
-                try {
-
-                    anchor.delete();
-
-                } catch (error) {
-                }
             }
+
         }
     );
 
+
+    reticle.visible =
+        false;
+
+
     startPlacementAnimation(
+
         placedModel,
         food,
-        finalScale,
-        finalY
+        getCurrentModelScale(food),
+        placedModel.position.y
+
     );
+
 }
 
 
 
 // ==========================================
-// MANIPULATION
+// MOVE
 // ==========================================
 
 function canManipulate() {
 
     return (
-        menuARState.placedObject !== null &&
-        menuARState.appState === "PLACED"
+
+        menuARState.placedObject &&
+        menuARState.appState ===
+            "PLACED"
+
     );
+
 }
 
 
@@ -3064,58 +3339,35 @@ function enterMoveMode() {
     if (
         !canManipulate()
     ) {
+
         return;
+
     }
+
 
     menuARState.appState =
         "MOVE_MODE";
 
+
     menuARState.surfaceFound =
         false;
+
 
     reticle.visible =
         false;
 
-    if (
-        menuARState.activeShadow
-    ) {
-
-        menuARState.activeShadow.visible =
-            false;
-    }
 
     moveModeStartedAt =
         performance.now();
 
-    ignoreXRSelectUntil =
-        performance.now() +
-        UI_SELECT_GUARD_MS;
 
     setMoveModeControls();
 
+
     setStatus(
-        "Choose a new spot on the table, then tap the white circle."
+        "Choose a new spot on the table."
     );
-}
 
-
-
-function setMoveModeStatus() {
-
-    if (
-        menuARState.surfaceFound
-    ) {
-
-        setStatus(
-            "New spot found. Tap the white circle to move your dish."
-        );
-
-    } else {
-
-        setStatus(
-            "Move your device slowly to find a new spot."
-        );
-    }
 }
 
 
@@ -3123,83 +3375,37 @@ function setMoveModeStatus() {
 function repositionPlacedFood() {
 
     if (
-        menuARState.appState !== "MOVE_MODE" ||
+        menuARState.appState !==
+            "MOVE_MODE" ||
         !menuARState.placedObject ||
         !reticle.visible
     ) {
+
         return;
+
     }
 
-    const objectBeingMoved =
-        menuARState.placedObject;
 
-    const savedQuaternion =
-        objectBeingMoved
-            .quaternion
-            .clone();
-
-    const savedScale =
-        objectBeingMoved
-            .scale
-            .clone();
-
-    const newPosition =
+    const position =
         new THREE.Vector3();
 
-    newPosition.setFromMatrixPosition(
+
+    position.setFromMatrixPosition(
         reticle.matrix
     );
 
-    const config =
+
+    menuARState.placedObject.position.copy(
+        position
+    );
+
+
+    menuARState.placedObject.position.y +=
+
         MODEL_CONFIG[
             menuARState.selectedFood
-        ];
+        ].surfaceOffset;
 
-    objectBeingMoved.position.copy(
-        newPosition
-    );
-
-    objectBeingMoved.position.y +=
-        config.surfaceOffset;
-
-    objectBeingMoved.quaternion.copy(
-        savedQuaternion
-    );
-
-    objectBeingMoved.scale.copy(
-        savedScale
-    );
-
-    deleteAnchorFromObject(
-        objectBeingMoved
-    );
-
-    createAnchorForHitResult(
-        latestHitTestResult
-    ).then(
-        (anchor) => {
-
-            if (
-                anchor &&
-                menuARState.placedObject === objectBeingMoved
-            ) {
-
-                objectBeingMoved.userData.anchor =
-                    anchor;
-
-            } else if (
-                anchor
-            ) {
-
-                try {
-
-                    anchor.delete();
-
-                } catch (error) {
-                }
-            }
-        }
-    );
 
     if (
         menuARState.activeShadow
@@ -3209,36 +3415,30 @@ function repositionPlacedFood() {
             menuARState.activeShadow
         );
 
-        updateShadowAppearance(
-            menuARState.activeShadow,
-            menuARState.selectedFood,
-            menuARState.selectedSize
-        );
-
-        menuARState.activeShadow.visible =
-            true;
     }
+
 
     menuARState.appState =
         "PLACED";
 
-    menuARState.surfaceFound =
-        false;
 
     reticle.visible =
         false;
 
+
     enableManipulationControls();
 
+
     setStatus(
-        `${getFoodName(menuARState.selectedFood)} moved to the new spot.`
+        "Dish moved to the new spot."
     );
+
 }
 
 
 
 // ==========================================
-// REMOVE CURRENT DISH
+// REMOVE FOOD
 // ==========================================
 
 function removeFood() {
@@ -3246,45 +3446,33 @@ function removeFood() {
     if (
         !menuARState.placedObject
     ) {
+
         return;
+
     }
 
-    const removedFood =
-        getFoodName(
-            menuARState.selectedFood
-        );
 
     removeActivePreviewFromScene();
 
-    menuARState.surfaceFound =
-        false;
 
     menuARState.appState =
         "SCANNING";
 
+
     reticle.visible =
         false;
 
+
     hideInteractionControls();
+
 
     disableManipulationControls();
 
-    updateOrderBadge();
 
-    if (
-        menuARState.confirmedItems.length > 0
-    ) {
+    setStatus(
+        "Dish removed. Find another spot."
+    );
 
-        setStatus(
-            `${removedFood} removed. Choose another dish to continue your order.`
-        );
-
-    } else {
-
-        setStatus(
-            `${removedFood} removed. Choose another spot when you're ready.`
-        );
-    }
 }
 
 
@@ -3298,10 +3486,13 @@ function addCurrentItemToOrder() {
     if (
         !canManipulate()
     ) {
+
         return;
+
     }
 
-    const item = {
+
+    menuARState.confirmedItems.push({
 
         id:
             menuARState.nextItemId++,
@@ -3317,26 +3508,25 @@ function addCurrentItemToOrder() {
 
         shadow:
             menuARState.activeShadow
-    };
 
-    item.object.userData.orderLocked =
-        true;
+    });
 
-    menuARState.confirmedItems.push(
-        item
-    );
 
     menuARState.placedObject =
         null;
 
+
     menuARState.activeShadow =
         null;
 
+
     playAddedSound();
 
+
     showOrderReview(
-        `${SIZE_PRESETS[item.sizeKey].label} ${getFoodName(item.food)} added to your order.`
+        "Dish added to your order."
     );
+
 }
 
 
@@ -3346,55 +3536,49 @@ function addCurrentItemToOrder() {
 // ==========================================
 
 function showOrderReview(
-    message = "Review your order."
+    message
 ) {
-
-    if (
-        menuARState.confirmedItems.length === 0
-    ) {
-        return;
-    }
 
     menuARState.appState =
         "ORDER_REVIEW";
 
-    menuARState.surfaceFound =
-        false;
 
     reticle.visible =
         false;
 
+
     dishSelectionArea.hidden =
         true;
 
+
     hideInteractionControls();
+
 
     orderBadge.hidden =
         true;
 
-    orderCompletePanel.hidden =
-        true;
 
     orderReviewPanel.hidden =
         false;
 
-    tableActionBtn.hidden =
+
+    orderCompletePanel.hidden =
+        true;
+
+
+    cancelOrderBtn.hidden =
         false;
 
-    tableActionBtn.textContent =
-        "Clear Table";
-
-    tableActionBtn.classList.remove(
-        "done-state"
-    );
 
     renderOrderSummary(
         orderSummary
     );
 
+
     setStatus(
         message
     );
+
 }
 
 
@@ -3405,95 +3589,55 @@ function showOrderReview(
 
 function addAnotherDish() {
 
-    if (
-        menuARState.confirmedItems.length === 0
-    ) {
-        return;
-    }
-
     menuARState.appState =
         "SCANNING";
 
-    menuARState.surfaceFound =
-        false;
 
     menuARState.selectedSize =
         "medium";
 
-    reticle.visible =
-        false;
-
-    burgerBtn.disabled =
-        false;
-
-    pizzaBtn.disabled =
-        false;
 
     dishSelectionArea.hidden =
         false;
 
+
     orderReviewPanel.hidden =
         true;
 
-    orderCompletePanel.hidden =
-        true;
-
-    tableActionBtn.hidden =
-        false;
-
-    tableActionBtn.textContent =
-        "Clear Table";
-
-    tableActionBtn.classList.remove(
-        "done-state"
-    );
 
     hideInteractionControls();
 
+
     updateSizeButtons();
 
-    updateFoodButtons(
-        menuARState.selectedFood
-    );
 
     updateOrderBadge();
 
+
     setStatus(
-        "Choose your next dish, then find another spot on the table."
+        "Choose your next dish and find another spot."
     );
+
 }
 
 
 
 // ==========================================
-// FINAL PULSE
+// ORDER PULSE
 // ==========================================
 
 function startOrderPulseAnimation() {
-
-    if (
-        menuARState.confirmedItems.length === 0
-    ) {
-        return;
-    }
 
     orderPulseAnimation = {
 
         startTime:
             null,
 
-        durationPerItem:
-            420,
+        duration:
+            500
 
-        stagger:
-            130,
-
-        baseScales:
-            menuARState.confirmedItems.map(
-                (item) =>
-                    item.object.scale.clone()
-            )
     };
+
 }
 
 
@@ -3505,110 +3649,108 @@ function updateOrderPulseAnimation(
     if (
         !orderPulseAnimation
     ) {
+
         return;
+
     }
 
+
     if (
-        orderPulseAnimation.startTime === null
+        orderPulseAnimation.startTime ===
+        null
     ) {
 
         orderPulseAnimation.startTime =
             timestamp;
+
     }
 
-    const elapsed =
-        timestamp -
-        orderPulseAnimation.startTime;
 
-    const itemCount =
-        menuARState.confirmedItems.length;
+    const progress =
+
+        THREE.MathUtils.clamp(
+
+            (
+                timestamp -
+                orderPulseAnimation.startTime
+            ) /
+
+            orderPulseAnimation.duration,
+
+            0,
+            1
+
+        );
+
+
+    const pulse =
+
+        1 +
+
+        0.05 *
+        Math.sin(
+            Math.PI *
+            progress
+        );
+
 
     menuARState.confirmedItems.forEach(
-        (
-            item,
-            index
-        ) => {
+        (item) => {
 
-            const localElapsed =
-                elapsed -
-                (
-                    index *
-                    orderPulseAnimation.stagger
-                );
+            const scale =
 
-            const baseScale =
-                orderPulseAnimation
-                    .baseScales[index];
+                MODEL_CONFIG[
+                    item.food
+                ].baseScale *
 
-            if (
-                localElapsed < 0
-            ) {
+                SIZE_PRESETS[
+                    item.sizeKey
+                ].factor;
 
-                item.object.scale.copy(
-                    baseScale
-                );
 
-                return;
-            }
+            item.object.scale.setScalar(
 
-            const progress =
-                THREE.MathUtils.clamp(
-                    localElapsed /
-                    orderPulseAnimation.durationPerItem,
-                    0,
-                    1
-                );
-
-            const pulse =
-                1 +
-                (
-                    0.065 *
-                    Math.sin(
-                        Math.PI *
-                        progress
-                    )
-                );
-
-            item.object.scale.copy(
-                baseScale
-            );
-
-            item.object.scale.multiplyScalar(
+                scale *
                 pulse
+
             );
+
         }
     );
 
-    const totalDuration =
-        orderPulseAnimation.durationPerItem +
-        (
-            Math.max(
-                itemCount - 1,
-                0
-            ) *
-            orderPulseAnimation.stagger
-        );
 
     if (
-        elapsed >= totalDuration
+        progress >=
+        1
     ) {
 
         menuARState.confirmedItems.forEach(
-            (
-                item,
-                index
-            ) => {
+            (item) => {
 
-                item.object.scale.copy(
-                    orderPulseAnimation
-                        .baseScales[index]
+                const scale =
+
+                    MODEL_CONFIG[
+                        item.food
+                    ].baseScale *
+
+                    SIZE_PRESETS[
+                        item.sizeKey
+                    ].factor;
+
+
+                item.object.scale.setScalar(
+                    scale
                 );
+
             }
         );
 
+
         orderPulseAnimation =
             null;
+
     }
+
 }
 
 
@@ -3620,75 +3762,69 @@ function updateOrderPulseAnimation(
 function placeOrder() {
 
     if (
-        menuARState.confirmedItems.length === 0 ||
-        menuARState.placedObject
+        menuARState.confirmedItems.length ===
+        0
     ) {
+
         return;
+
     }
+
 
     menuARState.appState =
         "ORDER_CONFIRMED";
 
+
     menuARState.orderPlaced =
         true;
 
-    menuARState.surfaceFound =
-        false;
 
     reticle.visible =
         false;
 
+
     dishSelectionArea.hidden =
         true;
 
-    hideInteractionControls();
-
-    orderBadge.hidden =
-        true;
 
     orderReviewPanel.hidden =
         true;
 
+
+    hideInteractionControls();
+
+
+    cancelOrderBtn.hidden =
+        true;
+
+
     orderCompletePanel.hidden =
         false;
 
-    tableActionBtn.hidden =
+
+    doneBtn.disabled =
         false;
 
-    tableActionBtn.disabled =
-        false;
 
-    tableActionBtn.textContent =
+    doneBtn.textContent =
         "Done";
 
-    tableActionBtn.classList.add(
-        "done-state"
-    );
 
     renderOrderSummary(
         finalOrderSummary
     );
 
-    orderCompletePanel.classList.remove(
-        "order-complete-pop"
-    );
-
-    void orderCompletePanel.offsetWidth;
-
-    orderCompletePanel.classList.add(
-        "order-complete-pop"
-    );
-
-    const itemCount =
-        menuARState.confirmedItems.length;
 
     setStatus(
-        `Order confirmed. ${itemCount} ${itemCount === 1 ? "dish" : "dishes"} selected.`
+        "Order confirmed."
     );
+
 
     startOrderPulseAnimation();
 
+
     playOrderConfirmationSound();
+
 }
 
 
@@ -3702,25 +3838,35 @@ function onXRSelect() {
     const now =
         performance.now();
 
-    if (
-        now < ignoreXRSelectUntil
-    ) {
-        return;
-    }
 
     if (
-        menuARState.appState === "SURFACE_FOUND" &&
+        now <
+        ignoreXRSelectUntil
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        menuARState.appState ===
+            "SURFACE_FOUND" &&
         !menuARState.placedObject &&
         reticle.visible
     ) {
 
         placeSelectedFood();
 
+
         return;
+
     }
 
+
     if (
-        menuARState.appState === "MOVE_MODE" &&
+        menuARState.appState ===
+            "MOVE_MODE" &&
         menuARState.placedObject &&
         reticle.visible
     ) {
@@ -3730,11 +3876,16 @@ function onXRSelect() {
             moveModeStartedAt <
             MOVE_ACTIVATION_DELAY_MS
         ) {
+
             return;
+
         }
 
+
         repositionPlacedFood();
+
     }
+
 }
 
 
@@ -3752,13 +3903,12 @@ function render(
         timestamp
     );
 
+
     updateOrderPulseAnimation(
         timestamp
     );
 
 
-
-    // ANCHOR TRACKING
 
     if (
         frame &&
@@ -3767,38 +3917,58 @@ function render(
 
         if (
             menuARState.placedObject &&
-            menuARState.appState === "PLACED"
+            menuARState.appState ===
+                "PLACED"
         ) {
 
             applyAnchorTracking(
+
                 menuARState.placedObject,
+
                 menuARState.activeShadow,
+
                 frame,
+
                 referenceSpace
+
             );
+
         }
+
 
         menuARState.confirmedItems.forEach(
             (item) => {
 
                 applyAnchorTracking(
+
                     item.object,
+
                     item.shadow,
+
                     frame,
+
                     referenceSpace
+
                 );
+
             }
         );
+
     }
 
 
 
-    // HIT TEST
-
     const shouldRunHitTest =
-        menuARState.appState === "SCANNING" ||
-        menuARState.appState === "SURFACE_FOUND" ||
-        menuARState.appState === "MOVE_MODE";
+
+        menuARState.appState ===
+            "SCANNING" ||
+
+        menuARState.appState ===
+            "SURFACE_FOUND" ||
+
+        menuARState.appState ===
+            "MOVE_MODE";
+
 
     if (
         frame &&
@@ -3807,25 +3977,28 @@ function render(
         shouldRunHitTest
     ) {
 
-        const hitTestResults =
+        const results =
+
             frame.getHitTestResults(
                 hitTestSource
             );
 
+
         if (
-            hitTestResults.length > 0
+            results.length >
+            0
         ) {
 
-            const hit =
-                hitTestResults[0];
-
             latestHitTestResult =
-                hit;
+                results[0];
+
 
             const pose =
-                hit.getPose(
+
+                latestHitTestResult.getPose(
                     referenceSpace
                 );
+
 
             if (
                 pose
@@ -3834,32 +4007,39 @@ function render(
                 reticle.visible =
                     true;
 
+
                 reticle.matrix.fromArray(
                     pose.transform.matrix
                 );
 
+
                 menuARState.surfaceFound =
                     true;
 
+
                 if (
-                    !menuARState.placedObject &&
-                    menuARState.appState !== "MOVE_MODE"
+                    menuARState.appState !==
+                        "MOVE_MODE"
                 ) {
 
                     menuARState.appState =
                         "SURFACE_FOUND";
 
+
                     setStatus(
-                        `Perfect, tap the white circle to place your ${getFoodName(menuARState.selectedFood)}.`
+
+                        `Tap the white circle to place your ${getFoodName(menuARState.selectedFood)}.`
+
                     );
+
+                } else {
+
+                    setStatus(
+                        "Tap the white circle to move your dish."
+                    );
+
                 }
 
-                if (
-                    menuARState.appState === "MOVE_MODE"
-                ) {
-
-                    setMoveModeStatus();
-                }
             }
 
         } else {
@@ -3867,34 +4047,34 @@ function render(
             latestHitTestResult =
                 null;
 
+
             reticle.visible =
                 false;
+
 
             menuARState.surfaceFound =
                 false;
 
+
             if (
-                menuARState.appState === "MOVE_MODE"
+                menuARState.appState !==
+                    "MOVE_MODE"
             ) {
-
-                setMoveModeStatus();
-
-            } else {
 
                 menuARState.appState =
                     "SCANNING";
 
+
                 setStatus(
-                    `Move your device slowly over the table to find a spot for your ${getFoodName(menuARState.selectedFood)}.`
+                    "Move your device slowly over the table."
                 );
+
             }
+
         }
 
-    } else {
-
-        latestHitTestResult =
-            null;
     }
+
 
     if (
         !shouldRunHitTest
@@ -3902,12 +4082,15 @@ function render(
 
         reticle.visible =
             false;
+
     }
+
 
     renderer.render(
         scene,
         camera
     );
+
 }
 
 
@@ -3919,39 +4102,54 @@ function render(
 function markUITouch() {
 
     ignoreXRSelectUntil =
+
         performance.now() +
         UI_SELECT_GUARD_MS;
+
 }
 
 
 
 arControls.addEventListener(
+
     "pointerdown",
+
     markUITouch,
+
     true
+
 );
 
 
-
 arControls.addEventListener(
+
     "touchstart",
+
     markUITouch,
+
     {
-        capture: true,
-        passive: true
+        capture:
+            true,
+
+        passive:
+            true
     }
+
 );
 
 
-
 arControls.addEventListener(
+
     "beforexrselect",
+
     (event) => {
 
         event.preventDefault();
 
         markUITouch();
+
     }
+
 );
 
 
@@ -3961,132 +4159,167 @@ arControls.addEventListener(
 // ==========================================
 
 burgerBtn.addEventListener(
+
     "click",
+
     () => {
+
         selectFood(
             "burger"
         );
-    }
-);
 
+    }
+
+);
 
 
 pizzaBtn.addEventListener(
+
     "click",
+
     () => {
+
         selectFood(
             "pizza"
         );
-    }
-);
 
+    }
+
+);
 
 
 sizeSmallBtn.addEventListener(
+
     "click",
+
     () => {
+
         selectPreviewSize(
             "small"
         );
-    }
-);
 
+    }
+
+);
 
 
 sizeMediumBtn.addEventListener(
+
     "click",
+
     () => {
+
         selectPreviewSize(
             "medium"
         );
-    }
-);
 
+    }
+
+);
 
 
 sizeLargeBtn.addEventListener(
+
     "click",
+
     () => {
+
         selectPreviewSize(
             "large"
         );
-    }
-);
 
+    }
+
+);
 
 
 moveBtn.addEventListener(
-    "click",
-    enterMoveMode
-);
 
+    "click",
+
+    enterMoveMode
+
+);
 
 
 removeBtn.addEventListener(
-    "click",
-    removeFood
-);
 
+    "click",
+
+    removeFood
+
+);
 
 
 addToOrderBtn.addEventListener(
-    "click",
-    addCurrentItemToOrder
-);
 
+    "click",
+
+    addCurrentItemToOrder
+
+);
 
 
 addAnotherBtn.addEventListener(
-    "click",
-    addAnotherDish
-);
 
+    "click",
+
+    addAnotherDish
+
+);
 
 
 placeOrderBtn.addEventListener(
+
     "click",
+
     placeOrder
+
 );
 
 
+cancelOrderBtn.addEventListener(
 
-// ==========================================
-// CLEAR TABLE / DONE
-// ==========================================
-
-tableActionBtn.addEventListener(
     "click",
+
     async () => {
 
         markUITouch();
 
-        if (
-            menuARState.appState === "ORDER_CONFIRMED"
-        ) {
+        await cancelOrder();
 
-            await finishOrder();
-
-            return;
-        }
-
-        clearTable();
     }
+
 );
 
 
+doneBtn.addEventListener(
 
-// ==========================================
-// START
-// ==========================================
+    "click",
+
+    async () => {
+
+        markUITouch();
+
+        await finishOrder();
+
+    }
+
+);
+
 
 startARBtn.addEventListener(
+
     "click",
+
     async () => {
 
         ensureAudioContext();
 
         await startARSession();
+
     }
+
 );
 
 
@@ -4096,27 +4329,39 @@ startARBtn.addEventListener(
 // ==========================================
 
 window.addEventListener(
+
     "resize",
+
     () => {
 
         if (
             !camera ||
             !renderer
         ) {
+
             return;
+
         }
 
+
         camera.aspect =
+
             window.innerWidth /
             window.innerHeight;
 
+
         camera.updateProjectionMatrix();
 
+
         renderer.setSize(
+
             window.innerWidth,
             window.innerHeight
+
         );
+
     }
+
 );
 
 
@@ -4129,22 +4374,24 @@ async function initializeApplication() {
 
     showPreARInterface();
 
+
     initThreeJS();
+
 
     resetControls();
 
-    updateFoodButtons(
-        "burger"
-    );
-
-    updateSizeButtons();
 
     await Promise.all([
+
         loadModels(),
+
         checkXRSupport()
+
     ]);
 
+
     updateStartButton();
+
 }
 
 
